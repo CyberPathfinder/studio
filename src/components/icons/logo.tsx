@@ -3,10 +3,12 @@ import { cn } from "@/lib/utils";
 export const VivaFormLogo = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
   <svg
     height="40"
-    viewBox="0 0 156 40"
+    viewBox="0 0 230 40"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={cn("text-foreground w-auto", className)}
+    role="img"
+    aria-label="VivaForm"
     {...props}
   >
     <path
@@ -15,9 +17,11 @@ export const VivaFormLogo = ({ className, ...props }: React.SVGProps<SVGSVGEleme
       strokeWidth="3"
       strokeLinecap="round"
       strokeLinejoin="round"
+      preserveAspectRatio="xMidYMid meet"
+      vectorEffect="non-scaling-stroke"
     />
     <text
-      x="45"
+      x="52"
       y="30"
       className="font-headline"
       fontSize="30"
