@@ -68,6 +68,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     // The next "action" is to complete the quiz and go to summary.
     if (state.isLastQuestion) {
         completeQuiz();
+        return { isValid: true };
     }
     
     return { isValid: true };
