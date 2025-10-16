@@ -59,6 +59,18 @@
       "description": "Portrait of an energetic user, Mike Chen.",
       "imageUrl": "https://picsum.photos/seed/viva-avatar4/100/100",
       "imageHint": "person happy"
+    },
+    {
+      "id": "testimonial-5",
+      "description": "Portrait of a user, Emily R.",
+      "imageUrl": "https://picsum.photos/seed/viva-avatar5/100/100",
+      "imageHint": "woman smiling"
+    },
+    {
+      "id": "testimonial-6",
+      "description": "Portrait of a user, David K.",
+      "imageUrl": "https://picsum.photos/seed/viva-avatar6/100/100",
+      "imageHint": "man smiling"
     }
   ]
 }

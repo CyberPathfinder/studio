@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -8,6 +10,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import Autoplay from "embla-carousel-autoplay";
+import * as React from "react";
 
 const testimonials = [
   {
@@ -34,9 +38,25 @@ const testimonials = [
     role: "Marathon Runner",
     quote: "The detailed nutritional breakdown is exactly what I need for my training. VivaForm is an essential tool in my performance arsenal.",
   },
+  {
+    id: "testimonial-5",
+    name: "Emily R.",
+    role: "New Mom",
+    quote: "Finding time for healthy eating was tough. VivaForm's quick logging and recipe ideas have made it so much easier to stay on track.",
+  },
+  {
+    id: "testimonial-6",
+    name: "David K.",
+    role: "Retiree",
+    quote: "This app is wonderful. It’s simple to use, helps me watch my nutrition, and has even made me more adventurous in the kitchen!",
+  },
 ];
 
 const TestimonialsSection = () => {
+  const plugin = React.useRef(
+    Autoplay({ delay: 5000, stopOnInteraction: true, stopOnHover: true })
+  );
+
   return (
     <section id="testimonials" className="bg-white py-20 md:py-28">
       <div className="container">
@@ -50,18 +70,22 @@ const TestimonialsSection = () => {
         </div>
 
         <Carousel
+          plugins={[plugin.current]}
           opts={{
             align: "start",
             loop: true,
           }}
           className="w-full"
+          onMouseEnter={plugin.current.stop}
+          onMouseLeave={plugin.current.reset}
+          aria-roledescription="carousel"
         >
           <CarouselContent>
             {testimonials.map((testimonial) => {
               const image = PlaceHolderImages.find((img) => img.id === testimonial.id);
               return (
                 <CarouselItem key={testimonial.id} className="md:basis-1/2 lg:basis-1/3">
-                  <div className="p-1">
+                  <div className="p-1 h-full">
                     <Card className="h-full">
                       <CardContent className="flex h-full flex-col justify-between p-6">
                         <p className="text-muted-foreground">"{testimonial.quote}"</p>
@@ -88,8 +112,8 @@ const TestimonialsSection = () => {
               );
             })}
           </CarouselContent>
-          <CarouselPrevious className="hidden sm:flex" />
-          <CarouselNext className="hidden sm:flex" />
+          <CarouselPrevious className="hidden sm:flex" aria-label="Previous testimonial" />
+          <CarouselNext className="hidden sm:flex" aria-label="Next testimonial"/>
         </Carousel>
       </div>
     </section>
