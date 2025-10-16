@@ -1,275 +1,524 @@
 
 {
-  "id": "vivaform-onboarding-v1",
-  "version": "1.1.0",
+  "quizId": "vivaform_intake_v1",
   "sections": [
-    { "id": "profile", "order": 1, "i18n": { "en": { "title": "Your Profile" }, "ru": {"title": "Ваш профиль" } } },
-    { "id": "body", "order": 2, "i18n": { "en": { "title": "About Your Body" }, "ru": {"title": "О вашем теле" } } },
-    { "id": "goals", "order": 3, "i18n": { "en": { "title": "Your Goals" }, "ru": {"title": "Ваши цели" } } },
-    { "id": "diet_style", "order": 4, "i18n": { "en": { "title": "Diet Style" }, "ru": {"title": "Стиль питания" } } },
-    { "id": "restrictions", "order": 5, "i18n": { "en": { "title": "Dietary Restrictions" }, "ru": {"title": "Ограничения в питании" } } },
-    { "id": "preferences", "order": 6, "i18n": { "en": { "title": "Food Preferences" }, "ru": {"title": "Предпочтения в еде" } } },
-    { "id": "activity", "order": 7, "i18n": { "en": { "title": "Activity Level" }, "ru": {"title": "Уровень активности" } } },
-    { "id": "habits", "order": 8, "i18n": { "en": { "title": "Your Habits" }, "ru": {"title": "Ваши привычки" } } }
+    { "id": "profile", "title": "Profile" },
+    { "id": "body", "title": "Body" },
+    { "id": "diet", "title": "Diet Style" },
+    { "id": "habits", "title": "Habits & Lifestyle" },
+    { "id": "health", "title": "Health" },
+    { "id": "summary", "title": "Summary" }
   ],
   "questions": [
     {
-      "id": "name",
-      "section": "profile",
+      "id": "diet_style",
+      "section": "diet",
       "order": 1,
-      "type": "text",
-      "analytics_key": "quiz_name",
-      "i18n": { "en": { "label": "What should we call you?", "hint": "Enter your first name" } },
-      "validation": { "required": true }
+      "type": "single_choice",
+      "label": "Which diet plan are you interested in?",
+      "options": [
+        { "value": "mediterranean", "label": "Mediterranean" },
+        { "value": "carnivore", "label": "Carnivore" },
+        { "value": "anti_inflammatory", "label": "Anti-Inflammatory" }
+      ],
+      "validation": { "required": true },
+      "analytics_key": "diet_style"
     },
     {
-      "id": "gender",
+      "id": "age",
       "section": "profile",
       "order": 2,
-      "type": "single_choice",
-      "analytics_key": "quiz_gender",
-      "i18n": { "en": { "label": "Biological Sex", "options": [{ "value": "male", "label": "Male" }, { "value": "female", "label": "Female" }] } },
-      "validation": { "required": true }
-    },
-    {
-      "id": "dob",
-      "section": "profile",
-      "order": 3,
-      "type": "date",
-      "analytics_key": "quiz_dob",
-      "i18n": { "en": { "label": "Date of Birth" } },
-      "validation": { "required": true }
+      "type": "number",
+      "label": "How old are you?",
+      "hint": "Digits only.",
+      "validation": { "required": true, "min": 13, "max": 120, "step": 1 },
+      "analytics_key": "age"
     },
     {
       "id": "height",
       "section": "body",
-      "order": 1,
-      "type": "number",
-      "analytics_key": "quiz_height",
-      "i18n": { "en": { "label": "What is your height? (cm)", "hint": "e.g., 175" } },
-      "validation": { "required": true, "min": 120, "max": 250 }
+      "order": 3,
+      "type": "height",
+      "label": "What is your height?",
+      "ui": { "unit_toggle": ["cm", "ft_in"] },
+      "validation": { "required": true, "min": 100, "max": 250 },
+      "analytics_key": "height_cm"
     },
     {
-      "id": "current_weight",
+      "id": "weight",
       "section": "body",
-      "order": 2,
-      "type": "number",
-      "analytics_key": "quiz_current_weight",
-      "i18n": { "en": { "label": "What is your current weight? (kg)", "hint": "e.g., 70" } },
-      "validation": { "required": true, "min": 35, "max": 300 }
-    },
-    {
-      "id": "body_fat_percentage",
-      "section": "body",
-      "order": 3,
-      "type": "number",
-      "analytics_key": "quiz_body_fat",
-      "i18n": { "en": { "label": "Body Fat Percentage (Optional)", "description": "If you know it, this helps with accuracy.", "hint": "e.g., 15" } },
-      "validation": { "min": 3, "max": 60 }
-    },
-    {
-      "id": "primary_goal",
-      "section": "goals",
-      "order": 1,
-      "type": "single_choice",
-      "analytics_key": "quiz_goal",
-      "i18n": { "en": { "label": "What is your primary goal?", "options": [{ "value": "lose", "label": "Lose Weight" }, { "value": "maintain", "label": "Maintain Weight" }, { "value": "gain", "label": "Gain Muscle" }] } },
-      "validation": { "required": true }
-    },
-    {
-      "id": "target_weight",
-      "section": "goals",
-      "order": 2,
-      "type": "number",
-      "analytics_key": "quiz_target_weight",
-      "i18n": { "en": { "label": "What is your target weight? (kg)", "hint": "Enter your target weight" } },
-      "validation": { "required": true, "min": 35, "max": 300 },
-      "branching": { "show_if": "answers['primary_goal'] === 'lose' || answers['primary_goal'] === 'gain'" }
-    },
-    {
-      "id": "target_date",
-      "section": "goals",
-      "order": 3,
-      "type": "date",
-      "analytics_key": "quiz_target_date",
-      "i18n": { "en": { "label": "When would you like to achieve this by?", "description": "A realistic timeframe is key to success." } },
-      "validation": { "required": true },
-      "branching": { "show_if": "answers['primary_goal'] === 'lose'" }
-    },
-    {
-      "id": "diet_style",
-      "section": "diet_style",
-      "order": 1,
-      "type": "single_choice",
-      "analytics_key": "quiz_diet_style",
-      "i18n": { "en": { "label": "Which best describes your diet?", "options": [{ "value": "omnivore", "label": "Omnivore" }, { "value": "vegetarian", "label": "Vegetarian" }, { "value": "vegan", "label": "Vegan" }, { "value": "pescetarian", "label": "Pescetarian" }, { "value": "carnivore", "label": "Carnivore" }] } },
-      "validation": { "required": true }
-    },
-    {
-      "id": "diet_familiarity",
-      "section": "diet_style",
-      "order": 2,
-      "type": "single_choice",
-      "analytics_key": "quiz_diet_familiarity",
-      "i18n": { "en": { "label": "How familiar are you with this way of eating?", "options": [{"value": "new", "label": "New to it"}, {"value": "familiar", "label": "Familiar"}, {"value": "expert", "label": "Expert"}] } }
-    },
-    {
-      "id": "restrictions",
-      "section": "restrictions",
-      "order": 1,
-      "type": "multi_choice",
-      "analytics_key": "quiz_restrictions",
-      "i18n": { "en": { "label": "Do you have any dietary restrictions?", "options": [{ "value": "none", "label": "None" }, { "value": "lactose", "label": "Lactose" }, { "value": "gluten", "label": "Gluten" }, { "value": "nuts", "label": "Nuts" }, { "value": "soy", "label": "Soy" }, { "value": "other", "label": "Other" }] } },
-      "validation": { "required": true }
-    },
-    {
-      "id": "restrictions_other",
-      "section": "restrictions",
-      "order": 2,
-      "type": "text",
-      "i18n": { "en": { "label": "Please specify your other restriction(s)", "hint": "e.g., Shellfish" } },
-      "validation": { "required": true },
-      "branching": { "show_if": "answers['restrictions'] && answers['restrictions'].includes('other')" }
-    },
-    {
-      "id": "gluten_substitutes",
-      "section": "restrictions",
-      "order": 3,
-      "type": "yes_no",
-      "i18n": { "en": { "label": "Are you open to using gluten-free substitutes?", "description": "e.g., gluten-free bread, pasta" } },
-      "validation": { "required": true },
-      "branching": { "show_if": "answers['restrictions'] && answers['restrictions'].includes('gluten')" }
-    },
-    {
-      "id": "fav_protein",
-      "section": "preferences",
-      "order": 1,
-      "type": "multi_choice",
-      "i18n": { "en": { "label": "Favorite Protein Sources?", "options": [{"value": "chicken", "label": "Chicken"}, {"value": "beef", "label": "Beef"}, {"value": "fish", "label": "Fish"}, {"value": "eggs", "label": "Eggs"}]} },
-      "branching": { "show_if": "answers['diet_style'] !== 'vegan'" }
-    },
-    {
-      "id": "fav_plant_protein",
-      "section": "preferences",
-      "order": 2,
-      "type": "multi_choice",
-      "i18n": { "en": { "label": "Favorite Plant-Based Proteins?", "options": [{"value": "tofu", "label": "Tofu/Tempeh"}, {"value": "legumes", "label": "Beans/Lentils"}, {"value": "seeds", "label": "Seeds/Nuts"}, {"value": "seitan", "label": "Seitan"}]} },
-      "branching": { "show_if": "answers['diet_style'] !== 'carnivore'" }
-    },
-    {
-      "id": "fav_carbs",
-      "section": "preferences",
-      "order": 3,
-      "type": "multi_choice",
-      "i18n": { "en": { "label": "Favorite Carb Sources?", "options": [{"value": "rice", "label": "Rice"}, {"value": "potatoes", "label": "Potatoes"}, {"value": "pasta", "label": "Pasta"}, {"value": "bread", "label": "Bread"}] } },
-      "branching": { "show_if": "answers['diet_style'] !== 'carnivore'" }
-    },
-    {
-      "id": "fav_fats",
-      "section": "preferences",
       "order": 4,
-      "type": "multi_choice",
-      "i18n": { "en": { "label": "Favorite Healthy Fats?", "options": [{"value": "avocado", "label": "Avocado"}, {"value": "olive_oil", "label": "Olive Oil"}, {"value": "nuts", "label": "Nuts"}, {"value": "seeds", "label": "Seeds"}] } }
+      "type": "weight",
+      "label": "What’s your current weight?",
+      "ui": { "unit_toggle": ["kg", "lb"] },
+      "validation": { "required": true, "min": 35, "max": 300 },
+      "analytics_key": "weight_kg"
     },
     {
-      "id": "food_dislikes",
-      "section": "preferences",
+      "id": "bmi_calc",
+      "section": "body",
       "order": 5,
+      "type": "computed_bmi",
+      "label": "Your BMI",
+      "hint": "We’ll use BMI to personalize your plan.",
+      "branching": { "show_if": "answers['height'] && answers['weight']" },
+      "analytics_key": "bmi"
+    },
+    {
+      "id": "bmi_education",
+      "section": "body",
+      "order": 6,
+      "type": "chart_bmi",
+      "label": "Risks of unhealthy BMI",
+      "ui": { "range": [16, 40], "healthy_zone": [18.5, 24.9] },
+      "description": "Reaching and maintaining a healthy BMI (18.5–24.9) can reduce the risk of several chronic conditions.",
+      "source": "National Institutes of Health",
+      "branching": { "show_if": "answers['bmi_calc']" }
+    },
+    {
+      "id": "goal_weight",
+      "section": "body",
+      "order": 7,
+      "type": "weight",
+      "label": "What’s your goal weight?",
+      "ui": { "unit_toggle": ["kg", "lb"] },
+      "validation": { "required": true, "min": 35, "max": 300 },
+      "analytics_key": "goal_weight"
+    },
+    {
+      "id": "goal_confirm",
+      "section": "body",
+      "order": 8,
+      "type": "message",
+      "label": "Great!",
+      "description": "You’ve set your first goal. You can change it later.",
+      "emoji": "🎉"
+    },
+    {
+      "id": "sex",
+      "section": "profile",
+      "order": 9,
+      "type": "single_choice",
+      "label": "What’s your gender?",
+      "options": [
+        { "value": "female", "label": "Female" },
+        { "value": "male", "label": "Male" }
+      ],
+      "validation": { "required": true },
+      "analytics_key": "sex"
+    },
+    {
+      "id": "name",
+      "section": "profile",
+      "order": 10,
       "type": "text",
-      "i18n": { "en": { "label": "Any foods you strongly dislike?", "hint": "e.g., cilantro, mushrooms" } }
+      "label": "What is your name?",
+      "validation": { "required": true, "minLength": 2, "maxLength": 40 },
+      "analytics_key": "name"
     },
     {
-      "id": "activity_level",
-      "section": "activity",
-      "order": 1,
+      "id": "profile_card",
+      "section": "summary",
+      "order": 11,
+      "type": "profile_card",
+      "label": "Your personal profile",
+      "branching": { "show_if": "answers['bmi_calc'] && answers['goal_weight'] && answers['name']" },
+      "ui": { "show_bmi_badge": true }
+    },
+    {
+      "id": "med_knowledge",
+      "section": "diet",
+      "order": 12,
       "type": "single_choice",
-      "analytics_key": "quiz_activity",
-      "i18n": { "en": { "label": "Your Daily Activity Level", "description": "This does not include planned workouts.", "options": [{ "value": "sedentary", "label": "Sedentary (desk job)" }, { "value": "light", "label": "Lightly Active (some walking)" }, { "value": "moderate", "label": "Moderately Active (on your feet)" }, { "value": "active", "label": "Active (physical work)" }] } },
+      "label": "How familiar are you with Mediterranean diet?",
+      "branching": { "show_if": "answers['diet_style']=='mediterranean'" },
+      "options": [
+        { "value": "beginner", "label": "😊 Beginner" },
+        { "value": "basic", "label": "😎 Some basic knowledge" },
+        { "value": "experienced", "label": "😳 Well experienced" }
+      ]
+    },
+    {
+      "id": "med_info",
+      "section": "diet",
+      "order": 13,
+      "type": "diet_info",
+      "label": "Mediterranean diet is a plant-based, healthy diet for weight management.",
+      "branching": { "show_if": "answers['diet_style']=='mediterranean'" },
+      "ui": { "macros": { "fat": 30, "protein": 25, "carb": 45 } },
+      "disclaimer": "Educational content only; not medical advice."
+    },
+    {
+      "id": "med_testimonial",
+      "section": "diet",
+      "order": 14,
+      "type": "testimonial",
+      "label": "Mediterranean Diet makes weight loss easier for many.",
+      "branching": { "show_if": "answers['diet_style']=='mediterranean'" },
+      "ui": { "name": "Jay", "location": "United States", "stars": 5 }
+    },
+    {
+      "id": "living_area",
+      "section": "habits",
+      "order": 15,
+      "type": "single_choice",
+      "label": "Which of the following best describes the area you live in?",
+      "options": [
+        { "value": "countryside", "label": "The countryside" },
+        { "value": "city", "label": "A major city" },
+        { "value": "suburbs", "label": "The suburbs" }
+      ]
+    },
+    {
+      "id": "lost_before",
+      "section": "habits",
+      "order": 16,
+      "type": "yes_no",
+      "label": "Have you successfully lost weight before but found it hard to keep the results?"
+    },
+    {
+      "id": "med_diff",
+      "section": "diet",
+      "order": 17,
+      "type": "message",
+      "label": "Mediterranean is different",
+      "description": "Many people lose weight at first but struggle to maintain it. Mediterranean-style eating focuses on sustainable habits.",
+      "branching": { "show_if": "answers['diet_style']=='mediterranean' && answers['lost_before']=='yes'" }
+    },
+    {
+      "id": "plan_calculating",
+      "section": "summary",
+      "order": 18,
+      "type": "loader",
+      "label": "Calculating your personal plan",
+      "description": "Analyzing your profile…",
+      "ui": { "progress": 18, "community_counter": { "men_30s": 147165, "weight_lost_tons": 396 } }
+    },
+    {
+      "id": "prediction",
+      "section": "summary",
+      "order": 19,
+      "type": "prediction",
+      "label": "Your predicted progress",
+      "description": "Based on your answers, we estimate your trajectory.",
+      "disclaimer": "This is an estimate based on similar members and not a guarantee.",
+      "branching": { "show_if": "answers['goal_weight'] && answers['weight'] && answers['name']" }
+    },
+    {
+      "id": "halfway_msg",
+      "section": "habits",
+      "order": 20,
+      "type": "message",
+      "label": "Halfway there!",
+      "description": "We created a basic plan. Let’s customize it — your answers will refine recommendations."
+    },
+    {
+      "id": "activity",
+      "section": "habits",
+      "order": 21,
+      "type": "single_choice",
+      "label": "What’s your typical week like?",
+      "options": [
+        { "value": "sedentary", "label": "🛋 Mostly sedentary" },
+        { "value": "light", "label": "🚶‍♀️ Lightly active" },
+        { "value": "moderate", "label": "🏃‍♂️ Moderately active" },
+        { "value": "active", "label": "🚴 Active daily" }
+      ],
       "validation": { "required": true }
     },
     {
-      "id": "workout_frequency",
-      "section": "activity",
-      "order": 2,
+      "id": "ideal_when",
+      "section": "habits",
+      "order": 22,
       "type": "single_choice",
-      "analytics_key": "quiz_workout_freq",
-      "i18n": { "en": { "label": "How many times per week do you work out?", "options": [{"value": "0", "label": "0 times"}, {"value": "1-2", "label": "1-2 times"}, {"value": "3-4", "label": "3-4 times"}, {"value": "5+", "label": "5+ times"}] } },
-      "validation": { "required": true }
+      "label": "When was the last time you were at your ideal weight?",
+      "options": [
+        { "value": "lt1y", "label": "Less than a year ago" },
+        { "value": "1to2", "label": "1 to 2 years ago" },
+        { "value": "gt3", "label": "More than 3 years ago" },
+        { "value": "never", "label": "Never" }
+      ]
     },
     {
-      "id": "workout_type",
-      "section": "activity",
-      "order": 3,
+      "id": "size_now",
+      "section": "body",
+      "order": 23,
+      "type": "single_choice",
+      "label": "What size clothes do you usually wear?",
+      "options": ["XXXL+","XXXL","XXL","XL","L","M","S","XS","dont_know"].map(v=>({ "value": v.toLowerCase(), "label": v==="dont_know"?"I don’t know":v }))
+    },
+    {
+      "id": "size_goal",
+      "section": "body",
+      "order": 24,
+      "type": "single_choice",
+      "label": "What size clothes do you want to wear?",
+      "options": ["XXXL+","XXXL","XXL","XL","L","M","S","XS","dont_know"].map(v=>({ "value": v.toLowerCase(), "label": v==="dont_know"?"I don’t know":v }))
+    },
+    {
+      "id": "eating_habits",
+      "section": "habits",
+      "order": 25,
+      "type": "single_choice",
+      "label": "How would you describe your eating habits?",
+      "options": [
+        { "value": "same", "label": "I eat the same food every day" },
+        { "value": "similar", "label": "I eat similar foods, with some variation" },
+        { "value": "rotate", "label": "I rotate between familiar foods" },
+        { "value": "experiment", "label": "I like to experiment with different foods" }
+      ]
+    },
+    {
+      "id": "cooking_skill",
+      "section": "habits",
+      "order": 26,
+      "type": "single_choice",
+      "label": "How would you describe your cooking skills?",
+      "options": [
+        { "value": "expert", "label": "I’m an expert cook" },
+        { "value": "learning", "label": "I’m learning to be a better cook" },
+        { "value": "novice", "label": "I don’t know how to cook yet" }
+      ]
+    },
+    {
+      "id": "food_prefs",
+      "section": "diet",
+      "order": 27,
       "type": "multi_choice",
-      "i18n": { "en": { "label": "What kind of workouts do you do?", "options": [{"value": "cardio", "label": "Cardio (Running, Cycling)"}, {"value": "strength", "label": "Strength Training"}, {"value": "hiit", "label": "HIIT"}, {"value": "yoga", "label": "Yoga/Pilates"}, {"value": "sports", "label": "Sports"}]} },
-      "branching": { "show_if": "answers['workout_frequency'] !== '0'" }
+      "label": "What are your food preferences?",
+      "hint": "Choose at least 5 products.",
+      "options": [
+        "all_in_one","avocados","eggs","mushrooms","onions","cheese","nuts","butter","coconut","milk","seafood","olives","tofu","cottage_cheese"
+      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) })),
+      "validation": { "required": true, "minSelected": 5 }
     },
     {
-      "id": "sleep_hours",
-      "section": "habits",
-      "order": 1,
-      "type": "number",
-      "analytics_key": "quiz_sleep",
-      "i18n": { "en": { "label": "On average, how many hours do you sleep?", "hint": "e.g., 7.5" } },
-      "validation": { "required": true, "min": 2, "max": 12, "step": 0.5 }
+      "id": "meat_prefs",
+      "section": "diet",
+      "order": 28,
+      "type": "multi_choice",
+      "label": "Which meat do you prefer?",
+      "options": ["all_in_one","chicken","pork","bacon","beef","turkey","fish","lamb","vegetarian"]
+        .map(v=>({ "value": v, "label": v==="all_in_one"?"All in one": (v==="vegetarian"?"I’m a vegetarian":v.charAt(0).toUpperCase()+v.slice(1)) }))
     },
     {
-      "id": "stress_level",
-      "section": "habits",
-      "order": 2,
-      "type": "single_choice",
-      "analytics_key": "quiz_stress",
-      "i18n": { "en": { "label": "Average Stress Level", "options": [{ "value": "low", "label": "Low" }, { "value": "moderate", "label": "Moderate" }, { "value": "high", "label": "High" }] } },
-      "validation": { "required": true }
+      "id": "allergies",
+      "section": "health",
+      "order": 29,
+      "type": "multi_choice",
+      "label": "Do you have any food allergies or intolerance?",
+      "options": [
+        "none","lactose","nuts","milk_protein","egg_protein","honey","fish","citrus","prefer_not_to_answer"
+      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) }))
     },
     {
       "id": "water_intake",
       "section": "habits",
-      "order": 3,
-      "type": "number",
-      "analytics_key": "quiz_water",
-      "i18n": { "en": { "label": "Daily Water Intake (liters)", "hint": "e.g., 2" } },
-      "validation": { "required": true, "min": 0, "max": 10, "step": 0.25 }
-    },
-    {
-      "id": "alcohol_consumption",
-      "section": "habits",
-      "order": 4,
+      "order": 30,
       "type": "single_choice",
-      "analytics_key": "quiz_alcohol",
-      "i18n": { "en": { "label": "Alcohol Consumption", "options": [{"value": "none", "label": "None"}, {"value": "rarely", "label": "Rarely"}, {"value": "socially", "label": "Socially"}, {"value": "regularly", "label": "Regularly"}]} },
-      "validation": { "required": true }
+      "label": "How many glasses of water do you drink per day?",
+      "options": [
+        { "value": "coffee_tea_only", "label": "I only have coffee or tea" },
+        { "value": "lt2", "label": "Less than 2 glasses" },
+        { "value": "3to6", "label": "About 3–6 glasses" },
+        { "value": "gt6", "label": "More than 6 glasses" }
+      ]
     },
     {
-      "id": "cooking_frequency",
+      "id": "weekend_hard",
       "section": "habits",
-      "order": 5,
+      "order": 31,
+      "type": "yes_no",
+      "label": "Is it hard for you to make healthy choices during the weekend?"
+    },
+    {
+      "id": "same_time_meals",
+      "section": "habits",
+      "order": 32,
+      "type": "yes_no",
+      "label": "Do you typically eat meals around the same time each day?"
+    },
+    {
+      "id": "sleep_quality",
+      "section": "health",
+      "order": 33,
       "type": "single_choice",
-      "analytics_key": "quiz_cooking_freq",
-      "i18n": { "en": { "label": "How often do you cook at home?", "options": [{"value": "rarely", "label": "Rarely"}, {"value": "sometimes", "label": "A few times a week"}, {"value": "often", "label": "Most days"}, {"value": "daily", "label": "Every meal"}]} },
-      "validation": { "required": true }
+      "label": "How would you rate the quality of your sleep?",
+      "options": [
+        { "value": "trouble_falling", "label": "I have trouble falling asleep" },
+        { "value": "varies", "label": "It varies" },
+        { "value": "sleep_well", "label": "I sleep well most nights" }
+      ]
     },
     {
-      "id": "meal_timing",
+      "id": "work_schedule",
       "section": "habits",
-      "order": 6,
+      "order": 34,
+      "type": "single_choice",
+      "label": "What’s your work schedule?",
+      "subtitle": "Daily planning can play a big role for some members.",
+      "options": [
+        "flexible","nine_to_five","shifts","between_jobs","seasonal","retired","other"
+      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) }))
+    },
+    {
+      "id": "health_risks",
+      "section": "health",
+      "order": 35,
       "type": "multi_choice",
-      "i18n": { "en": { "label": "Which meals do you typically eat?", "options": [{"value": "breakfast", "label": "Breakfast"}, {"value": "lunch", "label": "Lunch"}, {"value": "dinner", "label": "Dinner"}, {"value": "snacks", "label": "Snacks"}] } },
+      "label": "Are you at risk of any of the following?",
+      "options": [
+        "high_blood_pressure","heart_disease_or_stroke","high_cholesterol","diabetes","osteoarthritis","kidney_disease","depression","none_of_these"
+      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) }))
+    },
+    {
+      "id": "energy_levels",
+      "section": "health",
+      "order": 36,
+      "type": "single_choice",
+      "label": "How would you rate your energy levels?",
+      "options": [
+        { "value": "very_high", "label": "Very high" },
+        { "value": "moderate", "label": "Moderate" },
+        { "value": "low", "label": "Low" },
+        { "value": "very_low", "label": "Very low" },
+        { "value": "varies", "label": "It varies day to day" }
+      ]
+    },
+    {
+      "id": "mobility_limited",
+      "section": "health",
+      "order": 37,
+      "type": "single_choice",
+      "label": "Are you limited in mobility?",
+      "options": [
+        { "value": "no", "label": "No, not at all" },
+        { "value": "slightly", "label": "Yes, slightly" },
+        { "value": "significantly", "label": "Yes, significantly" },
+        { "value": "temporarily", "label": "Yes, temporarily" }
+      ]
+    },
+    {
+      "id": "need_help_activities",
+      "section": "health",
+      "order": 38,
+      "type": "single_choice",
+      "label": "Do you require help to do regular activities?",
+      "options": [
+        { "value": "no", "label": "No, not at all" },
+        { "value": "sometimes", "label": "Yes, sometimes" },
+        { "value": "often", "label": "Yes, often" },
+        { "value": "always", "label": "Yes, always" }
+      ]
+    },
+    {
+      "id": "miss_activities",
+      "section": "health",
+      "order": 39,
+      "type": "single_choice",
+      "label": "Do you miss any activities that you love but can’t do anymore?",
+      "options": [
+        { "value": "no", "label": "No, not really" },
+        { "value": "few", "label": "Yes, a few" },
+        { "value": "many", "label": "Yes, many" }
+      ]
+    },
+    {
+      "id": "self_esteem",
+      "section": "health",
+      "order": 40,
+      "type": "yes_no",
+      "label": "My weight impacts my self-esteem — do you agree?"
+    },
+    {
+      "id": "family_concerned",
+      "section": "health",
+      "order": 41,
+      "type": "yes_no",
+      "label": "My family is concerned about my health"
+    },
+    {
+      "id": "motivation_level",
+      "section": "health",
+      "order": 42,
+      "type": "yes_no",
+      "label": "I am highly motivated to reach my target weight"
+    },
+    {
+      "id": "start_with_support",
+      "section": "habits",
+      "order": 43,
+      "type": "single_choice",
+      "label": "Do you plan to start dieting on your own or with support?",
+      "options": [
+        { "value": "solo", "label": "On my own" },
+        { "value": "friend", "label": "With a friend" },
+        { "value": "family", "label": "With a family member" },
+        { "value": "solo_want_connection", "label": "On my own but I’d love to connect with someone" }
+      ]
+    },
+    {
+      "id": "extra_goals",
+      "section": "habits",
+      "order": 44,
+      "type": "multi_choice",
+      "label": "What goal would you like to achieve in addition to weight loss?",
+      "options": [
+        "run_5k","look_better_in_clothes","feel_healthier","reverse_condition","sleep_well","prepare_for_event","feel_more_comfortable","outdoor_activities"
+      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) }))
+    },
+    {
+      "id": "medications",
+      "section": "health",
+      "order": 45,
+      "type": "multi_choice",
+      "label": "Are you taking any medications?",
+      "options": [
+        "vitamins","hormones","antibiotics","anxiety_medications","other","no"
+      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) }))
+    },
+    {
+      "id": "restrictions_yesno",
+      "section": "health",
+      "order": 46,
+      "type": "yes_no",
+      "label": "Do you have any dietary restrictions?",
+      "analytics_key": "restrictions_yn"
+    },
+    {
+      "id": "restrictions_followup",
+      "section": "health",
+      "order": 47,
+      "type": "multi_choice",
+      "label": "Select your dietary restrictions",
+      "options": [
+        "gluten_free","lactose_free","nut_free","egg_free","fish_free","low_carb","low_fodmap","other"
+      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) })),
+      "branching": { "show_if": "answers['restrictions_yesno']=='yes'" }
+    },
+    {
+      "id": "newsletter_optin",
+      "section": "summary",
+      "order": 48,
+      "type": "yes_no",
+      "label": "Do you want to receive emails with tips and exclusive offers from us?"
+    },
+    {
+      "id": "signup_lead",
+      "section": "summary",
+      "order": 49,
+      "type": "lead_capture",
+      "label": "Sign up",
+      "ui": { "fields": ["email"] },
       "validation": { "required": true }
     },
     {
-      "id": "caffeine_intake",
-      "section": "habits",
-      "order": 7,
-      "type": "single_choice",
-      "i18n": { "en": { "label": "Do you consume caffeine?", "options": [{"value": "none", "label": "No"}, {"value": "low", "label": "1-2 servings/day"}, {"value": "high", "label": "3+ servings/day"}]} }
-    },
-    {
-      "id": "challenges",
-      "section": "habits",
-      "order": 8,
-      "type": "multi_choice",
-      "i18n": { "en": { "label": "What are your biggest challenges?", "options": [{"value": "time", "label": "Lack of time"}, {"value": "cravings", "label": "Cravings"}, {"value": "cost", "label": "Cost of healthy food"}, {"value": "motivation", "label": "Staying motivated"}]} }
+      "id": "thanks",
+      "section": "summary",
+      "order": 50,
+      "type": "message",
+      "label": "Thank you for sharing!",
+      "description": "You’re taking meaningful steps toward your goals. You can do this 💪"
     }
   ]
 }
