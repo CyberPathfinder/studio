@@ -5,7 +5,6 @@ import { evaluateBranchingLogic, validateAnswer } from '@/lib/quiz-engine/utils'
 import { useReducer, useCallback, useMemo, useContext, createContext, ReactNode } from 'react';
 import { useAnalytics } from './use-analytics';
 import { useDebouncedCallback } from 'use-debounce';
-import { useFirebase } from '@/firebase';
 import { deleteQuizDraft, saveIntakeData } from '@/firebase/quiz';
 
 type QuizEngineContextType = {
@@ -14,7 +13,7 @@ type QuizEngineContextType = {
   isInitialized: boolean;
   initializeState: (initialAnswers: Record<string, any>, currentQuestionId?: string | null) => void;
   handleAnswerChange: (questionId: string, value: any, analyticsKey?: string) => void;
-  nextQuestion: (skipValidation?: boolean) => { isValid: boolean, message?: string };
+  nextQuestion: (skipValidation?: boolean) => { isValid: boolean, message?: string } | void;
   prevQuestion: () => void;
   completeQuiz: () => void;
   jumpToQuestion: (questionId: string) => void;
@@ -26,19 +25,25 @@ const QuizEngineContext = createContext<QuizEngineContextType | null>(null);
 
 export const QuizEngineProvider = ({ children, config }: { children: ReactNode, config: QuizConfig }) => {
   const { track } = useAnalytics();
-  const { user } = useFirebase();
   const [state, dispatch] = useReducer(quizReducer, getInitialState(config));
 
   const initializeState = useCallback((initialAnswers: Record<string, any>, currentQuestionId: string | null = null) => {
     dispatch({ type: 'INITIALIZE_STATE', payload: { config, initialAnswers, currentQuestionId } });
   }, [config]);
 
-  const handleAnswerChange = useDebouncedCallback((questionId: string, value: any) => {
+  const debouncedAnswerChange = useDebouncedCallback((questionId: string, value: any) => {
     dispatch({ type: 'SET_ANSWER', payload: { questionId, value } });
   }, 300);
 
+  const handleAnswerChange = useCallback((questionId: string, value: any, analyticsKey?: string) => {
+    if (analyticsKey) {
+        track('quiz_step' as any, { analyticsKey, value });
+    }
+    debouncedAnswerChange(questionId, value);
+  }, [track, debouncedAnswerChange]);
+
   const completeQuiz = useCallback(() => {
-    track('quiz_complete' as any);
+    track('quiz_step' as any, { step: 'complete' });
     dispatch({ type: 'COMPLETE_QUIZ' });
   },[track]);
 
@@ -53,6 +58,11 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
         }
     }
 
+    if (state.isLastQuestion) {
+        completeQuiz();
+        return; // <-- FIX: Explicitly return here
+    }
+
     let nextIndex = state.currentQuestionIndex + 1;
     while (nextIndex < config.questions.length) {
       const nextQ = config.questions[nextIndex];
@@ -64,13 +74,8 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
       nextIndex++;
     }
     
-    // No more questions, which means we're on the last question.
-    // The next "action" is to complete the quiz and go to summary.
-    if (state.isLastQuestion) {
-        completeQuiz();
-        return { isValid: true };
-    }
-    
+    // If no next question is found, complete the quiz
+    completeQuiz();
     return { isValid: true };
 
   }, [state, config.questions, track, completeQuiz]);
@@ -78,7 +83,6 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
   const prevQuestion = useCallback(() => {
     const { answers } = state;
     if (state.status === 'completed') {
-        // If on summary screen, go back to the last question
         const lastQuestionIndex = config.questions.map(q => evaluateBranchingLogic(q.branching, answers)).lastIndexOf(true);
         dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: lastQuestionIndex });
         return;
@@ -154,7 +158,6 @@ export const useQuizEngine = () => {
   return context;
 };
 
-// Top-level provider for the quiz page
 export const QuizProvider = ({ children, config }: { children: ReactNode, config: QuizConfig }) => (
     <QuizEngineProvider config={config}>
         {children}
