@@ -59,7 +59,7 @@ const TestimonialsSection = () => {
 
   return (
     <section id="testimonials" className="bg-white py-20 md:py-28">
-      <div className="container">
+      <div className="container px-4 sm:px-6 lg:px-8">
         <div className="mx-auto mb-16 max-w-3xl text-center">
           <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Loved by Users Worldwide

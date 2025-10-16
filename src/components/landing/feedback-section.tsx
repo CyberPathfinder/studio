@@ -14,7 +14,7 @@ const FeedbackSection = () => {
 
   return (
     <section id="feedback" className="py-20 md:py-28">
-      <div className="container">
+      <div className="container px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-24">
           <div className="order-last lg:order-first">
             <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">

@@ -22,7 +22,7 @@ export function Footer() {
 
   return (
     <footer className="bg-white">
-      <div className="container py-12 lg:py-16">
+      <div className="container py-12 lg:py-16 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-8 md:flex-row md:items-start">
           <div className="flex flex-col items-center md:items-start">
             <VivaFormLogo className="h-10 w-auto text-primary" />

@@ -154,7 +154,7 @@ const HeroSection = () => {
   return (
     <section className="relative w-full overflow-hidden pt-20 md:pt-28 lg:pt-32">
       <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background -z-10"></div>
-      <div className="container">
+      <div className="container px-4 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-8">
           <div className="flex flex-col justify-center text-center lg:text-left">
             <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
