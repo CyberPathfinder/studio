@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useQuizEngine } from '@/hooks/useQuizEngine';
+import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { useFirebase } from '@/firebase';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useToast } from '@/hooks/use-toast';

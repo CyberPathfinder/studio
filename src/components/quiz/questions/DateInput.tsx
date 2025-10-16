@@ -1,5 +1,5 @@
 'use client';
-import { useQuizEngine } from '@/hooks/useQuizEngine';
+import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Question } from '@/lib/quiz-engine/config';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';

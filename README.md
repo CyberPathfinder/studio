@@ -19,20 +19,20 @@ Replace the placeholder values with your actual tracking IDs. The application wi
 
 ## Quiz Engine: Managing Questions
 
-The quiz is powered by a JSON configuration file located at `/data/questions.json`. This allows for easy updates to questions, sections, and logic without changing the application code.
+The quiz is powered by a JSON configuration file located at `src/data/questions.json`. This allows for easy updates to questions, sections, and logic without changing the application code.
 
 ### How to Add or Translate Questions
 
-The easiest way to manage questions is by editing the CSV template located at `/data/questions_template.csv` and then running the conversion script.
+The easiest way to manage questions is by editing the CSV template located at `src/data/questions_template.csv` and then running the conversion script.
 
-1.  **Edit the CSV**: Open `/data/questions_template.csv` in a spreadsheet editor.
+1.  **Edit the CSV**: Open `src/data/questions_template.csv` in a spreadsheet editor.
     *   **Add a question**: Add a new row and fill in the columns.
     *   **Translate a question**: Fill in the `label_ru`, `description_ru`, `hint_ru`, and `options_ru` columns for the desired question.
 2.  **Run the Converter**: After saving your CSV changes, run the following command from your project root:
     ```bash
-    node data/csv-to-json.mjs
+    node src/data/csv-to-json.mjs
     ```
-    This will automatically update the `/data/questions.json` file.
+    This will automatically update the `src/data/questions.json` file.
 
 ### How Branching Logic Works
 
@@ -57,7 +57,7 @@ answers['primary_goal'] === 'lose_weight' || answers['primary_goal'] === 'gain_m
 
 ### Question Bank Report
 
-This report provides a summary of the current question bank in `data/questions.json`.
+This report provides a summary of the current question bank in `src/data/questions.json`.
 
 *   **Total Questions**: 30
 

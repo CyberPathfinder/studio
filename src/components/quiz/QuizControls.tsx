@@ -1,5 +1,5 @@
 'use client';
-import { useQuizEngine } from '@/hooks/useQuizEngine';
+import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -9,23 +9,23 @@ const QuizControls = () => {
   const { toast } = useToast();
 
   const handleNext = () => {
-    const { isValid, message } = nextQuestion();
-    if (!isValid) {
+    const result = nextQuestion();
+    if (result && !result.isValid) {
       toast({
         variant: 'destructive',
         title: 'Validation Error',
-        description: message,
+        description: result.message,
       });
     }
   };
 
   const handleSkip = () => {
-    const { isValid, message } = nextQuestion(true); // skip validation
-    if (!isValid) {
+    const result = nextQuestion(true); // skip validation
+    if (result && !result.isValid) {
         toast({
             variant: 'destructive',
             title: 'Error',
-            description: message,
+            description: result.message,
         });
     }
   }

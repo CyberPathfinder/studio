@@ -1,5 +1,5 @@
 'use client';
-import { useQuizEngine } from '@/hooks/useQuizEngine';
+import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Question } from '@/lib/quiz-engine/config';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';

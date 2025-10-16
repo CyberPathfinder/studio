@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useFirebase } from '@/firebase';
 import { getQuizDraft, saveQuizDraft } from '@/firebase/quiz';
-import { useQuizEngine, QuizProvider } from '@/hooks/useQuizEngine';
+import { useQuizEngine, QuizProvider } from '@/hooks/useQuizEngine.tsx';
 import quizConfig from '@/data/questions.json';
 import ResumePrompt from './ResumePrompt';
 import QuizEngine from './QuizEngine';
