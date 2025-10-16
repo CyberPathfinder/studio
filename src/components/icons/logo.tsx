@@ -2,12 +2,11 @@ import { cn } from "@/lib/utils";
 
 export const VivaFormLogo = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
   <svg
-    width="156"
     height="40"
     viewBox="0 0 156 40"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    className={cn("text-foreground", className)}
+    className={cn("text-foreground w-auto", className)}
     {...props}
   >
     <path
