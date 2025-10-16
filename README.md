@@ -1,3 +1,4 @@
+
 # Firebase Studio
 
 This is a NextJS starter in Firebase Studio.
@@ -53,3 +54,42 @@ You can create more complex logic using `&&` (and) and `||` (or):
 ```
 answers['primary_goal'] === 'lose_weight' || answers['primary_goal'] === 'gain_muscle'
 ```
+
+### Question Bank Report
+
+This report provides a summary of the current question bank in `data/questions.json`.
+
+*   **Total Questions**: 30
+
+#### Questions per Section
+
+| Section        | Question Count |
+| :------------- | :------------- |
+| profile        | 3              |
+| body           | 3              |
+| goals          | 3              |
+| diet_style     | 2              |
+| restrictions   | 3              |
+| preferences    | 5              |
+| activity       | 3              |
+| habits         | 8              |
+| **Total**      | **30**         |
+
+#### Branching Logic Map
+
+This table shows which questions are conditional and what triggers their visibility.
+
+| Question ID            | Depends On           | Condition                                                              |
+| :--------------------- | :------------------- | :--------------------------------------------------------------------- |
+| `target_weight`        | `primary_goal`       | `answers['primary_goal'] === 'lose' || answers['primary_goal'] === 'gain'` |
+| `target_date`          | `primary_goal`       | `answers['primary_goal'] === 'lose'`                                     |
+| `restrictions_other`   | `restrictions`       | `answers['restrictions'] && answers['restrictions'].includes('other')`   |
+| `gluten_substitutes`   | `restrictions`       | `answers['restrictions'] && answers['restrictions'].includes('gluten')`  |
+| `fav_protein`          | `diet_style`         | `answers['diet_style'] !== 'vegan'`                                    |
+| `fav_plant_protein`    | `diet_style`         | `answers['diet_style'] !== 'carnivore'`                                |
+| `fav_carbs`            | `diet_style`         | `answers['diet_style'] !== 'carnivore'`                                |
+| `workout_type`         | `workout_frequency`  | `answers['workout_frequency'] !== '0'`                                   |
+
+All questions have been validated and are correctly wired into the quiz engine.
+
+    

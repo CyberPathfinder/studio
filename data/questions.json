@@ -1,92 +1,26 @@
+
 {
   "id": "vivaform-onboarding-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "sections": [
-    {
-      "id": "profile",
-      "order": 1,
-      "i18n": {
-        "en": {
-          "title": "Your Profile"
-        },
-        "ru": {
-          "title": "Ваш профиль"
-        }
-      }
-    },
-    {
-      "id": "nutrition",
-      "order": 2,
-      "i18n": {
-        "en": {
-          "title": "Nutrition"
-        },
-        "ru": {
-          "title": "Питание"
-        }
-      }
-    },
-    {
-      "id": "habits",
-      "order": 3,
-      "i18n": {
-        "en": {
-          "title": "Your Habits"
-        },
-        "ru": {
-          "title": "Ваши привычки"
-        }
-      }
-    }
+    { "id": "profile", "order": 1, "i18n": { "en": { "title": "Your Profile" }, "ru": {"title": "Ваш профиль" } } },
+    { "id": "body", "order": 2, "i18n": { "en": { "title": "About Your Body" }, "ru": {"title": "О вашем теле" } } },
+    { "id": "goals", "order": 3, "i18n": { "en": { "title": "Your Goals" }, "ru": {"title": "Ваши цели" } } },
+    { "id": "diet_style", "order": 4, "i18n": { "en": { "title": "Diet Style" }, "ru": {"title": "Стиль питания" } } },
+    { "id": "restrictions", "order": 5, "i18n": { "en": { "title": "Dietary Restrictions" }, "ru": {"title": "Ограничения в питании" } } },
+    { "id": "preferences", "order": 6, "i18n": { "en": { "title": "Food Preferences" }, "ru": {"title": "Предпочтения в еде" } } },
+    { "id": "activity", "order": 7, "i18n": { "en": { "title": "Activity Level" }, "ru": {"title": "Уровень активности" } } },
+    { "id": "habits", "order": 8, "i18n": { "en": { "title": "Your Habits" }, "ru": {"title": "Ваши привычки" } } }
   ],
   "questions": [
     {
-      "id": "primary_goal",
+      "id": "name",
       "section": "profile",
       "order": 1,
-      "type": "single_choice",
-      "analytics_key": "quiz_goal",
-      "i18n": {
-        "en": {
-          "label": "What is your primary goal?",
-          "description": "This helps us tailor your plan.",
-          "options": [
-            {
-              "value": "lose_weight",
-              "label": "Lose Weight"
-            },
-            {
-              "value": "maintain_weight",
-              "label": "Maintain Weight"
-            },
-            {
-              "value": "gain_muscle",
-              "label": "Gain Muscle"
-            }
-          ]
-        },
-        "ru": {
-          "label": "Какова ваша основная цель?",
-          "description": "Это поможет нам адаптировать ваш план.",
-          "options": [
-            {
-              "value": "lose_weight",
-              "label": "Похудеть"
-            },
-            {
-              "value": "maintain_weight",
-              "label": "Поддерживать вес"
-            },
-            {
-              "value": "gain_muscle",
-              "label": "Набрать мышечную массу"
-            }
-          ]
-        }
-      },
-      "validation": {
-        "required": true
-      }
+      "type": "text",
+      "analytics_key": "quiz_name",
+      "i18n": { "en": { "label": "What should we call you?", "hint": "Enter your first name" } },
+      "validation": { "required": true }
     },
     {
       "id": "gender",
@@ -94,39 +28,8 @@
       "order": 2,
       "type": "single_choice",
       "analytics_key": "quiz_gender",
-      "i18n": {
-        "en": {
-          "label": "What is your biological sex?",
-          "description": "This helps us calculate your metabolic rate more accurately.",
-          "options": [
-            {
-              "value": "male",
-              "label": "Male"
-            },
-            {
-              "value": "female",
-              "label": "Female"
-            }
-          ]
-        },
-        "ru": {
-          "label": "Ваш биологический пол?",
-          "description": "Это помогает нам точнее рассчитать ваш метаболизм.",
-          "options": [
-            {
-              "value": "male",
-              "label": "Мужской"
-            },
-            {
-              "value": "female",
-              "label": "Женский"
-            }
-          ]
-        }
-      },
-      "validation": {
-        "required": true
-      }
+      "i18n": { "en": { "label": "Biological Sex", "options": [{ "value": "male", "label": "Male" }, { "value": "female", "label": "Female" }] } },
+      "validation": { "required": true }
     },
     {
       "id": "dob",
@@ -134,242 +37,172 @@
       "order": 3,
       "type": "date",
       "analytics_key": "quiz_dob",
-      "i18n": {
-        "en": {
-          "label": "What is your date of birth?",
-          "hint": "Pick a date"
-        },
-        "ru": {
-          "label": "Когда вы родились?",
-          "hint": "Выберите дату"
-        }
-      },
-      "validation": {
-        "required": true
-      }
+      "i18n": { "en": { "label": "Date of Birth" } },
+      "validation": { "required": true }
     },
     {
-      "id": "measurements",
-      "section": "profile",
-      "order": 4,
-      "type": "height_weight",
-      "analytics_key": "quiz_measurements",
-      "i18n": {
-        "en": {
-          "label": "Your Measurements",
-          "hint": "Height in cm / Weight in kg"
-        },
-        "ru": {
-          "label": "Ваши параметры",
-          "hint": "Рост в см / Вес в кг"
-        }
-      },
-      "validation": {
-        "required": true,
-        "min": 35,
-        "max": 300
-      }
+      "id": "height",
+      "section": "body",
+      "order": 1,
+      "type": "number",
+      "analytics_key": "quiz_height",
+      "i18n": { "en": { "label": "What is your height? (cm)", "hint": "e.g., 175" } },
+      "validation": { "required": true, "min": 120, "max": 250 }
+    },
+    {
+      "id": "current_weight",
+      "section": "body",
+      "order": 2,
+      "type": "number",
+      "analytics_key": "quiz_current_weight",
+      "i18n": { "en": { "label": "What is your current weight? (kg)", "hint": "e.g., 70" } },
+      "validation": { "required": true, "min": 35, "max": 300 }
+    },
+    {
+      "id": "body_fat_percentage",
+      "section": "body",
+      "order": 3,
+      "type": "number",
+      "analytics_key": "quiz_body_fat",
+      "i18n": { "en": { "label": "Body Fat Percentage (Optional)", "description": "If you know it, this helps with accuracy.", "hint": "e.g., 15" } },
+      "validation": { "min": 3, "max": 60 }
+    },
+    {
+      "id": "primary_goal",
+      "section": "goals",
+      "order": 1,
+      "type": "single_choice",
+      "analytics_key": "quiz_goal",
+      "i18n": { "en": { "label": "What is your primary goal?", "options": [{ "value": "lose", "label": "Lose Weight" }, { "value": "maintain", "label": "Maintain Weight" }, { "value": "gain", "label": "Gain Muscle" }] } },
+      "validation": { "required": true }
     },
     {
       "id": "target_weight",
-      "section": "profile",
-      "order": 5,
+      "section": "goals",
+      "order": 2,
       "type": "number",
       "analytics_key": "quiz_target_weight",
-      "i18n": {
-        "en": {
-          "label": "What is your target weight? (kg)",
-          "hint": "Enter your target weight"
-        },
-        "ru": {
-          "label": "Каков ваш целевой вес? (кг)",
-          "hint": "Введите ваш целевой вес"
-        }
-      },
-      "validation": {
-        "required": true,
-        "min": 35,
-        "max": 300
-      },
-      "branching": {
-        "show_if": "answers['primary_goal'] === 'lose_weight' || answers['primary_goal'] === 'gain_muscle'"
-      }
+      "i18n": { "en": { "label": "What is your target weight? (kg)", "hint": "Enter your target weight" } },
+      "validation": { "required": true, "min": 35, "max": 300 },
+      "branching": { "show_if": "answers['primary_goal'] === 'lose' || answers['primary_goal'] === 'gain'" }
+    },
+    {
+      "id": "target_date",
+      "section": "goals",
+      "order": 3,
+      "type": "date",
+      "analytics_key": "quiz_target_date",
+      "i18n": { "en": { "label": "When would you like to achieve this by?", "description": "A realistic timeframe is key to success." } },
+      "validation": { "required": true },
+      "branching": { "show_if": "answers['primary_goal'] === 'lose'" }
+    },
+    {
+      "id": "diet_style",
+      "section": "diet_style",
+      "order": 1,
+      "type": "single_choice",
+      "analytics_key": "quiz_diet_style",
+      "i18n": { "en": { "label": "Which best describes your diet?", "options": [{ "value": "omnivore", "label": "Omnivore" }, { "value": "vegetarian", "label": "Vegetarian" }, { "value": "vegan", "label": "Vegan" }, { "value": "pescetarian", "label": "Pescetarian" }, { "value": "carnivore", "label": "Carnivore" }] } },
+      "validation": { "required": true }
+    },
+    {
+      "id": "diet_familiarity",
+      "section": "diet_style",
+      "order": 2,
+      "type": "single_choice",
+      "analytics_key": "quiz_diet_familiarity",
+      "i18n": { "en": { "label": "How familiar are you with this way of eating?", "options": [{"value": "new", "label": "New to it"}, {"value": "familiar", "label": "Familiar"}, {"value": "expert", "label": "Expert"}] } }
+    },
+    {
+      "id": "restrictions",
+      "section": "restrictions",
+      "order": 1,
+      "type": "multi_choice",
+      "analytics_key": "quiz_restrictions",
+      "i18n": { "en": { "label": "Do you have any dietary restrictions?", "options": [{ "value": "none", "label": "None" }, { "value": "lactose", "label": "Lactose" }, { "value": "gluten", "label": "Gluten" }, { "value": "nuts", "label": "Nuts" }, { "value": "soy", "label": "Soy" }, { "value": "other", "label": "Other" }] } },
+      "validation": { "required": true }
+    },
+    {
+      "id": "restrictions_other",
+      "section": "restrictions",
+      "order": 2,
+      "type": "text",
+      "i18n": { "en": { "label": "Please specify your other restriction(s)", "hint": "e.g., Shellfish" } },
+      "validation": { "required": true },
+      "branching": { "show_if": "answers['restrictions'] && answers['restrictions'].includes('other')" }
+    },
+    {
+      "id": "gluten_substitutes",
+      "section": "restrictions",
+      "order": 3,
+      "type": "yes_no",
+      "i18n": { "en": { "label": "Are you open to using gluten-free substitutes?", "description": "e.g., gluten-free bread, pasta" } },
+      "validation": { "required": true },
+      "branching": { "show_if": "answers['restrictions'] && answers['restrictions'].includes('gluten')" }
+    },
+    {
+      "id": "fav_protein",
+      "section": "preferences",
+      "order": 1,
+      "type": "multi_choice",
+      "i18n": { "en": { "label": "Favorite Protein Sources?", "options": [{"value": "chicken", "label": "Chicken"}, {"value": "beef", "label": "Beef"}, {"value": "fish", "label": "Fish"}, {"value": "eggs", "label": "Eggs"}]} },
+      "branching": { "show_if": "answers['diet_style'] !== 'vegan'" }
+    },
+    {
+      "id": "fav_plant_protein",
+      "section": "preferences",
+      "order": 2,
+      "type": "multi_choice",
+      "i18n": { "en": { "label": "Favorite Plant-Based Proteins?", "options": [{"value": "tofu", "label": "Tofu/Tempeh"}, {"value": "legumes", "label": "Beans/Lentils"}, {"value": "seeds", "label": "Seeds/Nuts"}, {"value": "seitan", "label": "Seitan"}]} },
+      "branching": { "show_if": "answers['diet_style'] !== 'carnivore'" }
+    },
+    {
+      "id": "fav_carbs",
+      "section": "preferences",
+      "order": 3,
+      "type": "multi_choice",
+      "i18n": { "en": { "label": "Favorite Carb Sources?", "options": [{"value": "rice", "label": "Rice"}, {"value": "potatoes", "label": "Potatoes"}, {"value": "pasta", "label": "Pasta"}, {"value": "bread", "label": "Bread"}] } },
+      "branching": { "show_if": "answers['diet_style'] !== 'carnivore'" }
+    },
+    {
+      "id": "fav_fats",
+      "section": "preferences",
+      "order": 4,
+      "type": "multi_choice",
+      "i18n": { "en": { "label": "Favorite Healthy Fats?", "options": [{"value": "avocado", "label": "Avocado"}, {"value": "olive_oil", "label": "Olive Oil"}, {"value": "nuts", "label": "Nuts"}, {"value": "seeds", "label": "Seeds"}] } }
+    },
+    {
+      "id": "food_dislikes",
+      "section": "preferences",
+      "order": 5,
+      "type": "text",
+      "i18n": { "en": { "label": "Any foods you strongly dislike?", "hint": "e.g., cilantro, mushrooms" } }
     },
     {
       "id": "activity_level",
-      "section": "profile",
-      "order": 6,
-      "type": "single_choice",
-      "analytics_key": "quiz_activity",
-      "i18n": {
-        "en": {
-          "label": "What is your activity level?",
-          "description": "'Sedentary' is a desk job with little exercise. 'Very Active' is a physical job or daily intense workouts.",
-          "options": [
-            {
-              "value": "sedentary",
-              "label": "Sedentary"
-            },
-            {
-              "value": "light",
-              "label": "Lightly Active"
-            },
-            {
-              "value": "moderate",
-              "label": "Moderately Active"
-            },
-            {
-              "value": "active",
-              "label": "Active"
-            },
-            {
-              "value": "very_active",
-              "label": "Very Active"
-            }
-          ]
-        },
-        "ru": {
-          "label": "Какой у вас уровень активности?",
-          "description": "'Сидячий' - офисная работа с минимумом упражнений. 'Очень активный' - физическая работа или ежедневные интенсивные тренировки.",
-          "options": [
-            {
-              "value": "sedentary",
-              "label": "Сидячий"
-            },
-            {
-              "value": "light",
-              "label": "Малоактивный"
-            },
-            {
-              "value": "moderate",
-              "label": "Умеренно активный"
-            },
-            {
-              "value": "active",
-              "label": "Активный"
-            },
-            {
-              "value": "very_active",
-              "label": "Очень активный"
-            }
-          ]
-        }
-      },
-      "validation": {
-        "required": true
-      }
-    },
-    {
-      "id": "diet_preference",
-      "section": "nutrition",
+      "section": "activity",
       "order": 1,
       "type": "single_choice",
-      "analytics_key": "quiz_diet",
-      "i18n": {
-        "en": {
-          "label": "Any dietary preferences?",
-          "description": "We'll suggest recipes based on your choice.",
-          "options": [
-            {
-              "value": "omnivore",
-              "label": "None"
-            },
-            {
-              "value": "vegetarian",
-              "label": "Vegetarian"
-            },
-            {
-              "value": "vegan",
-              "label": "Vegan"
-            },
-            {
-              "value": "pescetarian",
-              "label": "Pescetarian"
-            }
-          ]
-        },
-        "ru": {
-          "label": "Есть ли диетические предпочтения?",
-          "description": "Мы будем предлагать рецепты на основе вашего выбора.",
-          "options": [
-            {
-              "value": "omnivore",
-              "label": "Никаких"
-            },
-            {
-              "value": "vegetarian",
-              "label": "Вегетарианец"
-            },
-            {
-              "value": "vegan",
-              "label": "Веган"
-            },
-            {
-              "value": "pescetarian",
-              "label": "Пескетарианец"
-            }
-          ]
-        }
-      },
-      "validation": {
-        "required": true
-      }
+      "analytics_key": "quiz_activity",
+      "i18n": { "en": { "label": "Your Daily Activity Level", "description": "This does not include planned workouts.", "options": [{ "value": "sedentary", "label": "Sedentary (desk job)" }, { "value": "light", "label": "Lightly Active (some walking)" }, { "value": "moderate", "label": "Moderately Active (on your feet)" }, { "value": "active", "label": "Active (physical work)" }] } },
+      "validation": { "required": true }
     },
     {
-      "id": "food_allergies",
-      "section": "nutrition",
+      "id": "workout_frequency",
+      "section": "activity",
       "order": 2,
+      "type": "single_choice",
+      "analytics_key": "quiz_workout_freq",
+      "i18n": { "en": { "label": "How many times per week do you work out?", "options": [{"value": "0", "label": "0 times"}, {"value": "1-2", "label": "1-2 times"}, {"value": "3-4", "label": "3-4 times"}, {"value": "5+", "label": "5+ times"}] } },
+      "validation": { "required": true }
+    },
+    {
+      "id": "workout_type",
+      "section": "activity",
+      "order": 3,
       "type": "multi_choice",
-      "analytics_key": "quiz_allergies",
-      "i18n": {
-        "en": {
-          "label": "Do you have any food allergies?",
-          "description": "Select all that apply.",
-          "options": [
-            {
-              "value": "none",
-              "label": "None"
-            },
-            {
-              "value": "lactose",
-              "label": "Lactose"
-            },
-            {
-              "value": "gluten",
-              "label": "Gluten"
-            },
-            {
-              "value": "nuts",
-              "label": "Nuts"
-            }
-          ]
-        },
-        "ru": {
-          "label": "У вас есть пищевая аллергия?",
-          "description": "Выберите все, что подходит.",
-          "options": [
-            {
-              "value": "none",
-              "label": "Нет"
-            },
-            {
-              "value": "lactose",
-              "label": "Лактоза"
-            },
-            {
-              "value": "gluten",
-              "label": "Глютен"
-            },
-            {
-              "value": "nuts",
-              "label": "Орехи"
-            }
-          ]
-        }
-      },
-      "validation": {
-        "required": true
-      }
+      "i18n": { "en": { "label": "What kind of workouts do you do?", "options": [{"value": "cardio", "label": "Cardio (Running, Cycling)"}, {"value": "strength", "label": "Strength Training"}, {"value": "hiit", "label": "HIIT"}, {"value": "yoga", "label": "Yoga/Pilates"}, {"value": "sports", "label": "Sports"}]} },
+      "branching": { "show_if": "answers['workout_frequency'] !== '0'" }
     },
     {
       "id": "sleep_hours",
@@ -377,22 +210,8 @@
       "order": 1,
       "type": "number",
       "analytics_key": "quiz_sleep",
-      "i18n": {
-        "en": {
-          "label": "How many hours do you sleep per night?",
-          "hint": "e.g., 7"
-        },
-        "ru": {
-          "label": "Сколько часов вы спите в сутки?",
-          "hint": "например, 7"
-        }
-      },
-      "validation": {
-        "required": true,
-        "min": 2,
-        "max": 12,
-        "step": 0.5
-      }
+      "i18n": { "en": { "label": "On average, how many hours do you sleep?", "hint": "e.g., 7.5" } },
+      "validation": { "required": true, "min": 2, "max": 12, "step": 0.5 }
     },
     {
       "id": "stress_level",
@@ -400,45 +219,59 @@
       "order": 2,
       "type": "single_choice",
       "analytics_key": "quiz_stress",
-      "i18n": {
-        "en": {
-          "label": "How would you rate your average stress level?",
-          "options": [
-            {
-              "value": "low",
-              "label": "Low"
-            },
-            {
-              "value": "moderate",
-              "label": "Moderate"
-            },
-            {
-              "value": "high",
-              "label": "High"
-            }
-          ]
-        },
-        "ru": {
-          "label": "Как бы вы оценили свой средний уровень стресса?",
-          "options": [
-            {
-              "value": "low",
-              "label": "Низкий"
-            },
-            {
-              "value": "moderate",
-              "label": "Средний"
-            },
-            {
-              "value": "high",
-              "label": "Высокий"
-            }
-          ]
-        }
-      },
-      "validation": {
-        "required": true
-      }
+      "i18n": { "en": { "label": "Average Stress Level", "options": [{ "value": "low", "label": "Low" }, { "value": "moderate", "label": "Moderate" }, { "value": "high", "label": "High" }] } },
+      "validation": { "required": true }
+    },
+    {
+      "id": "water_intake",
+      "section": "habits",
+      "order": 3,
+      "type": "number",
+      "analytics_key": "quiz_water",
+      "i18n": { "en": { "label": "Daily Water Intake (liters)", "hint": "e.g., 2" } },
+      "validation": { "required": true, "min": 0, "max": 10, "step": 0.25 }
+    },
+    {
+      "id": "alcohol_consumption",
+      "section": "habits",
+      "order": 4,
+      "type": "single_choice",
+      "analytics_key": "quiz_alcohol",
+      "i18n": { "en": { "label": "Alcohol Consumption", "options": [{"value": "none", "label": "None"}, {"value": "rarely", "label": "Rarely"}, {"value": "socially", "label": "Socially"}, {"value": "regularly", "label": "Regularly"}]} },
+      "validation": { "required": true }
+    },
+    {
+      "id": "cooking_frequency",
+      "section": "habits",
+      "order": 5,
+      "type": "single_choice",
+      "analytics_key": "quiz_cooking_freq",
+      "i18n": { "en": { "label": "How often do you cook at home?", "options": [{"value": "rarely", "label": "Rarely"}, {"value": "sometimes", "label": "A few times a week"}, {"value": "often", "label": "Most days"}, {"value": "daily", "label": "Every meal"}]} },
+      "validation": { "required": true }
+    },
+    {
+      "id": "meal_timing",
+      "section": "habits",
+      "order": 6,
+      "type": "multi_choice",
+      "i18n": { "en": { "label": "Which meals do you typically eat?", "options": [{"value": "breakfast", "label": "Breakfast"}, {"value": "lunch", "label": "Lunch"}, {"value": "dinner", "label": "Dinner"}, {"value": "snacks", "label": "Snacks"}] } },
+      "validation": { "required": true }
+    },
+    {
+      "id": "caffeine_intake",
+      "section": "habits",
+      "order": 7,
+      "type": "single_choice",
+      "i18n": { "en": { "label": "Do you consume caffeine?", "options": [{"value": "none", "label": "No"}, {"value": "low", "label": "1-2 servings/day"}, {"value": "high", "label": "3+ servings/day"}]} }
+    },
+    {
+      "id": "challenges",
+      "section": "habits",
+      "order": 8,
+      "type": "multi_choice",
+      "i18n": { "en": { "label": "What are your biggest challenges?", "options": [{"value": "time", "label": "Lack of time"}, {"value": "cravings", "label": "Cravings"}, {"value": "cost", "label": "Cost of healthy food"}, {"value": "motivation", "label": "Staying motivated"}]} }
     }
   ]
 }
+
+    
