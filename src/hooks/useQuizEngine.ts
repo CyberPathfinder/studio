@@ -33,11 +33,8 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     dispatch({ type: 'INITIALIZE_STATE', payload: { config, initialAnswers, currentQuestionId } });
   }, [config]);
 
-  const handleAnswerChange = useDebouncedCallback((questionId: string, value: any, analyticsKey?: string) => {
+  const handleAnswerChange = useDebouncedCallback((questionId: string, value: any) => {
     dispatch({ type: 'SET_ANSWER', payload: { questionId, value } });
-    if (analyticsKey) {
-        track('quiz_answer' as any, { id: analyticsKey, value });
-    }
   }, 300);
 
   const completeQuiz = useCallback(() => {
@@ -61,7 +58,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
       const nextQ = config.questions[nextIndex];
       if (evaluateBranchingLogic(nextQ.branching, answers)) {
         dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: nextIndex });
-        track('quiz_step' as any, { stepId: nextQ.id, direction: 'next' });
+        track('quiz_step', { stepId: nextQ.id, direction: 'next' });
         return { isValid: true };
       }
       nextIndex++;
@@ -91,7 +88,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
       const prevQ = config.questions[prevIndex];
       if (evaluateBranchingLogic(prevQ.branching, answers)) {
         dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: prevIndex });
-        track('quiz_step' as any, { stepId: prevQ.id, direction: 'previous' });
+        track('quiz_step', { stepId: prevQ.id, direction: 'previous' });
         return;
       }
       prevIndex--;
@@ -105,12 +102,12 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
             dispatch({ type: 'SET_STATUS', payload: 'in-progress' });
           }
           dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: questionIndex });
-          track('quiz_step' as any, { stepId: questionId, direction: 'jump' });
+          track('quiz_step', { stepId: questionId, direction: 'jump' });
       }
   }, [config.questions, track, state.status]);
 
   const submitQuiz = async (uid: string) => {
-    track('intake_saved' as any);
+    track('intake_saved');
     await saveIntakeData(uid, config.id, state.answers);
     await deleteQuizDraft(uid, config.id);
     localStorage.removeItem('vf_quiz_draft'); // Also clear local draft
