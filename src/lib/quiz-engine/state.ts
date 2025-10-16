@@ -34,7 +34,7 @@ export const getInitialState = (config: QuizConfig): QuizState => {
 };
 
 type Action =
-  | { type: 'INITIALIZE_STATE'; payload: { config: QuizConfig, initialAnswers: Record<string, any> } }
+  | { type: 'INITIALIZE_STATE'; payload: { config: QuizConfig, initialAnswers: Record<string, any>, currentQuestionId?: string | null } }
   | { type: 'SET_ANSWER'; payload: { questionId: string; value: any } }
   | { type: 'SET_QUESTION'; payload: number }
   | { type: 'COMPLETE_QUIZ' }
@@ -44,14 +44,24 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
   let newState = { ...state };
   switch (action.type) {
     case 'INITIALIZE_STATE':
-        const { config, initialAnswers } = action.payload;
-        const firstQuestionIndex = config.questions.findIndex(q => evaluateBranchingLogic(q.branching, initialAnswers));
+        const { config, initialAnswers, currentQuestionId } = action.payload;
+        let startIndex = -1;
+
+        if (currentQuestionId) {
+            startIndex = config.questions.findIndex(q => q.id === currentQuestionId);
+        }
+
+        // If no specific question ID is provided, find the first valid question
+        if (startIndex === -1) {
+            startIndex = config.questions.findIndex(q => evaluateBranchingLogic(q.branching, initialAnswers));
+        }
+        
         newState = {
             ...getInitialState(config),
             answers: initialAnswers,
             status: 'in-progress',
-            currentQuestionIndex: firstQuestionIndex,
-            currentQuestionId: config.questions[firstQuestionIndex]?.id || null,
+            currentQuestionIndex: startIndex,
+            currentQuestionId: config.questions[startIndex]?.id || null,
         };
         break;
 
@@ -87,7 +97,8 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
   if(newState.currentQuestion) {
     newState.currentSection = newState.config.sections.find(s => s.id === newState.currentQuestion?.section) || null;
   } else {
-    newState.currentSection = null;
+    // If quiz is complete, show the last section in the progress bar
+    newState.currentSection = newState.config.sections[newState.config.sections.length - 1] || null;
   }
   
   // Re-evaluate isFirstQuestion and isLastQuestion

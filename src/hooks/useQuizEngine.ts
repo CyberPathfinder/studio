@@ -10,7 +10,7 @@ type QuizEngineContextType = {
   state: ReturnType<typeof quizReducer>;
   dispatch: React.Dispatch<any>;
   isInitialized: boolean;
-  initializeState: (initialAnswers: Record<string, any>) => void;
+  initializeState: (initialAnswers: Record<string, any>, currentQuestionId?: string | null) => void;
   handleAnswerChange: (questionId: string, value: any, analyticsKey?: string) => void;
   nextQuestion: () => { isValid: boolean, message?: string };
   prevQuestion: () => void;
@@ -23,8 +23,8 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
   const { track } = useAnalytics();
   const [state, dispatch] = useReducer(quizReducer, getInitialState(config));
 
-  const initializeState = useCallback((initialAnswers: Record<string, any>) => {
-    dispatch({ type: 'INITIALIZE_STATE', payload: { config, initialAnswers } });
+  const initializeState = useCallback((initialAnswers: Record<string, any>, currentQuestionId: string | null = null) => {
+    dispatch({ type: 'INITIALIZE_STATE', payload: { config, initialAnswers, currentQuestionId } });
   }, [config]);
 
   const handleAnswerChange = useDebouncedCallback((questionId: string, value: any, analyticsKey?: string) => {
@@ -79,7 +79,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     dispatch({ type: 'COMPLETE_QUIZ' });
   }
 
-  const isInitialized = useMemo(() => state.currentQuestionId !== null, [state.currentQuestionId]);
+  const isInitialized = useMemo(() => state.status !== 'loading', [state.status]);
 
   const value = {
     state,

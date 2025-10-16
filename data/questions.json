@@ -1,0 +1,444 @@
+{
+  "id": "vivaform-onboarding-v1",
+  "version": "1.0.0",
+  "sections": [
+    {
+      "id": "profile",
+      "order": 1,
+      "i18n": {
+        "en": {
+          "title": "Your Profile"
+        },
+        "ru": {
+          "title": "Ваш профиль"
+        }
+      }
+    },
+    {
+      "id": "nutrition",
+      "order": 2,
+      "i18n": {
+        "en": {
+          "title": "Nutrition"
+        },
+        "ru": {
+          "title": "Питание"
+        }
+      }
+    },
+    {
+      "id": "habits",
+      "order": 3,
+      "i18n": {
+        "en": {
+          "title": "Your Habits"
+        },
+        "ru": {
+          "title": "Ваши привычки"
+        }
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "primary_goal",
+      "section": "profile",
+      "order": 1,
+      "type": "single_choice",
+      "analytics_key": "quiz_goal",
+      "i18n": {
+        "en": {
+          "label": "What is your primary goal?",
+          "description": "This helps us tailor your plan.",
+          "options": [
+            {
+              "value": "lose_weight",
+              "label": "Lose Weight"
+            },
+            {
+              "value": "maintain_weight",
+              "label": "Maintain Weight"
+            },
+            {
+              "value": "gain_muscle",
+              "label": "Gain Muscle"
+            }
+          ]
+        },
+        "ru": {
+          "label": "Какова ваша основная цель?",
+          "description": "Это поможет нам адаптировать ваш план.",
+          "options": [
+            {
+              "value": "lose_weight",
+              "label": "Похудеть"
+            },
+            {
+              "value": "maintain_weight",
+              "label": "Поддерживать вес"
+            },
+            {
+              "value": "gain_muscle",
+              "label": "Набрать мышечную массу"
+            }
+          ]
+        }
+      },
+      "validation": {
+        "required": true
+      }
+    },
+    {
+      "id": "gender",
+      "section": "profile",
+      "order": 2,
+      "type": "single_choice",
+      "analytics_key": "quiz_gender",
+      "i18n": {
+        "en": {
+          "label": "What is your biological sex?",
+          "description": "This helps us calculate your metabolic rate more accurately.",
+          "options": [
+            {
+              "value": "male",
+              "label": "Male"
+            },
+            {
+              "value": "female",
+              "label": "Female"
+            }
+          ]
+        },
+        "ru": {
+          "label": "Ваш биологический пол?",
+          "description": "Это помогает нам точнее рассчитать ваш метаболизм.",
+          "options": [
+            {
+              "value": "male",
+              "label": "Мужской"
+            },
+            {
+              "value": "female",
+              "label": "Женский"
+            }
+          ]
+        }
+      },
+      "validation": {
+        "required": true
+      }
+    },
+    {
+      "id": "dob",
+      "section": "profile",
+      "order": 3,
+      "type": "date",
+      "analytics_key": "quiz_dob",
+      "i18n": {
+        "en": {
+          "label": "What is your date of birth?",
+          "hint": "Pick a date"
+        },
+        "ru": {
+          "label": "Когда вы родились?",
+          "hint": "Выберите дату"
+        }
+      },
+      "validation": {
+        "required": true
+      }
+    },
+    {
+      "id": "measurements",
+      "section": "profile",
+      "order": 4,
+      "type": "height_weight",
+      "analytics_key": "quiz_measurements",
+      "i18n": {
+        "en": {
+          "label": "Your Measurements",
+          "hint": "Height in cm / Weight in kg"
+        },
+        "ru": {
+          "label": "Ваши параметры",
+          "hint": "Рост в см / Вес в кг"
+        }
+      },
+      "validation": {
+        "required": true,
+        "min": 35,
+        "max": 300
+      }
+    },
+    {
+      "id": "target_weight",
+      "section": "profile",
+      "order": 5,
+      "type": "number",
+      "analytics_key": "quiz_target_weight",
+      "i18n": {
+        "en": {
+          "label": "What is your target weight? (kg)",
+          "hint": "Enter your target weight"
+        },
+        "ru": {
+          "label": "Каков ваш целевой вес? (кг)",
+          "hint": "Введите ваш целевой вес"
+        }
+      },
+      "validation": {
+        "required": true,
+        "min": 35,
+        "max": 300
+      },
+      "branching": {
+        "show_if": "answers['primary_goal'] === 'lose_weight' || answers['primary_goal'] === 'gain_muscle'"
+      }
+    },
+    {
+      "id": "activity_level",
+      "section": "profile",
+      "order": 6,
+      "type": "single_choice",
+      "analytics_key": "quiz_activity",
+      "i18n": {
+        "en": {
+          "label": "What is your activity level?",
+          "description": "'Sedentary' is a desk job with little exercise. 'Very Active' is a physical job or daily intense workouts.",
+          "options": [
+            {
+              "value": "sedentary",
+              "label": "Sedentary"
+            },
+            {
+              "value": "light",
+              "label": "Lightly Active"
+            },
+            {
+              "value": "moderate",
+              "label": "Moderately Active"
+            },
+            {
+              "value": "active",
+              "label": "Active"
+            },
+            {
+              "value": "very_active",
+              "label": "Very Active"
+            }
+          ]
+        },
+        "ru": {
+          "label": "Какой у вас уровень активности?",
+          "description": "'Сидячий' - офисная работа с минимумом упражнений. 'Очень активный' - физическая работа или ежедневные интенсивные тренировки.",
+          "options": [
+            {
+              "value": "sedentary",
+              "label": "Сидячий"
+            },
+            {
+              "value": "light",
+              "label": "Малоактивный"
+            },
+            {
+              "value": "moderate",
+              "label": "Умеренно активный"
+            },
+            {
+              "value": "active",
+              "label": "Активный"
+            },
+            {
+              "value": "very_active",
+              "label": "Очень активный"
+            }
+          ]
+        }
+      },
+      "validation": {
+        "required": true
+      }
+    },
+    {
+      "id": "diet_preference",
+      "section": "nutrition",
+      "order": 1,
+      "type": "single_choice",
+      "analytics_key": "quiz_diet",
+      "i18n": {
+        "en": {
+          "label": "Any dietary preferences?",
+          "description": "We'll suggest recipes based on your choice.",
+          "options": [
+            {
+              "value": "omnivore",
+              "label": "None"
+            },
+            {
+              "value": "vegetarian",
+              "label": "Vegetarian"
+            },
+            {
+              "value": "vegan",
+              "label": "Vegan"
+            },
+            {
+              "value": "pescetarian",
+              "label": "Pescetarian"
+            }
+          ]
+        },
+        "ru": {
+          "label": "Есть ли диетические предпочтения?",
+          "description": "Мы будем предлагать рецепты на основе вашего выбора.",
+          "options": [
+            {
+              "value": "omnivore",
+              "label": "Никаких"
+            },
+            {
+              "value": "vegetarian",
+              "label": "Вегетарианец"
+            },
+            {
+              "value": "vegan",
+              "label": "Веган"
+            },
+            {
+              "value": "pescetarian",
+              "label": "Пескетарианец"
+            }
+          ]
+        }
+      },
+      "validation": {
+        "required": true
+      }
+    },
+    {
+      "id": "food_allergies",
+      "section": "nutrition",
+      "order": 2,
+      "type": "multi_choice",
+      "analytics_key": "quiz_allergies",
+      "i18n": {
+        "en": {
+          "label": "Do you have any food allergies?",
+          "description": "Select all that apply.",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "lactose",
+              "label": "Lactose"
+            },
+            {
+              "value": "gluten",
+              "label": "Gluten"
+            },
+            {
+              "value": "nuts",
+              "label": "Nuts"
+            }
+          ]
+        },
+        "ru": {
+          "label": "У вас есть пищевая аллергия?",
+          "description": "Выберите все, что подходит.",
+          "options": [
+            {
+              "value": "none",
+              "label": "Нет"
+            },
+            {
+              "value": "lactose",
+              "label": "Лактоза"
+            },
+            {
+              "value": "gluten",
+              "label": "Глютен"
+            },
+            {
+              "value": "nuts",
+              "label": "Орехи"
+            }
+          ]
+        }
+      },
+      "validation": {
+        "required": true
+      }
+    },
+    {
+      "id": "sleep_hours",
+      "section": "habits",
+      "order": 1,
+      "type": "number",
+      "analytics_key": "quiz_sleep",
+      "i18n": {
+        "en": {
+          "label": "How many hours do you sleep per night?",
+          "hint": "e.g., 7"
+        },
+        "ru": {
+          "label": "Сколько часов вы спите в сутки?",
+          "hint": "например, 7"
+        }
+      },
+      "validation": {
+        "required": true,
+        "min": 2,
+        "max": 12,
+        "step": 0.5
+      }
+    },
+    {
+      "id": "stress_level",
+      "section": "habits",
+      "order": 2,
+      "type": "single_choice",
+      "analytics_key": "quiz_stress",
+      "i18n": {
+        "en": {
+          "label": "How would you rate your average stress level?",
+          "options": [
+            {
+              "value": "low",
+              "label": "Low"
+            },
+            {
+              "value": "moderate",
+              "label": "Moderate"
+            },
+            {
+              "value": "high",
+              "label": "High"
+            }
+          ]
+        },
+        "ru": {
+          "label": "Как бы вы оценили свой средний уровень стресса?",
+          "options": [
+            {
+              "value": "low",
+              "label": "Низкий"
+            },
+            {
+              "value": "moderate",
+              "label": "Средний"
+            },
+            {
+              "value": "high",
+              "label": "Высокий"
+            }
+          ]
+        }
+      },
+      "validation": {
+        "required": true
+      }
+    }
+  ]
+}
