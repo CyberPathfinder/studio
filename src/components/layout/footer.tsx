@@ -12,10 +12,10 @@ export function Footer() {
   ];
 
   const footerLinks = [
-    { href: "#", name: "About" },
-    { href: "#", name: "Features" },
-    { href: "#", name: "Pricing" },
-    { href: "#", name: "Contact" },
+    { href: "#features", name: "Features" },
+    { href: "#recipes", name: "Recipes" },
+    { href: "#pricing", name: "Pricing" },
+    { href: "#contact", name: "Contact" },
     { href: "#", name: "Privacy Policy" },
     { href: "#", name: "Terms of Service" },
   ];

@@ -16,17 +16,17 @@ const HeroSection = () => {
               Wellness Within Reach
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
-              Effortlessly track your food, discover delicious healthy recipes, and achieve your wellness goals. Your journey to a healthier you starts here.
+              Effortlessly track food, find healthy recipes, and reach your wellness goals.
             </p>
             <div className="mt-8 flex w-full flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
               <Button size="lg" asChild className="w-full sm:w-auto">
-                <Link href="#">
+                <Link href="#" aria-label="Get Started for Free">
                   Get Started for Free
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
-                <Link href="#">Learn More</Link>
+                <Link href="#" aria-label="Learn More about VivaForm">Learn More</Link>
               </Button>
             </div>
           </div>
