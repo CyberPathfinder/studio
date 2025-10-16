@@ -3,24 +3,24 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 
 const features = [
   {
-    icon: <Camera className="h-10 w-10 text-primary" />,
+    icon: <Camera className="h-6 w-6 text-primary" />,
     title: "Photo Logging",
-    description: "Snap a photo of your meal and let our AI analyze it for you.",
+    description: "Just snap a photo of your meal. Our AI will handle the rest for you.",
   },
   {
-    icon: <ScanBarcode className="h-10 w-10 text-primary" />,
+    icon: <ScanBarcode className="h-6 w-6 text-primary" />,
     title: "Barcode Scanning",
-    description: "Instantly get nutrition facts by scanning the barcode on any product.",
+    description: "Quickly scan any product's barcode to instantly see its full nutritional information.",
   },
   {
-    icon: <Mic className="h-10 w-10 text-primary" />,
+    icon: <Mic className="h-6 w-6 text-primary" />,
     title: "Voice Entry",
-    description: "Simply say what you ate and we'll log it. It's that easy.",
+    description: "On the go? Simply say what you ate, and we'll log it for you. It's that easy.",
   },
   {
-    icon: <Search className="h-10 w-10 text-primary" />,
+    icon: <Search className="h-6 w-6 text-primary" />,
     title: "Manual Search",
-    description: "Our vast food database makes it simple to find and log any item.",
+    description: "Find anything you're looking for in our huge database of foods and drinks.",
   },
 ];
 
@@ -44,7 +44,7 @@ const FeaturesSection = () => {
                   {feature.icon}
                 </div>
                 <CardTitle className="font-headline text-xl">{feature.title}</CardTitle>
-                <CardDescription className="mt-2">{feature.description}</CardDescription>
+                <CardDescription className="mt-2 h-16">{feature.description}</CardDescription>
               </CardHeader>
             </Card>
           ))}
