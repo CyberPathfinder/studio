@@ -1,0 +1,110 @@
+{
+  "entities": {
+    "UserIntake": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserIntake",
+      "type": "object",
+      "description": "Represents the user's initial intake information collected during the sign-up quiz.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user intake data.",
+          "format": "uuid"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User entity. (Relationship: User 1:1 UserIntake)"
+        },
+        "answers": {
+          "type": "array",
+          "description": "An array of answers provided by the user during the intake quiz.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time when the user intake was recorded.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "answers",
+        "createdAt"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user.",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time when the user was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. Only the authenticated user can read/write their own profile.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user, corresponding to their Firebase Auth UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/intake/initial",
+        "definition": {
+          "entityName": "UserIntake",
+          "schema": {
+            "$ref": "#/backend/entities/UserIntake"
+          },
+          "description": "Stores the initial intake information for a user. Only the authenticated user can read/write their own intake data.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user, corresponding to their Firebase Auth UID."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to manage user data and intake information securely and scalably, focusing on authorization independence. The primary strategy is to leverage path-based ownership for user-specific data, which simplifies security rules and enhances data privacy. This design supports QAPs by ensuring that list operations are secure through path-based rules.\n\nSpecifically:\n\n*   `/users/{userId}`: This collection stores individual user documents. Each user's data is isolated and secured via path-based rules (only the authenticated user can access their document). The `userId` obtained from `request.auth.uid` is used to enforce this.\n*   `/users/{userId}/intake/initial`: This subcollection stores the initial intake information for each user. It is also secured using path-based rules, ensuring that only the authenticated user can access their own intake data. This isolates intake data per user and avoids mixing data with different security requirements.\n\nThis structure inherently achieves Authorization Independence as no `get()` calls are required in the security rules to determine access. The presence of `request.auth.uid` matching the `userId` in the path is sufficient for granting access. QAPs are satisfied because listing operations on `/users` are inherently limited by security rules, and listing operations on `/users/{userId}/intake` are also secure due to the enforced path-based ownership."
+  }
+}
