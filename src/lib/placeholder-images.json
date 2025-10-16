@@ -1,3 +1,64 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-app-ui",
+      "description": "A screenshot of the VivaForm app interface, showing a user's daily food log and progress.",
+      "imageUrl": "https://picsum.photos/seed/viva-hero/320/640",
+      "imageHint": "app screenshot"
+    },
+    {
+      "id": "feedback-system-ui",
+      "description": "A close-up of the VivaForm app's smart feedback system, displaying personalized insights and charts.",
+      "imageUrl": "https://picsum.photos/seed/viva-feedback/600/500",
+      "imageHint": "dashboard chart"
+    },
+    {
+      "id": "recipe-1",
+      "description": "A vibrant and healthy quinoa salad in a white bowl.",
+      "imageUrl": "https://picsum.photos/seed/viva-recipe1/400/300",
+      "imageHint": "salad bowl"
+    },
+    {
+      "id": "recipe-2",
+      "description": "Perfectly grilled chicken breast with a side of steamed asparagus.",
+      "imageUrl": "https://picsum.photos/seed/viva-recipe2/400/300",
+      "imageHint": "grilled chicken"
+    },
+    {
+      "id": "recipe-3",
+      "description": "Artisanal avocado toast topped with cherry tomatoes and microgreens.",
+      "imageUrl": "https://picsum.photos/seed/viva-recipe3/400/300",
+      "imageHint": "avocado toast"
+    },
+    {
+      "id": "recipe-4",
+      "description": "A colorful smoothie bowl decorated with fresh berries, seeds, and coconut flakes.",
+      "imageUrl": "https://picsum.photos/seed/viva-recipe4/400/300",
+      "imageHint": "smoothie bowl"
+    },
+    {
+      "id": "testimonial-1",
+      "description": "Portrait of a smiling user, Jane Doe.",
+      "imageUrl": "https://picsum.photos/seed/viva-avatar1/100/100",
+      "imageHint": "person smiling"
+    },
+    {
+      "id": "testimonial-2",
+      "description": "Portrait of a happy user, John Smith.",
+      "imageUrl": "https://picsum.photos/seed/viva-avatar2/100/100",
+      "imageHint": "man portrait"
+    },
+    {
+      "id": "testimonial-3",
+      "description": "Portrait of a satisfied user, Sarah Lee.",
+      "imageUrl": "https://picsum.photos/seed/viva-avatar3/100/100",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "testimonial-4",
+      "description": "Portrait of an energetic user, Mike Chen.",
+      "imageUrl": "https://picsum.photos/seed/viva-avatar4/100/100",
+      "imageHint": "person happy"
+    }
+  ]
 }
