@@ -4,40 +4,47 @@ import { useCallback } from 'react';
 import { event as gtagEvent } from '@/lib/gtag';
 import { event as metaEvent } from '@/lib/meta';
 
-// Define your custom event types here
-type EventName = 'quiz_start' | 'quiz_step' | 'quiz_complete';
+// Define your custom event types here for strong typing
+type EventName =
+  | 'quiz_start'
+  | 'quiz_step'
+  | 'sign_up_attempt'
+  | 'sign_up_success'
+  | 'intake_saved';
 
-type GTagEvent = {
-  action: string;
-  category: string;
-  label: string;
-  value?: number;
-  [key: string]: any;
+// Defines the structure for analytics mapping for each service
+type AnalyticsMapping = {
+  gtag?: (payload?: any) => { action: string; [key: string]: any };
+  meta?: (payload?: any) => { eventName: string; params?: object };
+  gads?: (payload?: any) => { conversionLabel: string };
 };
 
 // Map your custom events to analytics-specific formats
-const eventMap: { [key in EventName]?: any } = {
+const eventMap: Record<EventName, AnalyticsMapping> = {
   quiz_start: {
-    gtag: { action: 'quiz_start', category: 'engagement', label: 'User started the onboarding quiz' },
-    meta: { eventName: 'Lead' },
-    gads: { conversionLabel: 'AW-CONVERSION-LABEL-LEAD' } // Placeholder for Google Ads
+    gtag: () => ({ action: 'quiz_start', category: 'engagement', label: 'User started the onboarding quiz' }),
+    meta: () => ({ eventName: 'Lead' }),
+    gads: () => ({ conversionLabel: 'AW-CONVERSION-LABEL-LEAD' }), // Placeholder for Google Ads
   },
   quiz_step: {
-    gtag: (payload: { step: number, direction: 'next' | 'previous' }) => ({
+    gtag: (payload: { step: number; direction: 'next' | 'previous' | 'jump' }) => ({
       action: `quiz_step_${payload.step}`,
       category: 'engagement',
-      label: `User went to step ${payload.step} (${payload.direction})`
+      label: `User went to step ${payload.step} (${payload.direction})`,
     }),
-    meta: null, // No specific Meta event for each step
-    gads: null,
   },
-  quiz_complete: {
-    gtag: { action: 'quiz_complete', category: 'conversion', label: 'User completed the onboarding quiz' },
-    meta: { eventName: 'CompleteRegistration' },
-    gads: { conversionLabel: 'AW-CONVERSION-LABEL-SIGNUP' } // Placeholder for Google Ads
-  }
+  sign_up_attempt: {
+    gtag: () => ({ action: 'sign_up_attempt', category: 'engagement', label: 'User attempted to sign up' }),
+  },
+  sign_up_success: {
+    gtag: (payload: { uid: string }) => ({ action: 'sign_up_success', category: 'conversion', label: 'User created an account', user_id: payload.uid }),
+    meta: () => ({ eventName: 'CompleteRegistration' }),
+    gads: () => ({ conversionLabel: 'AW-CONVERSION-LABEL-SIGNUP' }), // Placeholder for Google Ads
+  },
+  intake_saved: {
+    gtag: () => ({ action: 'intake_saved', category: 'conversion', label: 'User intake data was saved' }),
+  },
 };
-
 
 export const useAnalytics = () => {
   const track = useCallback((eventName: EventName, payload?: any) => {
@@ -49,27 +56,24 @@ export const useAnalytics = () => {
     if (!mappings) return;
 
     // --- Google Analytics (GA4) ---
-    const gtagMapping = mappings.gtag;
-    if (gtagMapping && process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID) {
-      const eventData = typeof gtagMapping === 'function' ? gtagMapping(payload) : gtagMapping;
-      gtagEvent(eventData);
+    if (mappings.gtag && process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID) {
+      const eventData = mappings.gtag(payload);
+      gtagEvent(eventData.action, eventData);
     }
-    
+
     // --- Meta Pixel ---
-    const metaMapping = mappings.meta;
-    if (metaMapping && process.env.NEXT_PUBLIC_META_PIXEL_ID) {
-       metaEvent(metaMapping.eventName, payload);
+    if (mappings.meta && process.env.NEXT_PUBLIC_META_PIXEL_ID) {
+      const { eventName, params } = mappings.meta(payload);
+      metaEvent(eventName, params);
     }
 
     // --- Google Ads ---
-    // Example of how you would track a Google Ads conversion
-    const gadsMapping = mappings.gads;
-    if (gadsMapping && window.gtag) {
+    if (mappings.gads && window.gtag) {
+      // const { conversionLabel } = mappings.gads(payload);
       // window.gtag('event', 'conversion', {
-      //   'send_to': `AW-YOUR_CONVERSION_ID/${gadsMapping.conversionLabel}`,
+      //   send_to: `AW-YOUR_CONVERSION_ID/${conversionLabel}`,
       // });
     }
-
   }, []);
 
   return { track };

@@ -15,7 +15,7 @@ type QuizContextType = {
   nextStep: () => void;
   prevStep: () => void;
   goToStep: (step: number) => void;
-  form: UseFormReturn<QuizData>;
+  getValues: () => QuizData;
 };
 
 export const QuizContext = createContext<QuizContextType | null>(null);
@@ -24,7 +24,6 @@ export const QuizProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = quizSteps.length;
   const { track } = useAnalytics();
-
 
   const form = useForm<QuizData>({
     resolver: zodResolver(QuizSchema),
@@ -61,8 +60,8 @@ export const QuizProvider = ({ children }: { children: React.ReactNode }) => {
   
   const goToStep = useCallback((step: number) => {
     if (step >= 1 && step <= totalSteps) {
-      // Allow jumping to any previous step, or the next immediate step
-      if(step < currentStep || step === currentStep + 1) {
+      // Allow jumping to any previous step
+      if(step < currentStep) {
         setCurrentStep(step);
         track('quiz_step', { step, direction: 'jump' });
       }
@@ -80,8 +79,8 @@ export const QuizProvider = ({ children }: { children: React.ReactNode }) => {
     goToStep,
     isFirstStep,
     isLastStep,
-    form,
-  }), [currentStep, totalSteps, nextStep, prevStep, goToStep, isFirstStep, isLastStep, form]);
+    getValues: form.getValues,
+  }), [currentStep, totalSteps, nextStep, prevStep, goToStep, isFirstStep, isLastStep, form.getValues]);
 
   return (
     <QuizContext.Provider value={contextValue}>
