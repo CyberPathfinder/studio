@@ -165,8 +165,8 @@ const HeroSection = () => {
             </p>
             <div className="mt-8 flex w-full flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
               <Button size="lg" asChild className="w-full sm:w-auto">
-                <Link href="#" aria-label="Get Started for Free">
-                  Get Started for Free
+                <Link href="/quiz" aria-label="Get Started for Free">
+                  Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
