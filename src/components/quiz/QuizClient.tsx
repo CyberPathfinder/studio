@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useAnalytics } from '@/hooks/use-analytics';
-import { useAuth, useFirebase } from '@/firebase';
+import { useFirebase } from '@/firebase';
 import { getQuizDraft, saveQuizDraft } from '@/firebase/quiz';
 import { useQuizEngine, QuizProvider } from '@/hooks/useQuizEngine';
 import quizConfig from '@/data/questions.json';

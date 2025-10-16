@@ -12,9 +12,11 @@ type QuizEngineContextType = {
   isInitialized: boolean;
   initializeState: (initialAnswers: Record<string, any>, currentQuestionId?: string | null) => void;
   handleAnswerChange: (questionId: string, value: any, analyticsKey?: string) => void;
-  nextQuestion: () => { isValid: boolean, message?: string };
+  nextQuestion: (skipValidation?: boolean) => { isValid: boolean, message?: string };
   prevQuestion: () => void;
   completeQuiz: () => void;
+  jumpToQuestion: (questionId: string) => void;
+  canSkip: boolean;
 };
 
 const QuizEngineContext = createContext<QuizEngineContextType | null>(null);
@@ -32,31 +34,36 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     if (analyticsKey) {
         track('quiz_answer', { id: analyticsKey, value });
     }
-  }, 800);
+  }, 300);
 
-  const nextQuestion = useCallback(() => {
+  const nextQuestion = useCallback((skipValidation = false) => {
     const { currentQuestion, answers } = state;
     if (!currentQuestion) return { isValid: false, message: 'No current question' };
 
-    const { isValid, message } = validateAnswer(currentQuestion, answers[currentQuestion.id]);
-    if (!isValid) {
-      return { isValid: false, message };
+    if (!skipValidation) {
+        const { isValid, message } = validateAnswer(currentQuestion, answers[currentQuestion.id]);
+        if (!isValid) {
+          return { isValid: false, message };
+        }
     }
 
     let nextIndex = state.currentQuestionIndex + 1;
     while (nextIndex < config.questions.length) {
       const nextQ = config.questions[nextIndex];
       if (evaluateBranchingLogic(nextQ.branching, answers)) {
-        dispatch({ type: 'SET_QUESTION', payload: nextIndex });
+        dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: nextIndex });
         track('quiz_step', { stepId: nextQ.id });
         return { isValid: true };
       }
       nextIndex++;
     }
     
-    // No more questions
-    dispatch({ type: 'COMPLETE_QUIZ' });
-    track('quiz_complete');
+    // No more questions, which means we're on the last question.
+    // The next "action" is to complete the quiz.
+    if (state.isLastQuestion) {
+        completeQuiz();
+    }
+    
     return { isValid: true };
 
   }, [state, config.questions, track]);
@@ -67,12 +74,21 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     while (prevIndex >= 0) {
       const prevQ = config.questions[prevIndex];
       if (evaluateBranchingLogic(prevQ.branching, answers)) {
-        dispatch({ type: 'SET_QUESTION', payload: prevIndex });
+        dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: prevIndex });
+        track('quiz_step', { stepId: prevQ.id, direction: 'previous' });
         return;
       }
       prevIndex--;
     }
-  }, [state, config.questions]);
+  }, [state, config.questions, track]);
+  
+  const jumpToQuestion = useCallback((questionId: string) => {
+      const questionIndex = config.questions.findIndex(q => q.id === questionId);
+      if (questionIndex !== -1) {
+          dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: questionIndex });
+          track('quiz_step', { stepId: questionId, direction: 'jump' });
+      }
+  }, [config.questions, track]);
 
   const completeQuiz = () => {
     track('quiz_complete');
@@ -80,6 +96,13 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
   }
 
   const isInitialized = useMemo(() => state.status !== 'loading', [state.status]);
+
+  const canSkip = useMemo(() => {
+    if (!state.currentQuestion || !state.currentQuestion.validation) {
+        return true;
+    }
+    return !state.currentQuestion.validation.required;
+  }, [state.currentQuestion]);
 
   const value = {
     state,
@@ -89,7 +112,9 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     handleAnswerChange,
     nextQuestion,
     prevQuestion,
-    completeQuiz
+    completeQuiz,
+    jumpToQuestion,
+    canSkip
   };
 
   return (

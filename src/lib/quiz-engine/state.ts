@@ -36,7 +36,7 @@ export const getInitialState = (config: QuizConfig): QuizState => {
 type Action =
   | { type: 'INITIALIZE_STATE'; payload: { config: QuizConfig, initialAnswers: Record<string, any>, currentQuestionId?: string | null } }
   | { type: 'SET_ANSWER'; payload: { questionId: string; value: any } }
-  | { type: 'SET_QUESTION'; payload: number }
+  | { type: 'SET_QUESTION_BY_INDEX'; payload: number }
   | { type: 'COMPLETE_QUIZ' }
   | { type: 'SAVE_COMPLETE' };
 
@@ -73,7 +73,7 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
       newState.isDirty = true;
       break;
 
-    case 'SET_QUESTION':
+    case 'SET_QUESTION_BY_INDEX':
       newState.currentQuestionIndex = action.payload;
       newState.currentQuestionId = newState.config.questions[action.payload]?.id || null;
       break;
@@ -96,9 +96,9 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
   newState.currentQuestion = newState.config.questions[newState.currentQuestionIndex] || null;
   if(newState.currentQuestion) {
     newState.currentSection = newState.config.sections.find(s => s.id === newState.currentQuestion?.section) || null;
-  } else {
+  } else if (newState.status === 'completed') {
     // If quiz is complete, show the last section in the progress bar
-    newState.currentSection = newState.config.sections[newState.config.sections.length - 1] || null;
+    newState.currentSection = newState.sections[newState.sections.length - 1] || null;
   }
   
   // Re-evaluate isFirstQuestion and isLastQuestion

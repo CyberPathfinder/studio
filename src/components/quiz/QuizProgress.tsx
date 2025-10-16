@@ -12,10 +12,13 @@ const QuizProgress = () => {
   
   return (
     <div className="w-full text-center">
-      <p className="text-sm font-medium text-muted-foreground">
-        Section {currentSectionIndex + 1} of {sections.length}: <span className="text-foreground">{currentSection.i18n.en.title}</span>
-      </p>
-      <Progress value={progressPercentage} className="mt-2 h-2" />
+      <div className='flex justify-between items-center px-1 mb-1'>
+        <p className="text-sm font-semibold text-foreground">
+            {currentSection.i18n.en.title}
+        </p>
+        <p className='text-xs text-muted-foreground'>~5-7 min remaining</p>
+      </div>
+      <Progress value={progressPercentage} className="h-2" />
     </div>
   );
 };
