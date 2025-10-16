@@ -5,6 +5,8 @@ import { evaluateBranchingLogic, validateAnswer } from '@/lib/quiz-engine/utils'
 import { useReducer, useCallback, useMemo, useContext, createContext, ReactNode } from 'react';
 import { useAnalytics } from './use-analytics';
 import { useDebouncedCallback } from 'use-debounce';
+import { useFirebase } from '@/firebase';
+import { deleteQuizDraft, saveIntakeData } from '@/firebase/quiz';
 
 type QuizEngineContextType = {
   state: ReturnType<typeof quizReducer>;
@@ -17,12 +19,14 @@ type QuizEngineContextType = {
   completeQuiz: () => void;
   jumpToQuestion: (questionId: string) => void;
   canSkip: boolean;
+  submitQuiz: (uid: string) => Promise<void>;
 };
 
 const QuizEngineContext = createContext<QuizEngineContextType | null>(null);
 
 export const QuizEngineProvider = ({ children, config }: { children: ReactNode, config: QuizConfig }) => {
   const { track } = useAnalytics();
+  const { user } = useFirebase();
   const [state, dispatch] = useReducer(quizReducer, getInitialState(config));
 
   const initializeState = useCallback((initialAnswers: Record<string, any>, currentQuestionId: string | null = null) => {
@@ -35,6 +39,11 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
         track('quiz_answer', { id: analyticsKey, value });
     }
   }, 300);
+
+  const completeQuiz = useCallback(() => {
+    track('quiz_complete');
+    dispatch({ type: 'COMPLETE_QUIZ' });
+  },[track]);
 
   const nextQuestion = useCallback((skipValidation = false) => {
     const { currentQuestion, answers } = state;
@@ -52,24 +61,31 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
       const nextQ = config.questions[nextIndex];
       if (evaluateBranchingLogic(nextQ.branching, answers)) {
         dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: nextIndex });
-        track('quiz_step', { stepId: nextQ.id });
+        track('quiz_step', { stepId: nextQ.id, direction: 'next' });
         return { isValid: true };
       }
       nextIndex++;
     }
     
     // No more questions, which means we're on the last question.
-    // The next "action" is to complete the quiz.
+    // The next "action" is to complete the quiz and go to summary.
     if (state.isLastQuestion) {
         completeQuiz();
     }
     
     return { isValid: true };
 
-  }, [state, config.questions, track]);
+  }, [state, config.questions, track, completeQuiz]);
 
   const prevQuestion = useCallback(() => {
     const { answers } = state;
+    if (state.status === 'completed') {
+        // If on summary screen, go back to the last question
+        const lastQuestionIndex = config.questions.map(q => evaluateBranchingLogic(q.branching, answers)).lastIndexOf(true);
+        dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: lastQuestionIndex });
+        return;
+    }
+
     let prevIndex = state.currentQuestionIndex - 1;
     while (prevIndex >= 0) {
       const prevQ = config.questions[prevIndex];
@@ -85,15 +101,21 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
   const jumpToQuestion = useCallback((questionId: string) => {
       const questionIndex = config.questions.findIndex(q => q.id === questionId);
       if (questionIndex !== -1) {
+          if (state.status === 'completed') {
+            dispatch({ type: 'SET_STATUS', payload: 'in-progress' });
+          }
           dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: questionIndex });
           track('quiz_step', { stepId: questionId, direction: 'jump' });
       }
-  }, [config.questions, track]);
+  }, [config.questions, track, state.status]);
 
-  const completeQuiz = () => {
-    track('quiz_complete');
-    dispatch({ type: 'COMPLETE_QUIZ' });
-  }
+  const submitQuiz = async (uid: string) => {
+    track('intake_saved');
+    await saveIntakeData(uid, config.id, state.answers);
+    await deleteQuizDraft(uid, config.id);
+    localStorage.removeItem('vf_quiz_draft'); // Also clear local draft
+  };
+
 
   const isInitialized = useMemo(() => state.status !== 'loading', [state.status]);
 
@@ -114,7 +136,8 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     prevQuestion,
     completeQuiz,
     jumpToQuestion,
-    canSkip
+    canSkip,
+    submitQuiz
   };
 
   return (

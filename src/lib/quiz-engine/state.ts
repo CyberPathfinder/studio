@@ -37,6 +37,7 @@ type Action =
   | { type: 'INITIALIZE_STATE'; payload: { config: QuizConfig, initialAnswers: Record<string, any>, currentQuestionId?: string | null } }
   | { type: 'SET_ANSWER'; payload: { questionId: string; value: any } }
   | { type: 'SET_QUESTION_BY_INDEX'; payload: number }
+  | { type: 'SET_STATUS'; payload: 'loading' | 'in-progress' | 'completed' }
   | { type: 'COMPLETE_QUIZ' }
   | { type: 'SAVE_COMPLETE' };
 
@@ -74,9 +75,14 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
       break;
 
     case 'SET_QUESTION_BY_INDEX':
+      newState.status = 'in-progress'; // If we are setting a question, we are in progress
       newState.currentQuestionIndex = action.payload;
       newState.currentQuestionId = newState.config.questions[action.payload]?.id || null;
       break;
+
+    case 'SET_STATUS':
+        newState.status = action.payload;
+        break;
 
     case 'COMPLETE_QUIZ':
       newState.status = 'completed';

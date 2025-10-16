@@ -13,6 +13,7 @@ import { CheckCircle, Circle, Edit, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
+import QuizSummary from './QuizSummary';
 
 
 const QuizSummarySidebar = () => {
@@ -67,15 +68,15 @@ const QuizEngine = () => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Enter' && !e.shiftKey) {
-                // Check if target is not a textarea or button
                 const target = e.target as HTMLElement;
                 if(target.nodeName !== 'TEXTAREA' && target.nodeName !== 'BUTTON') {
                     e.preventDefault();
-                    document.getElementById('quiz-next-btn')?.click();
+                    // This will trigger the `nextQuestion` function from the controls
+                    document.querySelector<HTMLButtonElement>('button[aria-label="Go to next step (Enter)"]')?.click();
                 }
             } else if (e.key === 'Enter' && e.shiftKey) {
                 e.preventDefault();
-                document.getElementById('quiz-prev-btn')?.click();
+                document.querySelector<HTMLButtonElement>('button[aria-label="Go to previous step (Shift + Enter)"]')?.click();
             }
         };
 
@@ -85,11 +86,8 @@ const QuizEngine = () => {
 
   if (state.status === 'completed') {
     return (
-        <div className="flex min-h-screen items-center justify-center">
-            <Card className="text-center p-8 max-w-lg">
-                <h1 className="text-2xl font-bold font-headline">Quiz Completed!</h1>
-                <p className="text-muted-foreground mt-2">Thank you for your responses. We are now calculating your personalized plan.</p>
-            </Card>
+        <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+            <QuizSummary />
         </div>
     );
   }

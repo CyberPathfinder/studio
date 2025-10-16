@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const QuizControls = () => {
-  const { state, nextQuestion, prevQuestion, completeQuiz, canSkip } = useQuizEngine();
+  const { state, nextQuestion, prevQuestion, canSkip } = useQuizEngine();
   const { toast } = useToast();
 
   const handleNext = () => {
@@ -50,7 +50,7 @@ const QuizControls = () => {
             </Button>
         )}
         {state.isLastQuestion ? (
-            <Button onClick={completeQuiz} aria-label="Complete Quiz">
+            <Button onClick={handleNext} aria-label="Finish Quiz (Enter)">
             Finish
             <Check className="ml-2 h-4 w-4" />
             </Button>
