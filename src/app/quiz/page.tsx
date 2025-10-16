@@ -7,6 +7,7 @@ import MeasurementsStep from '@/components/quiz/03-measurements-step';
 import DietStep from '@/components/quiz/04-diet-step';
 import RestrictionsStep from '@/components/quiz/05-restrictions-step';
 import ActivityStep from '@/components/quiz/06-activity-step';
+import SummaryStep from '@/components/quiz/07-summary-step';
 import { useQuiz } from '@/hooks/use-quiz';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAnalytics } from '@/hooks/use-analytics';
@@ -22,7 +23,7 @@ const stepComponents: { [key: number]: React.ComponentType } = {
   4: DietStep,
   5: RestrictionsStep,
   6: ActivityStep,
-  // Future steps will be added here
+  7: SummaryStep,
 };
 
 const QuizContent = () => {
@@ -42,7 +43,7 @@ const QuizContent = () => {
       <Card className="w-full max-w-xl overflow-hidden shadow-2xl">
         <div className="p-8">
           <QuizProgress />
-          <div className="relative mt-8 h-80">
+          <div className="relative mt-8 h-[28rem]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}

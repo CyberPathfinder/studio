@@ -58,9 +58,13 @@ export const ActivitySchema = z.object({
 });
 export type Activity = z.infer<typeof ActivitySchema>;
 
-// --- Empty Schemas for Future Steps ---
-export const SummarySchema = z.object({});
-export type Summary = z.infer<typeof SummarySchema>;
+// Step 7: Summary/Sign Up
+export const SignUpSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  consent: z.literal(true),
+});
+export type SignUp = z.infer<typeof SignUpSchema>;
 
 
 // Combined Schema for the entire quiz
@@ -69,7 +73,7 @@ export const QuizSchema = GoalSchema.merge(DemographicsSchema)
   .merge(DietSchema)
   .merge(RestrictionsSchema)
   .merge(ActivitySchema)
-  .merge(SummarySchema);
+  .merge(SignUpSchema.partial()); // Summary step does not need to validate sign-up
 
 export type QuizData = z.infer<typeof QuizSchema>;
 
@@ -89,6 +93,9 @@ export const defaultQuizValues: Partial<QuizData> = {
     other_text: '',
   },
   activity_level: 'light',
+  email: '',
+  password: '',
+  consent: false,
 };
 
 export type QuizStepId = 'goal' | 'demographics' | 'measurements' | 'diet' | 'restrictions' | 'activity' | 'summary';

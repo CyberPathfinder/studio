@@ -5,6 +5,7 @@ import { useForm, FormProvider, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { QuizSchema, defaultQuizValues, QuizData, quizSteps, QuizStepId } from '@/lib/quiz-data';
 import { useAnalytics } from '@/hooks/use-analytics';
+import { FieldPath } from 'react-hook-form';
 
 type QuizContextType = {
   currentStep: number;
@@ -35,7 +36,10 @@ export const QuizProvider = ({ children }: { children: React.ReactNode }) => {
     const currentStepInfo = quizSteps.find(q => q.step === currentStep);
     if (!currentStepInfo) return;
 
-    const fieldsToValidate = currentStepInfo.fields;
+    // The last step (summary) does not have fields to validate before proceeding
+    if (isLastStep) return;
+
+    const fieldsToValidate = currentStepInfo.fields as FieldPath<QuizData>[];
     const isValid = fieldsToValidate ? await form.trigger(fieldsToValidate) : true;
     
     if (isValid) {
@@ -57,9 +61,13 @@ export const QuizProvider = ({ children }: { children: React.ReactNode }) => {
   
   const goToStep = useCallback((step: number) => {
     if (step >= 1 && step <= totalSteps) {
-      setCurrentStep(step);
+      // Allow jumping to any previous step, or the next immediate step
+      if(step < currentStep || step === currentStep + 1) {
+        setCurrentStep(step);
+        track('quiz_step', { step, direction: 'jump' });
+      }
     }
-  }, [totalSteps]);
+  }, [totalSteps, currentStep, track]);
 
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep === totalSteps;

@@ -1,10 +1,14 @@
 'use client';
 import { useQuiz } from '@/hooks/use-quiz';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 const QuizControls = () => {
   const { prevStep, nextStep, isFirstStep, isLastStep } = useQuiz();
+
+  if (isLastStep) {
+    return null; // Hide controls on the summary/sign-up step
+  }
 
   return (
     <div className="flex justify-between items-center">
@@ -18,9 +22,9 @@ const QuizControls = () => {
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back
       </Button>
-      <Button onClick={nextStep} aria-label={isLastStep ? 'Complete quiz' : 'Go to next step'}>
-        {isLastStep ? 'Finish' : 'Next'}
-        {isLastStep ? <Check className="ml-2 h-4 w-4" /> : <ArrowRight className="ml-2 h-4 w-4" />}
+      <Button onClick={nextStep} aria-label={'Go to next step'}>
+        Next
+        <ArrowRight className="ml-2 h-4 w-4" />
       </Button>
     </div>
   );
