@@ -1,0 +1,45 @@
+'use client';
+import { useQuizEngine } from '@/hooks/useQuizEngine';
+import { Question } from '@/lib/quiz-engine/config';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+
+const MultiChoice = ({ question }: { question: Question }) => {
+  const { state, handleAnswerChange } = useQuizEngine();
+  const currentAnswers: string[] = state.answers[question.id] || [];
+
+  const onSelect = (value: string) => {
+    const newAnswers = currentAnswers.includes(value)
+      ? currentAnswers.filter((v) => v !== value)
+      : [...currentAnswers, value];
+    handleAnswerChange(question.id, newAnswers, question.analytics_key);
+  };
+
+  return (
+    <div className="w-full">
+      <CardHeader className="text-center p-0 mb-8">
+        <CardTitle className="font-headline text-3xl">{question.i18n.en.label}</CardTitle>
+        {question.i18n.en.description && <CardDescription>{question.i18n.en.description}</CardDescription>}
+      </CardHeader>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {question.i18n.en.options?.map((option) => (
+          <div key={option.value} className="flex items-center space-x-3 rounded-md border p-4">
+            <Checkbox
+              id={`${question.id}-${option.value}`}
+              checked={currentAnswers.includes(option.value)}
+              onCheckedChange={() => onSelect(option.value)}
+              aria-labelledby={`${question.id}-${option.value}-label`}
+            />
+            <Label id={`${question.id}-${option.value}-label`} htmlFor={`${question.id}-${option.value}`} className="font-normal w-full cursor-pointer">
+              {option.label}
+            </Label>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default MultiChoice;

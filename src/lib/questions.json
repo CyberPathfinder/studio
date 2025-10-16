@@ -1,0 +1,141 @@
+{
+  "id": "vivaform-onboarding-v1",
+  "version": "1.0.0",
+  "sections": [
+    { "id": "goals", "order": 1, "i18n": { "en": { "title": "Your Goal" } } },
+    { "id": "demographics", "order": 2, "i18n": { "en": { "title": "About You" } } },
+    { "id": "habits", "order": 3, "i18n": { "en": { "title": "Your Habits" } } }
+  ],
+  "questions": [
+    {
+      "id": "primary_goal",
+      "section": "goals",
+      "order": 1,
+      "type": "single_choice",
+      "analytics_key": "quiz_goal_selection",
+      "i18n": {
+        "en": {
+          "label": "What is your primary goal?",
+          "description": "This helps us tailor your plan.",
+          "options": [
+            { "value": "lose_weight", "label": "Lose Weight" },
+            { "value": "maintain_weight", "label": "Maintain Weight" },
+            { "value": "gain_muscle", "label": "Gain Muscle" }
+          ]
+        }
+      },
+      "validation": { "required": true }
+    },
+    {
+      "id": "measurements",
+      "section": "demographics",
+      "order": 1,
+      "type": "height_weight",
+      "analytics_key": "quiz_measurements",
+      "i18n": {
+        "en": {
+          "label": "Your Measurements",
+          "description": "This helps us understand your body composition."
+        }
+      },
+      "validation": { "required": true, "min": 35, "max": 300 }
+    },
+    {
+        "id": "dob",
+        "section": "demographics",
+        "order": 2,
+        "type": "date",
+        "analytics_key": "quiz_dob",
+        "i18n": {
+            "en": {
+                "label": "What is your date of birth?",
+                "description": "Your age helps us estimate your metabolic rate.",
+                "hint": "Select your birth date"
+            }
+        },
+        "validation": { "required": true }
+    },
+    {
+      "id": "diet_preference",
+      "section": "habits",
+      "order": 1,
+      "type": "single_choice",
+      "analytics_key": "quiz_diet_preference",
+      "i18n": {
+        "en": {
+          "label": "What's your dietary preference?",
+          "options": [
+            { "value": "omnivore", "label": "Omnivore" },
+            { "value": "vegetarian", "label": "Vegetarian" },
+            { "value": "vegan", "label": "Vegan" },
+            { "value": "pescetarian", "label": "Pescetarian" }
+          ]
+        }
+      },
+      "validation": { "required": true }
+    },
+    {
+        "id": "food_dislikes",
+        "section": "habits",
+        "order": 2,
+        "type": "text",
+        "analytics_key": "quiz_food_dislikes",
+        "i18n": {
+            "en": {
+                "label": "Any foods you dislike?",
+                "description": "(Optional) List any foods we should avoid recommending.",
+                "hint": "e.g., cilantro, mushrooms..."
+            }
+        }
+    },
+    {
+        "id": "medical_conditions",
+        "section": "habits",
+        "order": 3,
+        "type": "multi_choice",
+        "analytics_key": "quiz_medical_conditions",
+        "i18n": {
+            "en": {
+                "label": "Any allergies or intolerances?",
+                "description": "Select all that apply.",
+                "options": [
+                    { "value": "lactose_intolerance", "label": "Lactose Intolerance" },
+                    { "value": "gluten_intolerance", "label": "Gluten Intolerance" },
+                    { "value": "nut_allergy", "label": "Nut Allergy" },
+                    { "value": "none", "label": "None" }
+                ]
+            }
+        },
+        "validation": { "required": true }
+    },
+    {
+        "id": "target_weight_unit",
+        "section": "goals",
+        "order": 2,
+        "type": "unit_toggle",
+        "analytics_key": "quiz_target_weight_unit",
+        "i18n": {
+            "en": {
+                "label": "Choose your preferred unit for weight goals",
+                "options": [
+                    { "value": "kg", "label": "kg" },
+                    { "value": "lb", "label": "lb" }
+                ]
+            }
+        },
+        "branching": { "show_if": "answers['primary_goal'] === 'lose_weight' || answers['primary_goal'] === 'gain_muscle'" }
+    },
+    {
+        "id": "target_weight",
+        "section": "goals",
+        "order": 3,
+        "type": "number",
+        "analytics_key": "quiz_target_weight",
+        "i18n": {
+            "en": { "label": "What is your target weight?" }
+        },
+        "validation": { "required": true },
+        "branching": { "show_if": "answers['primary_goal'] === 'lose_weight' || answers['primary_goal'] === 'gain_muscle'" }
+    }
+  ]
+}
