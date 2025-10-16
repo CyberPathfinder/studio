@@ -22,7 +22,7 @@ const MeasurementsStep = () => {
     if (height && (height < heightRange.min || height > heightRange.max)) {
       const { id, dismiss } = toast({
         variant: 'destructive',
-        title: 'Heigh Unlikely',
+        title: 'Height Unlikely',
         description: `Are you sure about your height? Feel free to proceed if it is correct.`,
       });
        const timer = setTimeout(() => dismiss(id), 5000);
@@ -57,8 +57,10 @@ const MeasurementsStep = () => {
               <FormLabel className="font-bold text-lg flex items-center gap-2">
                 Height (cm)
                 <Popover>
-                  <PopoverTrigger>
-                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                  <PopoverTrigger asChild>
+                     <button type="button" aria-label="More information about height input">
+                      <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                    </button>
                   </PopoverTrigger>
                   <PopoverContent>
                     <p className="text-sm">Please provide your height in centimeters.</p>
@@ -66,7 +68,7 @@ const MeasurementsStep = () => {
                 </Popover>
               </FormLabel>
               <FormControl>
-                <Input type="number" placeholder="e.g., 175" {...field} className="text-center text-lg h-12" />
+                <Input type="number" placeholder="e.g., 175" {...field} className="text-center text-lg h-12" aria-label="Height in centimeters" />
               </FormControl>
                <div className="text-center h-4">
                 <FormMessage />
@@ -82,8 +84,10 @@ const MeasurementsStep = () => {
               <FormLabel className="font-bold text-lg flex items-center gap-2">
                 Weight (kg)
                  <Popover>
-                  <PopoverTrigger>
-                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                  <PopoverTrigger asChild>
+                    <button type="button" aria-label="More information about weight input">
+                      <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                    </button>
                   </PopoverTrigger>
                   <PopoverContent>
                     <p className="text-sm">Please provide your current weight in kilograms.</p>
@@ -91,7 +95,7 @@ const MeasurementsStep = () => {
                 </Popover>
               </FormLabel>
               <FormControl>
-                <Input type="number" placeholder="e.g., 70" {...field} className="text-center text-lg h-12" />
+                <Input type="number" placeholder="e.g., 70" {...field} className="text-center text-lg h-12" aria-label="Weight in kilograms" />
               </FormControl>
                <div className="text-center h-4">
                 <FormMessage />

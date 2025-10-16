@@ -16,17 +16,17 @@ type GTagEvent = {
 };
 
 // Map your custom events to analytics-specific formats
-const eventMap = {
+const eventMap: { [key in EventName]?: any } = {
   quiz_start: {
     gtag: { action: 'quiz_start', category: 'engagement', label: 'User started the onboarding quiz' },
     meta: { eventName: 'Lead' },
     gads: { conversionLabel: 'AW-CONVERSION-LABEL-LEAD' } // Placeholder for Google Ads
   },
   quiz_step: {
-    gtag: (payload: { step: number }) => ({
+    gtag: (payload: { step: number, direction: 'next' | 'previous' }) => ({
       action: `quiz_step_${payload.step}`,
       category: 'engagement',
-      label: `User completed step ${payload.step} of the quiz`
+      label: `User went to step ${payload.step} (${payload.direction})`
     }),
     meta: null, // No specific Meta event for each step
     gads: null,
@@ -41,21 +41,23 @@ const eventMap = {
 
 export const useAnalytics = () => {
   const track = useCallback((eventName: EventName, payload?: any) => {
-    console.log(`[Analytics] Event: ${eventName}`, payload || '');
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[Analytics] Event: ${eventName}`, payload || '');
+    }
 
     const mappings = eventMap[eventName];
     if (!mappings) return;
 
     // --- Google Analytics (GA4) ---
     const gtagMapping = mappings.gtag;
-    if (gtagMapping) {
+    if (gtagMapping && process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID) {
       const eventData = typeof gtagMapping === 'function' ? gtagMapping(payload) : gtagMapping;
       gtagEvent(eventData);
     }
     
     // --- Meta Pixel ---
     const metaMapping = mappings.meta;
-    if (metaMapping) {
+    if (metaMapping && process.env.NEXT_PUBLIC_META_PIXEL_ID) {
        metaEvent(metaMapping.eventName, payload);
     }
 

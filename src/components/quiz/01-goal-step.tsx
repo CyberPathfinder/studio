@@ -14,7 +14,7 @@ const goals = [
 ] as const;
 
 const GoalStep = () => {
-  const { control, watch } = useFormContext<{ goal: Goal['goal'] }>();
+  const { control, watch } = useFormContext<Goal>();
   const selectedGoal = watch('goal');
 
   return (
@@ -34,13 +34,16 @@ const GoalStep = () => {
                 onValueChange={field.onChange}
                 defaultValue={field.value}
                 className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+                aria-label="Primary Goal"
               >
                 {goals.map((goal) => (
                   <FormItem key={goal.value}>
                     <FormControl>
-                      <RadioGroupItem value={goal.value} className="sr-only" />
+                      <RadioGroupItem value={goal.value} id={goal.value} className="sr-only" aria-labelledby={`${goal.value}-label`} />
                     </FormControl>
                     <FormLabel
+                      htmlFor={goal.value}
+                      id={`${goal.value}-label`}
                       className={cn(
                         'flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all',
                         field.value === goal.value && 'border-primary shadow-lg'

@@ -6,7 +6,7 @@ import DemographicsStep from '@/components/quiz/02-demographics-step';
 import MeasurementsStep from '@/components/quiz/03-measurements-step';
 import { useQuiz } from '@/hooks/use-quiz';
 import { AnimatePresence, motion } from 'framer-motion';
-import { track } from '@/lib/analytics';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { useEffect } from 'react';
 import QuizProgress from '@/components/quiz/quiz-progress';
 import QuizControls from '@/components/quiz/quiz-controls';
@@ -21,13 +21,14 @@ const stepComponents: { [key: number]: React.ComponentType } = {
 
 const QuizContent = () => {
   const { currentStep } = useQuiz();
+  const { track } = useAnalytics();
   const StepComponent = stepComponents[currentStep];
 
   useEffect(() => {
     if (currentStep === 1) {
       track('quiz_start');
     }
-  }, [currentStep]);
+  }, [currentStep, track]);
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">

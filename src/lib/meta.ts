@@ -1,3 +1,4 @@
+'use client';
 // lib/meta.ts
 
 // Reference: https://developers.facebook.com/docs/meta-pixel/get-started

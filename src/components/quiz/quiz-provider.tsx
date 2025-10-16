@@ -3,7 +3,7 @@
 import React, { createContext, useState, useCallback, useMemo } from 'react';
 import { useForm, FormProvider, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { QuizSchema, defaultQuizValues, QuizData, quizSteps } from '@/lib/quiz-data';
+import { QuizSchema, defaultQuizValues, QuizData, quizSteps, QuizStepId } from '@/lib/quiz-data';
 import { useAnalytics } from '@/hooks/use-analytics';
 
 type QuizContextType = {
@@ -33,11 +33,11 @@ export const QuizProvider = ({ children }: { children: React.ReactNode }) => {
 
   const nextStep = useCallback(async () => {
     const currentStepInfo = quizSteps.find(q => q.step === currentStep);
-    // @ts-ignore
-    const fieldsToValidate = currentStepInfo?.fields || [];
-    // @ts-ignore
-    const isValid = await form.trigger(fieldsToValidate);
+    if (!currentStepInfo) return;
 
+    const fieldsToValidate = currentStepInfo.fields;
+    const isValid = fieldsToValidate ? await form.trigger(fieldsToValidate) : true;
+    
     if (isValid) {
       if (currentStep < totalSteps) {
         const nextStepNumber = currentStep + 1;
@@ -69,7 +69,7 @@ export const QuizProvider = ({ children }: { children: React.ReactNode }) => {
     totalSteps,
     nextStep,
     prevStep,
-goToStep,
+    goToStep,
     isFirstStep,
     isLastStep,
     form,

@@ -11,7 +11,9 @@ declare global {
     // Meta Pixel
     fbq?: (
       command: 'init' | 'track' | 'trackCustom',
-      target: string,
+      // Standard event names are strings, but this allows for custom events too.
+      // See: https://developers.facebook.com/docs/meta-pixel/reference
+      eventName: string, 
       params?: { [key: string]: any }
     ) => void;
   }

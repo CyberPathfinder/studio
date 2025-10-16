@@ -1,3 +1,4 @@
+'use client';
 // lib/gtag.ts
 
 // Reference: https://developers.google.com/analytics/devguides/collection/gtagjs/pages
