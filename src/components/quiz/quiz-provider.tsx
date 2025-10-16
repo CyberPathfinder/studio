@@ -4,7 +4,7 @@ import React, { createContext, useState, useCallback, useMemo } from 'react';
 import { useForm, FormProvider, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { QuizSchema, defaultQuizValues, QuizData, quizSteps } from '@/lib/quiz-data';
-import { track } from '@/lib/analytics';
+import { useAnalytics } from '@/hooks/use-analytics';
 
 type QuizContextType = {
   currentStep: number;
@@ -22,6 +22,8 @@ export const QuizContext = createContext<QuizContextType | null>(null);
 export const QuizProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = quizSteps.length;
+  const { track } = useAnalytics();
+
 
   const form = useForm<QuizData>({
     resolver: zodResolver(QuizSchema),
@@ -43,7 +45,7 @@ export const QuizProvider = ({ children }: { children: React.ReactNode }) => {
         track('quiz_step', { step: nextStepNumber, direction: 'next' });
       }
     }
-  }, [currentStep, totalSteps, form]);
+  }, [currentStep, totalSteps, form, track]);
 
   const prevStep = useCallback(() => {
     if (currentStep > 1) {
@@ -51,7 +53,7 @@ export const QuizProvider = ({ children }: { children: React.ReactNode }) => {
       setCurrentStep(prevStepNumber);
       track('quiz_step', { step: prevStepNumber, direction: 'previous' });
     }
-  }, [currentStep]);
+  }, [currentStep, track]);
   
   const goToStep = useCallback((step: number) => {
     if (step >= 1 && step <= totalSteps) {
@@ -67,7 +69,7 @@ export const QuizProvider = ({ children }: { children: React.ReactNode }) => {
     totalSteps,
     nextStep,
     prevStep,
-    goToStep,
+goToStep,
     isFirstStep,
     isLastStep,
     form,
