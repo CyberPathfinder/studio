@@ -153,7 +153,7 @@ const HeroSection = () => {
 
   return (
     <section className="relative w-full overflow-hidden pt-20 md:pt-28 lg:pt-32">
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background -z-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-[#E8FBF4] via-[#F9FCFB] to-[#F3FAFA] -z-10"></div>
       <div className="container px-4 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-8">
           <div className="flex flex-col justify-center text-center lg:text-left">
@@ -164,7 +164,7 @@ const HeroSection = () => {
               Effortlessly track food, find healthy recipes, and reach your wellness goals.
             </p>
             <div className="mt-8 flex w-full flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
-              <Button size="lg" asChild className="w-full sm:w-auto">
+              <Button size="lg" asChild className="w-full sm:w-auto" variant="gradient">
                 <Link href="/quiz" aria-label="Get Started for Free">
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -203,5 +203,3 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
-
-    

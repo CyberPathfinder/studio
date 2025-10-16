@@ -36,10 +36,10 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
-        <link rel="icon" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3e%3cpath fill='%230D9494' d='M83.4,23.3c1.5-6.5,9.6-9.6,14.4-4.8c4.8,4.8,3,14-2.8,18.8c-5.8,4.8-13,4.8-17.3,0C73,32.5,73.7,39.3,71.2,44.7c-2.5,5.4-8.7,7-12.7,2.7c-4-4.3-3.8-11.7,0-16.7c-3.8,5-8,8.8-13.2,9.8'/%3e%3c/svg%3e" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+        <link rel="icon" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3e%3cpath fill='%231BBF9A' d='M83.4,23.3c1.5-6.5,9.6-9.6,14.4-4.8c4.8,4.8,3,14-2.8,18.8c-5.8,4.8-13,4.8-17.3,0C73,32.5,73.7,39.3,71.2,44.7c-2.5,5.4-8.7,7-12.7,2.7c-4-4.3-3.8-11.7,0-16.7c-3.8,5-8,8.8-13.2,9.8'/%3e%3c/svg%3e" />
       </head>
-      <body className={cn("font-body antialiased", "bg-gradient-to-b from-background via-background to-white")}>
+      <body className={cn("font-body antialiased", "bg-background")}>
         <Analytics />
         <Header />
         <main>{children}</main>

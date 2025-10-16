@@ -30,7 +30,7 @@ export function Header() {
             <Button variant="outline" asChild>
               <Link href="#" aria-label="Log In">Log In</Link>
             </Button>
-            <Button asChild>
+            <Button asChild variant="gradient">
               <Link href="#" aria-label="Get Started with VivaForm">Get Started</Link>
             </Button>
           </nav>
@@ -51,7 +51,7 @@ export function Header() {
                   <Button variant="outline" asChild>
                     <Link href="#" aria-label="Log In">Log In</Link>
                   </Button>
-                  <Button asChild>
+                  <Button asChild variant="gradient">
                     <Link href="#" aria-label="Get Started with VivaForm">Get Started</Link>
                   </Button>
                 </div>

@@ -13,7 +13,7 @@ const CtaSection = () => {
             Join thousands of others who are transforming their health one meal at a time. Sign up for free and take the first step towards a better you.
           </p>
           <div className="mt-8">
-            <Button size="lg" asChild>
+            <Button size="lg" asChild variant="gradient">
               <Link href="#">Take the First Step</Link>
             </Button>
           </div>

@@ -38,7 +38,7 @@ const FeaturesSection = () => {
         </div>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature, index) => (
-            <Card key={index} className="transform-gpu transition-all duration-300 hover:-translate-y-2 hover:shadow-lg">
+            <Card key={index} className="transform-gpu transition-all duration-300 hover:-translate-y-2 hover:shadow-lg shadow-md">
               <CardHeader className="items-center text-center">
                 <div className="mb-4 rounded-full bg-primary/10 p-4">
                   {feature.icon}
