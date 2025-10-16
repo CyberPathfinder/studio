@@ -1,13 +1,16 @@
+
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Question } from '@/lib/quiz-engine/config';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { getLabel, getDescription, getOptions } from '@/lib/i18n';
 
 const MultiChoice = ({ question }: { question: Question }) => {
   const { state, handleAnswerChange } = useQuizEngine();
   const currentAnswers: string[] = state.answers[question.id] || [];
+  const options = getOptions(question);
 
   const onSelect = (value: string) => {
     const newAnswers = currentAnswers.includes(value)
@@ -19,12 +22,12 @@ const MultiChoice = ({ question }: { question: Question }) => {
   return (
     <div className="w-full">
       <CardHeader className="text-center p-0 mb-8">
-        <CardTitle className="font-headline text-3xl">{question.i18n.en.label}</CardTitle>
-        {question.i18n.en.description && <CardDescription>{question.i18n.en.description}</CardDescription>}
+        <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
+        {getDescription(question) && <CardDescription>{getDescription(question)}</CardDescription>}
       </CardHeader>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {question.i18n.en.options?.map((option) => (
+        {options?.map((option) => (
           <div key={option.value} className="flex items-center space-x-3 rounded-md border p-4">
             <Checkbox
               id={`${question.id}-${option.value}`}

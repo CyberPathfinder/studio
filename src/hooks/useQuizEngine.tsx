@@ -1,3 +1,4 @@
+
 'use client';
 import { QuizConfig } from '@/lib/quiz-engine/config';
 import { quizReducer, getInitialState } from '@/lib/quiz-engine/state';
@@ -6,6 +7,7 @@ import { useReducer, useCallback, useMemo, useContext, createContext, ReactNode 
 import { useAnalytics } from './use-analytics';
 import { useDebouncedCallback } from 'use-debounce';
 import { deleteQuizDraft, saveIntakeData } from '@/firebase/quiz';
+import { getLabel } from '@/lib/i18n';
 
 type QuizEngineContextType = {
   state: ReturnType<typeof quizReducer>;
@@ -31,16 +33,12 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     dispatch({ type: 'INITIALIZE_STATE', payload: { config, initialAnswers, currentQuestionId } });
   }, [config]);
 
-  const debouncedAnswerChange = useDebouncedCallback((questionId: string, value: any) => {
-    dispatch({ type: 'SET_ANSWER', payload: { questionId, value } });
-  }, 300);
-
-  const handleAnswerChange = useCallback((questionId: string, value: any, analyticsKey?: string) => {
+  const handleAnswerChange = useDebouncedCallback((questionId: string, value: any, analyticsKey?: string) => {
     if (analyticsKey) {
         track('quiz_step' as any, { analyticsKey, value });
     }
-    debouncedAnswerChange(questionId, value);
-  }, [track, debouncedAnswerChange]);
+    dispatch({ type: 'SET_ANSWER', payload: { questionId, value } });
+  }, 300);
 
   const completeQuiz = useCallback(() => {
     track('intake_saved');
@@ -76,7 +74,6 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     
     // If no next question is found, complete the quiz
     completeQuiz();
-    return { isValid: true };
 
   }, [state, config.questions, track, completeQuiz]);
 
@@ -113,8 +110,9 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
 
   const submitQuiz = async (uid: string) => {
     track('intake_saved');
-    await saveIntakeData(uid, config.id, state.answers);
-    await deleteQuizDraft(uid, config.id);
+    const quizId = config.quizId || config.id;
+    await saveIntakeData(uid, quizId, state.answers);
+    await deleteQuizDraft(uid, quizId);
     localStorage.removeItem('vf_quiz_draft'); // Also clear local draft
   };
 

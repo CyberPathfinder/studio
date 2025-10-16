@@ -1,8 +1,19 @@
+
 export { default as single_choice } from './SingleChoice';
 export { default as multi_choice } from './MultiChoice';
 export { default as number } from './NumberInput';
 export { default as text } from './TextInput';
 export { default as date } from './DateInput';
 export { default as yes_no } from './YesNo';
-export { default as height_weight } from './HeightWeight';
+export { default as height } from './Height';
+export { default as weight } from './Weight';
 export { default as unit_toggle } from './UnitToggle';
+export { default as computed_bmi } from './ComputedBmi';
+export { default as chart_bmi } from './ChartBmi';
+export { default as message } from './Message';
+export { default as testimonial } from './Testimonial';
+export { default as diet_info } from './DietInfo';
+export { default as loader } from './Loader';
+export { default as prediction } from './Prediction';
+export { default as profile_card } from './ProfileCard';
+export { default as lead_capture } from './LeadCapture';

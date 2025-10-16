@@ -1,3 +1,4 @@
+
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -5,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import QuizProgress from './QuizProgress';
 import QuizControls from './QuizControls';
 import * as QuestionComponents from './questions';
-import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarRail } from '../ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from '../ui/sidebar';
 import { VivaFormLogo } from '../icons/logo';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
 import QuizSummary from './QuizSummary';
+import { getLabel, getOptions } from '@/lib/i18n';
 
 
 const QuizSummarySidebar = () => {
@@ -26,7 +28,7 @@ const QuizSummarySidebar = () => {
             <SidebarMenu>
                 {config.sections.map((section) => (
                     <SidebarMenuItem key={section.id} className="p-2">
-                        <h4 className="font-semibold text-sm mb-2 px-2">{section.i18n.en.title}</h4>
+                        <h4 className="font-semibold text-sm mb-2 px-2">{section.i18n?.en.title || section.title}</h4>
                         <ul className="flex flex-col gap-1">
                             {config.questions
                                 .filter((q) => q.section === section.id)
@@ -42,7 +44,7 @@ const QuizSummarySidebar = () => {
                                             )}
                                         >
                                             {hasAnswer ? <CheckCircle className="h-3 w-3 text-primary" /> : <Circle className="h-3 w-3 text-muted-foreground" />}
-                                            <span className="flex-1 truncate">{q.i18n.en.label}</span>
+                                            <span className="flex-1 truncate">{getLabel(q)}</span>
                                             <Edit className="h-3 w-3 invisible group-hover:visible" />
                                         </button>
                                     </li>
@@ -136,7 +138,7 @@ const QuizEngine = () => {
                 <Card className="w-full max-w-2xl overflow-hidden shadow-2xl">
                     <div className="p-8">
                     <QuizProgress />
-                    <div className="relative mt-8 h-[28rem]">
+                    <div className="relative mt-8 h-[28rem] flex items-center justify-center">
                         <AnimatePresence mode="wait">
                         <motion.div
                             key={state.currentQuestionId}
@@ -157,7 +159,6 @@ const QuizEngine = () => {
                 </Card>
             </div>
         </SidebarInset>
-        <SidebarRail />
     </SidebarProvider>
   );
 };

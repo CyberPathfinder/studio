@@ -1,6 +1,8 @@
+
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Progress } from '@/components/ui/progress';
+import { getLabel } from '@/lib/i18n';
 
 const QuizProgress = () => {
   const { state } = useQuizEngine();
@@ -14,7 +16,7 @@ const QuizProgress = () => {
     <div className="w-full text-center">
       <div className='flex justify-between items-center px-1 mb-1'>
         <p className="text-sm font-semibold text-foreground">
-            {currentSection.i18n.en.title}
+            {currentSection.i18n?.en.title || currentSection.title}
         </p>
         <p className='text-xs text-muted-foreground'>~5-7 min remaining</p>
       </div>

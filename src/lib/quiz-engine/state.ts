@@ -1,3 +1,4 @@
+
 import { QuizConfig, Question, Section } from './config';
 import { evaluateBranchingLogic } from './utils';
 
@@ -27,7 +28,7 @@ export const getInitialState = (config: QuizConfig): QuizState => {
         // Computed
         currentQuestion: null,
         currentSection: null,
-        sections: config.sections.sort((a,b) => a.order - b.order),
+        sections: config.sections,
         isFirstQuestion: true,
         isLastQuestion: false,
     };
@@ -46,6 +47,9 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
   switch (action.type) {
     case 'INITIALIZE_STATE':
         const { config, initialAnswers, currentQuestionId } = action.payload;
+        newState.config.questions.sort((a,b) => a.order - b.order);
+        newState.config.sections.sort((a,b) => (a.order || 0) - (b.order || 0));
+
         let startIndex = -1;
 
         if (currentQuestionId) {

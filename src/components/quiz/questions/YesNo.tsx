@@ -1,9 +1,11 @@
+
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Question } from '@/lib/quiz-engine/config';
 import { Button } from '@/components/ui/button';
 import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { getLabel, getDescription } from '@/lib/i18n';
 
 const YesNo = ({ question }: { question: Question }) => {
   const { state, handleAnswerChange } = useQuizEngine();
@@ -12,8 +14,8 @@ const YesNo = ({ question }: { question: Question }) => {
   return (
     <div className="w-full max-w-md mx-auto">
       <CardHeader className="text-center p-0 mb-8">
-        <CardTitle className="font-headline text-3xl">{question.i18n.en.label}</CardTitle>
-        {question.i18n.en.description && <CardDescription>{question.i18n.en.description}</CardDescription>}
+        <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
+        {getDescription(question) && <CardDescription>{getDescription(question)}</CardDescription>}
       </CardHeader>
       
       <div className="flex justify-center gap-4">

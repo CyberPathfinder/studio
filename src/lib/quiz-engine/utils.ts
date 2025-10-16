@@ -1,3 +1,4 @@
+
 import { BranchingRule, Question, ValidationRules } from "./config";
 
 /**
@@ -18,8 +19,9 @@ export const evaluateBranchingLogic = (branching: BranchingRule | null | undefin
     const result = new Function('answers', `return ${branching.show_if}`)(answers);
     return !!result;
   } catch (error) {
-    console.error("Error evaluating branching logic:", branching.show_if, error);
-    return false; // Hide question on error
+    // It's common for expressions to fail if the dependent answer isn't available yet.
+    // console.log("Could not evaluate branching logic (this may be normal):", branching.show_if);
+    return false; // Hide question on error or if dependent answers are not ready
   }
 };
 
@@ -31,12 +33,17 @@ export const evaluateBranchingLogic = (branching: BranchingRule | null | undefin
  */
 export const validateAnswer = (question: Question, value: any): { isValid: boolean, message?: string } => {
     const rules = question.validation;
+    const label = question.i18n?.en.label || question.label;
     if (!rules) return { isValid: true };
 
     if (rules.required) {
         if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
-            return { isValid: false, message: `${question.i18n.en.label} is required.`};
+            return { isValid: false, message: `${label} is required.`};
         }
+    }
+
+    if (rules.minSelected && Array.isArray(value) && value.length < rules.minSelected) {
+        return { isValid: false, message: `Please select at least ${rules.minSelected} options for ${label}.`};
     }
     
     // Can add more specific validation logic here for min, max, pattern etc.

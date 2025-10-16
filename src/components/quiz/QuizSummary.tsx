@@ -1,16 +1,18 @@
+
 'use client';
 import { useState } from 'react';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { useFirebase } from '@/firebase';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Edit, Loader2 } from 'lucide-react';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getLabel } from '@/lib/i18n';
 
 const QuizSummary = () => {
   const { state, jumpToQuestion, submitQuiz } = useQuizEngine();
@@ -107,7 +109,7 @@ const QuizSummary = () => {
             .map((q) => (
             <div key={q.id} className="text-sm">
               <div className="flex justify-between items-center">
-                <p className="font-semibold text-muted-foreground">{q.i18n.en.label}</p>
+                <p className="font-semibold text-muted-foreground">{getLabel(q)}</p>
                 <Button variant="ghost" size="sm" onClick={() => jumpToQuestion(q.id)}>
                   <Edit className="h-3 w-3 mr-1" />
                   Edit

@@ -1,3 +1,4 @@
+
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Question } from '@/lib/quiz-engine/config';
@@ -9,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { convertWeight, roundToTwo } from '@/lib/unit-conversion';
+import { getLabel, getDescription } from '@/lib/i18n';
 
 const HeightWeight = ({ question }: { question: Question }) => {
   const { state, handleAnswerChange } = useQuizEngine();
@@ -68,8 +70,8 @@ const HeightWeight = ({ question }: { question: Question }) => {
   return (
     <div className="w-full">
       <CardHeader className="text-center p-0 mb-8">
-        <CardTitle className="font-headline text-3xl">{question.i18n.en.label}</CardTitle>
-        {question.i18n.en.description && <CardDescription>{question.i18n.en.description}</CardDescription>}
+        <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
+        {getDescription(question) && <CardDescription>{getDescription(question)}</CardDescription>}
       </CardHeader>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
         <div>

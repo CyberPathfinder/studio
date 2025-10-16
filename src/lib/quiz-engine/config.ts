@@ -1,3 +1,4 @@
+
 export type QuestionType =
   | 'single_choice'
   | 'multi_choice'
@@ -5,8 +6,18 @@ export type QuestionType =
   | 'text'
   | 'date'
   | 'yes_no'
-  | 'height_weight'
-  | 'unit_toggle';
+  | 'height'
+  | 'weight'
+  | 'unit_toggle'
+  | 'computed_bmi'
+  | 'chart_bmi'
+  | 'message'
+  | 'testimonial'
+  | 'diet_info'
+  | 'loader'
+  | 'prediction'
+  | 'profile_card'
+  | 'lead_capture';
 
 export interface QuestionOption {
   value: string;
@@ -19,6 +30,9 @@ export interface ValidationRules {
   max?: number;
   step?: number;
   pattern?: string;
+  minLength?: number;
+  maxLength?: number;
+  minSelected?: number;
 }
 
 export interface BranchingRule {
@@ -45,10 +59,18 @@ export interface Question {
   section: string;
   order: number;
   type: QuestionType;
-  i18n: QuestionI18n;
+  label: string; // Keep top-level label for simplicity in some components
+  description?: string;
+  hint?: string;
+  options?: QuestionOption[];
+  i18n?: QuestionI18n; // Make i18n optional for backward compatibility if needed
   analytics_key?: string;
   validation?: ValidationRules;
   branching?: BranchingRule | null;
+  ui?: Record<string, any>;
+  source?: string;
+  emoji?: string;
+  disclaimer?: string;
 }
 
 export interface SectionI18n {
@@ -58,13 +80,15 @@ export interface SectionI18n {
 
 export interface Section {
   id: string;
-  order: number;
-  i18n: SectionI18n;
+  title: string;
+  order?: number;
+  i18n?: SectionI18n;
 }
 
 export interface QuizConfig {
   id: string;
-  version: string;
+  quizId?: string; // a more semantic name for the quiz id
+  version?: string;
   sections: Section[];
   questions: Question[];
 }

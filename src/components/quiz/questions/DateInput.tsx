@@ -1,3 +1,4 @@
+
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Question } from '@/lib/quiz-engine/config';
@@ -8,6 +9,7 @@ import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { getLabel, getDescription, getHint } from '@/lib/i18n';
 
 const DateInput = ({ question }: { question: Question }) => {
   const { state, handleAnswerChange } = useQuizEngine();
@@ -16,8 +18,8 @@ const DateInput = ({ question }: { question: Question }) => {
   return (
     <div className="w-full max-w-md mx-auto">
       <CardHeader className="text-center p-0 mb-8">
-        <CardTitle className="font-headline text-3xl">{question.i18n.en.label}</CardTitle>
-        {question.i18n.en.description && <CardDescription>{question.i18n.en.description}</CardDescription>}
+        <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
+        {getDescription(question) && <CardDescription>{getDescription(question)}</CardDescription>}
       </CardHeader>
 
       <Popover>
@@ -30,7 +32,7 @@ const DateInput = ({ question }: { question: Question }) => {
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {answer ? format(answer, "PPP") : <span>{question.i18n.en.hint || 'Pick a date'}</span>}
+            {answer ? format(answer, "PPP") : <span>{getHint(question) || 'Pick a date'}</span>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">

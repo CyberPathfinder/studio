@@ -1,6 +1,9 @@
+
 const KG_TO_LB = 2.20462;
+const CM_TO_IN = 0.393701;
 
 type WeightUnit = 'kg' | 'lb';
+type HeightUnit = 'cm' | 'ft_in';
 
 /**
  * Converts a weight value from a source unit to a target unit.
@@ -10,7 +13,7 @@ type WeightUnit = 'kg' | 'lb';
  * @returns The converted weight value.
  */
 export const convertWeight = (value: number, fromUnit: WeightUnit, toUnit: WeightUnit): number => {
-  if (fromUnit === toUnit) {
+  if (fromUnit === toUnit || !value) {
     return value;
   }
   if (fromUnit === 'kg' && toUnit === 'lb') {
@@ -24,11 +27,36 @@ export const convertWeight = (value: number, fromUnit: WeightUnit, toUnit: Weigh
 };
 
 /**
+ * Converts a height value from centimeters to feet and inches.
+ * @param cm The height in centimeters.
+ * @returns An object with feet and inches.
+ */
+export const convertCmToFtIn = (cm: number): { feet: number, inches: number } => {
+    if (!cm) return { feet: 0, inches: 0 };
+    const totalInches = cm * CM_TO_IN;
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { feet, inches };
+};
+
+/**
+ * Converts a height value from feet and inches to centimeters.
+ * @param feet The feet part of the height.
+ * @param inches The inches part of the height.
+ * @returns The height in centimeters.
+ */
+export const convertFtInToCm = (feet: number, inches: number): number => {
+    const totalInches = (feet || 0) * 12 + (inches || 0);
+    return totalInches / CM_TO_IN;
+}
+
+
+/**
  * Rounds a number to a specified number of decimal places.
  * @param value The number to round.
- * @param decimalPlaces The number of decimal places to keep. Defaults to 2.
  * @returns The rounded number.
  */
 export const roundToTwo = (value: number): number => {
+  if (isNaN(value)) return 0;
   return Math.round((value + Number.EPSILON) * 100) / 100;
 };

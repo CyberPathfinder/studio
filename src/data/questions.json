@@ -245,7 +245,17 @@
       "order": 23,
       "type": "single_choice",
       "label": "What size clothes do you usually wear?",
-      "options": ["XXXL+","XXXL","XXL","XL","L","M","S","XS","dont_know"].map(v=>({ "value": v.toLowerCase(), "label": v==="dont_know"?"I don’t know":v }))
+      "options": [
+        { "value": "xxxl+", "label": "XXXL+" },
+        { "value": "xxxl", "label": "XXXL" },
+        { "value": "xxl", "label": "XXL" },
+        { "value": "xl", "label": "XL" },
+        { "value": "l", "label": "L" },
+        { "value": "m", "label": "M" },
+        { "value": "s", "label": "S" },
+        { "value": "xs", "label": "XS" },
+        { "value": "dont_know", "label": "I don’t know" }
+      ]
     },
     {
       "id": "size_goal",
@@ -253,7 +263,17 @@
       "order": 24,
       "type": "single_choice",
       "label": "What size clothes do you want to wear?",
-      "options": ["XXXL+","XXXL","XXL","XL","L","M","S","XS","dont_know"].map(v=>({ "value": v.toLowerCase(), "label": v==="dont_know"?"I don’t know":v }))
+      "options": [
+        { "value": "xxxl+", "label": "XXXL+" },
+        { "value": "xxxl", "label": "XXXL" },
+        { "value": "xxl", "label": "XXL" },
+        { "value": "xl", "label": "XL" },
+        { "value": "l", "label": "L" },
+        { "value": "m", "label": "M" },
+        { "value": "s", "label": "S" },
+        { "value": "xs", "label": "XS" },
+        { "value": "dont_know", "label": "I don’t know" }
+      ]
     },
     {
       "id": "eating_habits",
@@ -288,8 +308,21 @@
       "label": "What are your food preferences?",
       "hint": "Choose at least 5 products.",
       "options": [
-        "all_in_one","avocados","eggs","mushrooms","onions","cheese","nuts","butter","coconut","milk","seafood","olives","tofu","cottage_cheese"
-      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) })),
+        { "value": "all_in_one", "label": "All In One" },
+        { "value": "avocados", "label": "Avocados" },
+        { "value": "eggs", "label": "Eggs" },
+        { "value": "mushrooms", "label": "Mushrooms" },
+        { "value": "onions", "label": "Onions" },
+        { "value": "cheese", "label": "Cheese" },
+        { "value": "nuts", "label": "Nuts" },
+        { "value": "butter", "label": "Butter" },
+        { "value": "coconut", "label": "Coconut" },
+        { "value": "milk", "label": "Milk" },
+        { "value": "seafood", "label": "Seafood" },
+        { "value": "olives", "label": "Olives" },
+        { "value": "tofu", "label": "Tofu" },
+        { "value": "cottage_cheese", "label": "Cottage Cheese" }
+      ],
       "validation": { "required": true, "minSelected": 5 }
     },
     {
@@ -298,8 +331,17 @@
       "order": 28,
       "type": "multi_choice",
       "label": "Which meat do you prefer?",
-      "options": ["all_in_one","chicken","pork","bacon","beef","turkey","fish","lamb","vegetarian"]
-        .map(v=>({ "value": v, "label": v==="all_in_one"?"All in one": (v==="vegetarian"?"I’m a vegetarian":v.charAt(0).toUpperCase()+v.slice(1)) }))
+      "options": [
+        { "value": "all_in_one", "label": "All in one" },
+        { "value": "chicken", "label": "Chicken" },
+        { "value": "pork", "label": "Pork" },
+        { "value": "bacon", "label": "Bacon" },
+        { "value": "beef", "label": "Beef" },
+        { "value": "turkey", "label": "Turkey" },
+        { "value": "fish", "label": "Fish" },
+        { "value": "lamb", "label": "Lamb" },
+        { "value": "vegetarian", "label": "I’m a vegetarian" }
+      ]
     },
     {
       "id": "allergies",
@@ -308,8 +350,16 @@
       "type": "multi_choice",
       "label": "Do you have any food allergies or intolerance?",
       "options": [
-        "none","lactose","nuts","milk_protein","egg_protein","honey","fish","citrus","prefer_not_to_answer"
-      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) }))
+        { "value": "none", "label": "None" },
+        { "value": "lactose", "label": "Lactose" },
+        { "value": "nuts", "label": "Nuts" },
+        { "value": "milk_protein", "label": "Milk Protein" },
+        { "value": "egg_protein", "label": "Egg Protein" },
+        { "value": "honey", "label": "Honey" },
+        { "value": "fish", "label": "Fish" },
+        { "value": "citrus", "label": "Citrus" },
+        { "value": "prefer_not_to_answer", "label": "Prefer Not To Answer" }
+      ]
     },
     {
       "id": "water_intake",
@@ -356,10 +406,16 @@
       "order": 34,
       "type": "single_choice",
       "label": "What’s your work schedule?",
-      "subtitle": "Daily planning can play a big role for some members.",
+      "description": "Daily planning can play a big role for some members.",
       "options": [
-        "flexible","nine_to_five","shifts","between_jobs","seasonal","retired","other"
-      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) }))
+        { "value": "flexible", "label": "Flexible" },
+        { "value": "nine_to_five", "label": "Nine To Five" },
+        { "value": "shifts", "label": "Shifts" },
+        { "value": "between_jobs", "label": "Between Jobs" },
+        { "value": "seasonal", "label": "Seasonal" },
+        { "value": "retired", "label": "Retired" },
+        { "value": "other", "label": "Other" }
+      ]
     },
     {
       "id": "health_risks",
@@ -368,8 +424,15 @@
       "type": "multi_choice",
       "label": "Are you at risk of any of the following?",
       "options": [
-        "high_blood_pressure","heart_disease_or_stroke","high_cholesterol","diabetes","osteoarthritis","kidney_disease","depression","none_of_these"
-      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) }))
+        { "value": "high_blood_pressure", "label": "High Blood Pressure" },
+        { "value": "heart_disease_or_stroke", "label": "Heart Disease Or Stroke" },
+        { "value": "high_cholesterol", "label": "High Cholesterol" },
+        { "value": "diabetes", "label": "Diabetes" },
+        { "value": "osteoarthritis", "label": "Osteoarthritis" },
+        { "value": "kidney_disease", "label": "Kidney Disease" },
+        { "value": "depression", "label": "Depression" },
+        { "value": "none_of_these", "label": "None Of These" }
+      ]
     },
     {
       "id": "energy_levels",
@@ -464,8 +527,15 @@
       "type": "multi_choice",
       "label": "What goal would you like to achieve in addition to weight loss?",
       "options": [
-        "run_5k","look_better_in_clothes","feel_healthier","reverse_condition","sleep_well","prepare_for_event","feel_more_comfortable","outdoor_activities"
-      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) }))
+        { "value": "run_5k", "label": "Run 5k" },
+        { "value": "look_better_in_clothes", "label": "Look Better In Clothes" },
+        { "value": "feel_healthier", "label": "Feel Healthier" },
+        { "value": "reverse_condition", "label": "Reverse Condition" },
+        { "value": "sleep_well", "label": "Sleep Well" },
+        { "value": "prepare_for_event", "label": "Prepare For Event" },
+        { "value": "feel_more_comfortable", "label": "Feel More Comfortable" },
+        { "value": "outdoor_activities", "label": "Outdoor Activities" }
+      ]
     },
     {
       "id": "medications",
@@ -474,8 +544,13 @@
       "type": "multi_choice",
       "label": "Are you taking any medications?",
       "options": [
-        "vitamins","hormones","antibiotics","anxiety_medications","other","no"
-      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) }))
+        { "value": "vitamins", "label": "Vitamins" },
+        { "value": "hormones", "label": "Hormones" },
+        { "value": "antibiotics", "label": "Antibiotics" },
+        { "value": "anxiety_medications", "label": "Anxiety Medications" },
+        { "value": "other", "label": "Other" },
+        { "value": "no", "label": "No" }
+      ]
     },
     {
       "id": "restrictions_yesno",
@@ -492,9 +567,16 @@
       "type": "multi_choice",
       "label": "Select your dietary restrictions",
       "options": [
-        "gluten_free","lactose_free","nut_free","egg_free","fish_free","low_carb","low_fodmap","other"
-      ].map(v=>({ "value": v, "label": v.replaceAll('_',' ').replace(/\b\w/g,s=>s.toUpperCase()) })),
-      "branching": { "show_if": "answers['restrictions_yesno']=='yes'" }
+        { "value": "gluten_free", "label": "Gluten Free" },
+        { "value": "lactose_free", "label": "Lactose Free" },
+        { "value": "nut_free", "label": "Nut Free" },
+        { "value": "egg_free", "label": "Egg Free" },
+        { "value": "fish_free", "label": "Fish Free" },
+        { "value": "low_carb", "label": "Low Carb" },
+        { "value": "low_fodmap", "label": "Low Fodmap" },
+        { "value": "other", "label": "Other" }
+      ],
+      "branching": { "show_if": "answers['restrictions_yesno']" }
     },
     {
       "id": "newsletter_optin",
