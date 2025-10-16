@@ -17,6 +17,7 @@ import { collection, doc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ScrollArea } from '../ui/scroll-area';
+import { roundToTwo } from '@/lib/unit-conversion';
 
 const SignUpSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -91,6 +92,10 @@ const SummaryStep = () => {
     .filter(([, value]) => !!value && typeof value === 'boolean')
     .map(([key]) => key.charAt(0).toUpperCase() + key.slice(1))
     .join(', ') || 'None';
+    
+  const weightDisplay = quizData.weight && quizData.weight_unit 
+    ? `${roundToTwo(quizData.weight)} kg` 
+    : '';
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -107,7 +112,7 @@ const SummaryStep = () => {
                 <SummaryDisplay label="Age" value={quizData.age?.toString() || ''} step={2} />
                 <Separator />
                 <SummaryDisplay label="Height" value={`${quizData.height} cm`} step={3} />
-                <SummaryDisplay label="Weight" value={`${quizData.weight} kg`} step={3} />
+                <SummaryDisplay label="Weight" value={weightDisplay} step={3} />
                 <Separator />
                 <SummaryDisplay label="Diet" value={quizData.diet || ''} step={4} />
                 {quizData.dislikes && <SummaryDisplay label="Dislikes" value={quizData.dislikes} step={4} />}

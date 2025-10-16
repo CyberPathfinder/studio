@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { roundToTwo } from './unit-conversion';
 
 // Step 1: Goal
 export const GoalSchema = z.object({
@@ -18,7 +19,8 @@ export type Demographics = z.infer<typeof DemographicsSchema>;
 // Step 3: Measurements
 export const MeasurementsSchema = z.object({
   height: z.coerce.number().int().min(1, "Height is required."),
-  weight: z.coerce.number().int().min(1, "Weight is required."),
+  weight: z.coerce.number().min(1, "Weight is required."),
+  weight_unit: z.enum(['kg', 'lb']).default('kg'),
 });
 export type Measurements = z.infer<typeof MeasurementsSchema>;
 
@@ -83,6 +85,7 @@ export const defaultQuizValues: Partial<QuizData> = {
   age: 25,
   height: 170,
   weight: 70,
+  weight_unit: 'kg',
   diet: 'omnivore',
   dislikes: '',
   restrictions: {
@@ -110,7 +113,7 @@ type QuizStep = {
 export const quizSteps: QuizStep[] = [
   { step: 1, id: 'goal', title: 'Your Goal', fields: ['goal'] },
   { step: 2, id: 'demographics', title: 'About You', fields: ['sex', 'age'] },
-  { step: 3, id: 'measurements', title: 'Your Measurements', fields: ['height', 'weight'] },
+  { step: 3, id: 'measurements', title: 'Your Measurements', fields: ['height', 'weight', 'weight_unit'] },
   { step: 4, id: 'diet', title: 'Diet', fields: ['diet'] },
   { step: 5, id: 'restrictions', title: 'Restrictions', fields: ['restrictions'] },
   { step: 6, id: 'activity', title: 'Activity Level', fields: ['activity_level'] },
