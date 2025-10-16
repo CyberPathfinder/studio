@@ -4,6 +4,9 @@ import { QuizProvider } from '@/components/quiz/quiz-provider';
 import GoalStep from '@/components/quiz/01-goal-step';
 import DemographicsStep from '@/components/quiz/02-demographics-step';
 import MeasurementsStep from '@/components/quiz/03-measurements-step';
+import DietStep from '@/components/quiz/04-diet-step';
+import RestrictionsStep from '@/components/quiz/05-restrictions-step';
+import ActivityStep from '@/components/quiz/06-activity-step';
 import { useQuiz } from '@/hooks/use-quiz';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAnalytics } from '@/hooks/use-analytics';
@@ -16,6 +19,9 @@ const stepComponents: { [key: number]: React.ComponentType } = {
   1: GoalStep,
   2: DemographicsStep,
   3: MeasurementsStep,
+  4: DietStep,
+  5: RestrictionsStep,
+  6: ActivityStep,
   // Future steps will be added here
 };
 

@@ -22,15 +22,45 @@ export const MeasurementsSchema = z.object({
 });
 export type Measurements = z.infer<typeof MeasurementsSchema>;
 
-// --- Empty Schemas for Future Steps ---
-export const DietSchema = z.object({});
+// Step 4: Diet
+export const DietSchema = z.object({
+    diet: z.enum(['omnivore', 'vegetarian', 'vegan', 'pescetarian'], { required_error: 'Please select a diet preference.' }),
+    dislikes: z.string().optional(),
+});
 export type Diet = z.infer<typeof DietSchema>;
 
-export const RestrictionsSchema = z.object({});
+
+// Step 5: Restrictions
+export const RestrictionsSchema = z.object({
+  restrictions: z.object({
+    lactose: z.boolean().default(false),
+    gluten: z.boolean().default(false),
+    nuts: z.boolean().default(false),
+    other: z.boolean().default(false),
+    other_text: z.string().optional(),
+  }),
+}).refine(data => {
+    // if other is checked, other_text must not be empty
+    if (data.restrictions.other) {
+        return data.restrictions.other_text && data.restrictions.other_text.length > 0;
+    }
+    return true;
+}, {
+    message: "Please specify your 'other' restriction.",
+    path: ["restrictions.other_text"],
+});
 export type Restrictions = z.infer<typeof RestrictionsSchema>;
 
-export const ActivitySchema = z.object({});
+
+// Step 6: Activity Level
+export const ActivitySchema = z.object({
+  activity_level: z.enum(['sedentary', 'light', 'moderate', 'active', 'very_active'], { required_error: 'Please select an activity level.'}),
+});
 export type Activity = z.infer<typeof ActivitySchema>;
+
+// --- Empty Schemas for Future Steps ---
+export const SummarySchema = z.object({});
+export type Summary = z.infer<typeof SummarySchema>;
 
 
 // Combined Schema for the entire quiz
@@ -38,7 +68,8 @@ export const QuizSchema = GoalSchema.merge(DemographicsSchema)
   .merge(MeasurementsSchema)
   .merge(DietSchema)
   .merge(RestrictionsSchema)
-  .merge(ActivitySchema);
+  .merge(ActivitySchema)
+  .merge(SummarySchema);
 
 export type QuizData = z.infer<typeof QuizSchema>;
 
@@ -48,6 +79,16 @@ export const defaultQuizValues: Partial<QuizData> = {
   age: 25,
   height: 170,
   weight: 70,
+  diet: 'omnivore',
+  dislikes: '',
+  restrictions: {
+    lactose: false,
+    gluten: false,
+    nuts: false,
+    other: false,
+    other_text: '',
+  },
+  activity_level: 'light',
 };
 
 export type QuizStepId = 'goal' | 'demographics' | 'measurements' | 'diet' | 'restrictions' | 'activity' | 'summary';
@@ -63,8 +104,8 @@ export const quizSteps: QuizStep[] = [
   { step: 1, id: 'goal', title: 'Your Goal', fields: ['goal'] },
   { step: 2, id: 'demographics', title: 'About You', fields: ['sex', 'age'] },
   { step: 3, id: 'measurements', title: 'Your Measurements', fields: ['height', 'weight'] },
-  { step: 4, id: 'diet', title: 'Diet' },
-  { step: 5, id: 'restrictions', title: 'Restrictions' },
-  { step: 6, id: 'activity', title: 'Activity Level' },
+  { step: 4, id: 'diet', title: 'Diet', fields: ['diet'] },
+  { step: 5, id: 'restrictions', title: 'Restrictions', fields: ['restrictions'] },
+  { step: 6, id: 'activity', title: 'Activity Level', fields: ['activity_level'] },
   { step: 7, id: 'summary', title: 'Summary' },
 ];
