@@ -52,23 +52,29 @@ const Weight = ({ question }: { question: Question }) => {
 
   const showAmbitiousGoalToast = useDebouncedCallback(() => {
     toast({
-        title: 'Амбициозная цель',
-        description: `Это амбициозная цель, но мы поможем вам достичь ее безопасно.`,
+        title: state.translations.toasts.ambitious_goal.title,
+        description: state.translations.toasts.ambitious_goal.description,
     });
   }, 1000);
 
+
+  const debouncedDispatch = useDebouncedCallback((field: keyof import('@/lib/quiz-engine/state').BodyAnswers, value: string) => {
+    dispatch({ type: 'SET_BODY_VIEW_FIELD', payload: { field, value, analyticsKey: question.analytics_key }});
+  }, 300);
 
   const handleViewChange = (value: string) => {
     const field = isGoalWeightQuestion 
         ? (unitWeight === 'metric' ? 'goalWeightKgView' : 'goalWeightLbView')
         : (unitWeight === 'metric' ? 'weightKgView' : 'weightLbView');
-        
-    dispatch({ type: 'SET_BODY_VIEW_FIELD', payload: { field, value, analyticsKey: question.analytics_key } });
+    
+    // Optimistic update for responsive UI
+    dispatch({ type: 'SET_VIEW_ONLY', payload: { field, value } });
+    debouncedDispatch(field, value);
 
     // Perform soft validations after state update
     const numericValue = parseFloat(value);
     if (!isNaN(numericValue) && numericValue > 0) {
-      const valueInKg = unitWeight === 'lb' ? numericValue / 2.20462 : numericValue;
+      const valueInKg = unitWeight === 'imperial' ? numericValue / 2.20462 : numericValue;
 
       if (isGoalWeightQuestion && weightKg && valueInKg) {
         const lossPercentage = ((weightKg - valueInKg) / weightKg) * 100;
@@ -90,7 +96,7 @@ const Weight = ({ question }: { question: Question }) => {
   return (
     <div className="w-full max-w-lg mx-auto">
       <CardHeader className="text-center p-0 mb-8">
-        <CardTitle className="font-headline text-3xl">{getLabel(question, 'ru')}</CardTitle>
+        <CardTitle className="font-headline text-3xl">{getLabel(question, state.locale)}</CardTitle>
       </CardHeader>
 
       <div className='flex justify-center mb-8'>
@@ -100,27 +106,27 @@ const Weight = ({ question }: { question: Question }) => {
               className="flex rounded-md border p-1 bg-muted/50"
             >
               <RadioGroupItem value="metric" id="kg" className="sr-only" />
-              <Label htmlFor="kg" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'metric' && "bg-background font-semibold shadow-sm")}>Килограммы</Label>
+              <Label htmlFor="kg" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'metric' && "bg-background font-semibold shadow-sm")}>{state.translations.units.kg}</Label>
               <RadioGroupItem value="imperial" id="lb" className="sr-only" />
-              <Label htmlFor="lb" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'imperial' && "bg-background font-semibold shadow-sm")}>Фунты</Label>
+              <Label htmlFor="lb" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'imperial' && "bg-background font-semibold shadow-sm")}>{state.translations.units.lb}</Label>
             </RadioGroup>
       </div>
 
        <div className="max-w-xs mx-auto">
-            <Label htmlFor={`${question.id}-weight`} className="sr-only">Вес</Label>
+            <Label htmlFor={`${question.id}-weight`} className="sr-only">{state.translations.labels.weight}</Label>
             <Input
                 id={`${question.id}-weight`}
                 type="number"
                 inputMode='decimal'
                 value={displayValue}
                 onChange={(e) => handleViewChange(e.target.value)}
-                placeholder={unitWeight === 'metric' ? 'Например, 70' : 'Например, 154'}
+                placeholder={unitWeight === 'metric' ? state.translations.placeholders.weight_kg : state.translations.placeholders.weight_lb}
                 className="text-center text-xl h-16 rounded-lg shadow-inner"
                 autoFocus
             />
       </div>
       
-      {getDescription(question) && <p className="text-center text-sm text-muted-foreground mt-8">{getDescription(question)}</p>}
+      {getDescription(question) && <p className="text-center text-sm text-muted-foreground mt-8">{getDescription(question, state.locale)}</p>}
     </div>
   );
 };

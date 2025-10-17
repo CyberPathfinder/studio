@@ -2,6 +2,7 @@
 import { QuizConfig, Question, Section } from './config';
 import { evaluateBranchingLogic } from './utils';
 import { convertCmToFtIn, convertFtInToCm, convertWeight, normalizeInches, roundToTwo } from '@/lib/unit-conversion';
+import type { Translations } from '@/i18n';
 
 type UnitPref = 'metric' | 'imperial';
 
@@ -37,6 +38,8 @@ export interface QuizState {
   status: 'loading' | 'in-progress' | 'completed';
   isDirty: boolean; // Has been modified since last save
   lastSaved: Date | null;
+  locale: 'en' | 'ru';
+  translations: Translations;
   // Computed properties
   currentQuestion: Question | null;
   currentSection: Section | null;
@@ -57,7 +60,7 @@ const initialBodyState: BodyAnswers = {
     goalWeightLbView: '',
 };
 
-export const getInitialState = (config: QuizConfig): QuizState => {
+export const getInitialState = (config: QuizConfig, locale: 'en' | 'ru', translations: Translations): QuizState => {
     return {
         config,
         answers: {
@@ -68,6 +71,8 @@ export const getInitialState = (config: QuizConfig): QuizState => {
         status: 'loading',
         isDirty: false,
         lastSaved: null,
+        locale,
+        translations,
         // Computed
         currentQuestion: null,
         currentSection: null,
@@ -78,13 +83,14 @@ export const getInitialState = (config: QuizConfig): QuizState => {
 };
 
 type Action =
-  | { type: 'INITIALIZE_STATE'; payload: { config: QuizConfig, initialAnswers: Record<string, any>, currentQuestionId?: string | null } }
+  | { type: 'INITIALIZE_STATE'; payload: { config: QuizConfig, initialAnswers: Record<string, any>, currentQuestionId?: string | null, locale: 'en' | 'ru', translations: Translations } }
   | { type: 'SET_ANSWER'; payload: { questionId: string; value: any, analyticsKey?: string } }
   | { type: 'SET_QUESTION_BY_INDEX'; payload: number }
   | { type: 'SET_STATUS'; payload: 'loading' | 'in-progress' | 'completed' }
   | { type: 'COMPLETE_QUIZ' }
   | { type: 'SAVE_COMPLETE' }
   | { type: 'SET_BODY_UNIT'; payload: { unitType: 'height' | 'weight', unit: UnitPref } }
+  | { type: 'SET_VIEW_ONLY'; payload: { field: keyof BodyAnswers, value: string } }
   | { type: 'SET_BODY_VIEW_FIELD'; payload: { field: keyof BodyAnswers, value: string, analyticsKey?: string } }
   | { type: 'SET_BODY_CANONICAL'; payload: { field: 'heightCm' | 'weightKg' | 'goalWeightKg', value: number | null, analyticsKey?: string } };
 
@@ -93,7 +99,7 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
   
   switch (action.type) {
     case 'INITIALIZE_STATE':
-        const { config, initialAnswers, currentQuestionId } = action.payload;
+        const { config, initialAnswers, currentQuestionId, locale, translations } = action.payload;
         newState.config.questions.sort((a,b) => a.order - b.order);
         newState.config.sections.sort((a,b) => (a.order || 0) - (b.order || 0));
 
@@ -109,7 +115,7 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
         }
         
         newState = {
-            ...getInitialState(config),
+            ...getInitialState(config, locale, translations),
             answers: { ...initialAnswers, body: { ...initialBodyState, ...(initialAnswers.body || {}) } },
             status: 'in-progress',
             currentQuestionIndex: startIndex,
@@ -139,16 +145,21 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
       };
       newState.isDirty = true;
       break;
+    
+    case 'SET_VIEW_ONLY': {
+        // This action provides an "optimistic" update to the input field for responsiveness
+        // without triggering the full canonical->view sync.
+        const { field, value } = action.payload;
+        (newState.answers.body[field] as any) = value.replace(/[^0-9.]/g, '');
+        break;
+    }
 
     case 'SET_BODY_VIEW_FIELD': {
         const { field, value } = action.payload;
         const body = newState.answers.body!;
         
-        // 1. Update the string-based view field that the user is editing.
         (body[field] as any) = value.replace(/[^0-9.]/g, '');
 
-
-        // 2. Derive the canonical (SI unit) value from the view fields.
         let newCanonicalValue: number | undefined;
 
         if (field.startsWith('height')) {
@@ -171,26 +182,26 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
             body.goalWeightKg = newCanonicalValue > 0 ? newCanonicalValue : undefined;
         }
 
-        // 3. Sync all view fields from the new canonical value to ensure consistency.
+        // Sync back to view fields from the new canonical value
         if (body.heightCm) {
             const { feet, inches } = convertCmToFtIn(body.heightCm);
-            body.heightFtView = feet > 0 ? feet.toString() : '';
-            body.heightInView = inches > 0 ? roundToTwo(inches).toString() : '';
-            if (body.unitHeight === 'metric') {
-              body.heightCmView = body.heightCm > 0 ? roundToTwo(body.heightCm).toString() : '';
-            }
+            body.heightCmView = roundToTwo(body.heightCm).toString();
+            body.heightFtView = feet.toString();
+            body.heightInView = roundToTwo(inches).toString();
+        } else {
+             body.heightCmView = ''; body.heightFtView = ''; body.heightInView = '';
         }
         if (body.weightKg) {
-            body.weightLbView = body.weightKg > 0 ? roundToTwo(convertWeight(body.weightKg, 'kg', 'lb')).toString() : '';
-             if (body.unitWeight === 'metric') {
-              body.weightKgView = body.weightKg > 0 ? roundToTwo(body.weightKg).toString() : '';
-            }
+            body.weightKgView = roundToTwo(body.weightKg).toString();
+            body.weightLbView = roundToTwo(convertWeight(body.weightKg, 'kg', 'lb')).toString();
+        } else {
+            body.weightKgView = ''; body.weightLbView = '';
         }
         if (body.goalWeightKg) {
-            body.goalWeightLbView = body.goalWeightKg > 0 ? roundToTwo(convertWeight(body.goalWeightKg, 'kg', 'lb')).toString() : '';
-            if (body.unitWeight === 'metric') {
-              body.goalWeightKgView = body.goalWeightKg > 0 ? roundToTwo(body.goalWeightKg).toString() : '';
-            }
+            body.goalWeightKgView = roundToTwo(body.goalWeightKg).toString();
+            body.goalWeightLbView = roundToTwo(convertWeight(body.goalWeightKg, 'kg', 'lb')).toString();
+        } else {
+            body.goalWeightKgView = ''; body.goalWeightLbView = '';
         }
         
         newState.isDirty = true;
@@ -202,17 +213,17 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
         const body = newState.answers.body!;
         body[field] = value ?? undefined;
 
-        if (field === 'heightCm') {
+        if (field === 'heightCm' && value) {
             const { feet, inches } = convertCmToFtIn(value);
-            body.heightCmView = value ? roundToTwo(value).toString() : '';
+            body.heightCmView = roundToTwo(value).toString();
             body.heightFtView = feet.toString();
             body.heightInView = roundToTwo(inches).toString();
-        } else if (field === 'weightKg') {
-            body.weightKgView = value ? roundToTwo(value).toString() : '';
-            body.weightLbView = value ? roundToTwo(convertWeight(value, 'kg', 'lb')).toString() : '';
-        } else if (field === 'goalWeightKg') {
-            body.goalWeightKgView = value ? roundToTwo(value).toString() : '';
-            body.goalWeightLbView = value ? roundToTwo(convertWeight(value, 'kg', 'lb')).toString() : '';
+        } else if (field === 'weightKg' && value) {
+            body.weightKgView = roundToTwo(value).toString();
+            body.weightLbView = roundToTwo(convertWeight(value, 'kg', 'lb')).toString();
+        } else if (field === 'goalWeightKg' && value) {
+            body.goalWeightKgView = roundToTwo(value).toString();
+            body.goalWeightLbView = roundToTwo(convertWeight(value, 'kg', 'lb')).toString();
         }
         newState.isDirty = true;
         break;
@@ -229,6 +240,23 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
           if (body.unitWeight === unit) break; // No change
           body.unitWeight = unit;
         }
+        
+        // This is not a "view" change, but a direct command to re-sync the view from canonical
+        if (body.heightCm) {
+            const { feet, inches } = convertCmToFtIn(body.heightCm);
+            body.heightCmView = roundToTwo(body.heightCm).toString();
+            body.heightFtView = feet.toString();
+            body.heightInView = roundToTwo(inches).toString();
+        }
+        if (body.weightKg) {
+            body.weightKgView = roundToTwo(body.weightKg).toString();
+            body.weightLbView = roundToTwo(convertWeight(body.weightKg, 'kg', 'lb')).toString();
+        }
+        if (body.goalWeightKg) {
+            body.goalWeightKgView = roundToTwo(body.goalWeightKg).toString();
+            body.goalWeightLbView = roundToTwo(convertWeight(body.goalWeightKg, 'kg', 'lb')).toString();
+        }
+
         break;
     }
 
