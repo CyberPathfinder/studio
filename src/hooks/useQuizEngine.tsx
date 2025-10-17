@@ -37,9 +37,9 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
         let payload:any = { analyticsKey, value };
 
         // Add special payload for goal_weight
-        if (analyticsKey === 'goal_weight' && answers.weight > 0 && value > 0) {
-            const delta = value - answers.weight;
-            const deltaPct = (delta / answers.weight) * 100;
+        if (analyticsKey === 'goal_weight_kg' && answers.body?.weightKg > 0 && value > 0) {
+            const delta = value - answers.body.weightKg;
+            const deltaPct = (delta / answers.body.weightKg) * 100;
             payload.delta = delta;
             payload.deltaPct = deltaPct;
         }
@@ -65,7 +65,8 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     const { currentQuestion, answers, isLastQuestion } = state;
     if (!currentQuestion) return { isValid: false, message: 'No current question' };
 
-    if (!skipValidation && (currentQuestion.type !== 'number' && currentQuestion.type !== 'text')) {
+    // Skip validation for new body questions since it's handled in the component
+    if (!skipValidation && !['height', 'weight', 'goal_weight'].includes(currentQuestion.id)) {
         const { isValid, message } = validateAnswer(currentQuestion, answers[currentQuestion.id]);
         if (!isValid) {
           return { isValid: false, message };
@@ -136,10 +137,10 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
             sex: answers.sex
         },
         measures: {
-            height_cm: answers.height,
-            weight_kg: answers.weight,
+            height_cm: answers.body?.heightCm,
+            weight_kg: answers.body?.weightKg,
+            goal_weight_kg: answers.body?.goalWeightKg,
             bmi: answers.bmi_calc,
-            goal_weight_kg: answers.goal_weight,
         },
         preferences: {
             diet_style: answers.diet_style,
@@ -164,7 +165,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
             activity_assistance: answers.need_help_activities,
             missed_activities: answers.miss_activities,
             self_esteem_impact: answers.self_esteem,
-            family_concern: answers.family_concerned,
+            family_concern: answers.family_concern,
             medications: answers.medications,
             allergies: answers.allergies,
         }

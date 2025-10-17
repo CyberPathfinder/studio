@@ -82,7 +82,14 @@ const QuizSummary = () => {
   };
 
   const renderAnswer = (questionId: string) => {
-    const answer = state.answers[questionId];
+    let answer;
+    if(questionId.startsWith('body.')) {
+        const key = questionId.split('.')[1] as keyof typeof state.answers.body;
+        answer = state.answers.body?.[key];
+    } else {
+        answer = state.answers[questionId];
+    }
+
     if (answer === undefined || answer === null) return <span className="text-muted-foreground">Not answered</span>;
     if (typeof answer === 'boolean') return answer ? 'Yes' : 'No';
     if (Array.isArray(answer)) return answer.join(', ');
@@ -94,6 +101,18 @@ const QuizSummary = () => {
       return <Card className="p-8"><Loader2 className="animate-spin" /></Card>;
   }
 
+  const questionsToShow = state.config.questions.filter(q => {
+      if (q.id === 'height' || q.id === 'weight' || q.id === 'goal_weight') return false; // Handled by body object
+      return state.answers[q.id] !== undefined;
+  });
+
+  const bodyAnswers = [
+      { id: 'height', label: 'Height (cm)', value: state.answers.body?.heightCm?.toFixed(1) },
+      { id: 'weight', label: 'Weight (kg)', value: state.answers.body?.weightKg?.toFixed(1) },
+      { id: 'goal_weight', label: 'Goal Weight (kg)', value: state.answers.body?.goalWeightKg?.toFixed(1) },
+      { id: 'bmi_calc', label: 'BMI', value: state.answers['bmi_calc'] },
+  ].filter(item => item.value);
+
   return (
     <Card className="w-full max-w-4xl shadow-md rounded-2xl">
       <CardHeader>
@@ -104,9 +123,19 @@ const QuizSummary = () => {
         <div className="space-y-6">
           <h3 className="font-bold text-lg border-b pb-2">Your Answers</h3>
           <div className="space-y-4 max-h-96 overflow-y-auto pr-4">
-          {state.config.questions
-            .filter(q => state.answers[q.id] !== undefined)
-            .map((q) => (
+          {bodyAnswers.map((item) => (
+            <div key={item.id} className="text-sm">
+                <div className="flex justify-between items-center">
+                    <p className="font-semibold text-muted-foreground">{item.label}</p>
+                    <Button variant="ghost" size="sm" onClick={() => jumpToQuestion(item.id)}>
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
+                    </Button>
+                </div>
+                <p className="text-foreground text-base">{item.value}</p>
+            </div>
+          ))}
+          {questionsToShow.map((q) => (
             <div key={q.id} className="text-sm">
               <div className="flex justify-between items-center">
                 <p className="font-semibold text-muted-foreground">{getLabel(q)}</p>
@@ -159,7 +188,7 @@ const QuizSummary = () => {
                         setIsLoading(true);
                         submitQuiz(user.uid)
                         .then(() => toast({ title: "Success!", description: "Your plan has been saved."}))
-                        .catch(() => toast({ variant: "destructive", title: "Error", description: "Could not save your plan."}))
+                        .catch(() => toast({ variant: "destructive", title: "Error", "description": "Could not save your plan."}))
                         .finally(() => setIsLoading(false));
                     }} 
                     className="w-full" 

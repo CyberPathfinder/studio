@@ -5,20 +5,19 @@ import { Question } from '@/lib/quiz-engine/config';
 import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useEffect, useMemo } from 'react';
 import { getLabel, getDescription } from '@/lib/i18n';
-import { roundToTwo } from '@/lib/unit-conversion';
+import { calculateBmi } from '@/lib/unit-conversion';
 
 const ComputedBmi = ({ question }: { question: Question }) => {
   const { state, handleAnswerChange } = useQuizEngine();
   
-  const heightInM = (state.answers['height'] || 0) / 100;
-  const weightInKg = state.answers['weight'];
+  const { heightCm, weightKg } = state.answers.body || {};
 
   const bmi = useMemo(() => {
-    if (heightInM > 0 && weightInKg > 0) {
-      return roundToTwo(weightInKg / (heightInM * heightInM));
+    if (heightCm && weightKg) {
+      return calculateBmi(weightKg, heightCm);
     }
     return null;
-  }, [heightInM, weightInKg]);
+  }, [heightCm, weightKg]);
 
   useEffect(() => {
     // Update the answer in the quiz state if it has changed

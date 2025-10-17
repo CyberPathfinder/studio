@@ -1,3 +1,4 @@
+
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Question } from '@/lib/quiz-engine/config';
@@ -6,50 +7,48 @@ import { Label } from '@/components/ui/label';
 import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
-import { useEffect, useState, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { convertWeight, roundToTwo, getHealthyWeightRange } from '@/lib/unit-conversion';
+import { getHealthyWeightRange } from '@/lib/unit-conversion';
 import { getLabel, getDescription } from '@/lib/i18n';
 import { useDebouncedCallback } from 'use-debounce';
+import { useEffect, useMemo } from 'react';
 
 const Weight = ({ question }: { question: Question }) => {
-  const { state, handleAnswerChange } = useQuizEngine();
+  const { state, dispatch, handleAnswerChange } = useQuizEngine();
   const { toast } = useToast();
   
   const isGoalWeightQuestion = question.id === 'goal_weight';
-  const weightInKg = state.answers[question.id];
-  const currentWeightKg = state.answers['weight'];
-
-  const [unit, setUnit] = useState<'kg' | 'lb'>('kg');
-  const [displayWeight, setDisplayWeight] = useState<string>('');
   
-  // Suggest a 5% weight loss goal if it's the goal question and no goal is set
+  const { 
+    unitWeight = 'metric', 
+    weightKg,
+    weightKgView = '', 
+    weightLbView = '',
+    goalWeightKg,
+    goalWeightKgView = '',
+    goalWeightLbView = '',
+  } = state.answers.body || {};
+  
+  const { heightCm } = state.answers.body || {};
+
+  const displayValue = isGoalWeightQuestion
+    ? (unitWeight === 'metric' ? goalWeightKgView : goalWeightLbView)
+    : (unitWeight === 'metric' ? weightKgView : weightLbView);
+  
+  const canonicalValue = isGoalWeightQuestion ? goalWeightKg : weightKg;
+
   const suggestedGoalKg = useMemo(() => {
-    if (isGoalWeightQuestion && currentWeightKg > 0 && !weightInKg) {
-      return roundToTwo(currentWeightKg * 0.95);
+    if (isGoalWeightQuestion && weightKg && !goalWeightKg) {
+      return parseFloat((weightKg * 0.95).toFixed(1));
     }
     return null;
-  }, [isGoalWeightQuestion, currentWeightKg, weightInKg]);
-
-  // Effect to pre-fill the goal weight suggestion
-  useEffect(() => {
-    if (suggestedGoalKg !== null) {
-      handleAnswerChange(question.id, suggestedGoalKg, question.analytics_key);
-    }
-  }, [suggestedGoalKg, handleAnswerChange, question.id, question.analytics_key]);
+  }, [isGoalWeightQuestion, weightKg, goalWeightKg]);
   
   useEffect(() => {
-    const numericValue = parseFloat(weightInKg);
-    if (!isNaN(numericValue)) {
-        if (unit === 'lb') {
-            setDisplayWeight(roundToTwo(convertWeight(numericValue, 'kg', 'lb')).toString());
-        } else {
-            setDisplayWeight(roundToTwo(numericValue).toString());
-        }
-    } else {
-        setDisplayWeight('');
+    if (suggestedGoalKg !== null) {
+      dispatch({ type: 'SET_BODY_CANONICAL', payload: { field: 'goalWeightKg', value: suggestedGoalKg, analyticsKey: question.analytics_key }});
     }
-  }, [weightInKg, unit]);
+  }, [suggestedGoalKg, dispatch, question.analytics_key]);
 
   const showAmbitiousGoalToast = useDebouncedCallback(() => {
     toast({
@@ -59,42 +58,40 @@ const Weight = ({ question }: { question: Question }) => {
   }, 1000);
 
 
-  const onWeightInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const displayValue = e.target.value;
-    setDisplayWeight(displayValue);
-    
-    const numericValue = parseFloat(displayValue);
-    let newWeightInKg: number | null = null;
+  const handleViewChange = (value: string) => {
+    const field = isGoalWeightQuestion 
+        ? (unitWeight === 'metric' ? 'goalWeightKgView' : 'goalWeightLbView')
+        : (unitWeight === 'metric' ? 'weightKgView' : 'weightLbView');
+        
+    dispatch({ type: 'SET_BODY_VIEW_FIELD', payload: { field, value, analyticsKey: question.analytics_key } });
 
+    // Perform soft validations after state update
+    const numericValue = parseFloat(value);
     if (!isNaN(numericValue) && numericValue > 0) {
-        newWeightInKg = unit === 'lb' ? convertWeight(numericValue, 'lb', 'kg') : numericValue;
-        
-        // Soft validation for weight range
-        const min = question.validation?.min || 35;
-        const max = question.validation?.max || 300;
-        if (newWeightInKg < min || newWeightInKg > max) {
-            toast({
-                title: 'Unusual Weight',
-                description: `The weight seems unusual. Please double-check if it's correct.`
-            });
-        }
-        
-        // Soft validation for ambitious goal
-        if (isGoalWeightQuestion && currentWeightKg && newWeightInKg) {
-            const lossPercentage = ((currentWeightKg - newWeightInKg) / currentWeightKg) * 100;
-            const [minHealthy] = getHealthyWeightRange(state.answers['height']);
+      const valueInKg = unitWeight === 'lb' ? numericValue / 2.20462 : numericValue;
 
-            if (lossPercentage > 25 || newWeightInKg < minHealthy) {
-                showAmbitiousGoalToast();
-            }
+      const min = question.validation?.min || 35;
+      const max = question.validation?.max || 300;
+      if (valueInKg < min || valueInKg > max) {
+        toast({
+            title: 'Unusual Weight',
+            description: `The weight seems unusual. Please double-check if it's correct.`
+        });
+      }
+
+      if (isGoalWeightQuestion && weightKg && valueInKg) {
+        const lossPercentage = ((weightKg - valueInKg) / weightKg) * 100;
+        const [minHealthy] = getHealthyWeightRange(heightCm);
+
+        if (lossPercentage > 25 || valueInKg < minHealthy) {
+            showAmbitiousGoalToast();
         }
+      }
     }
-    
-    handleAnswerChange(question.id, newWeightInKg, question.analytics_key);
   };
 
-  const onUnitChange = (newUnit: 'kg' | 'lb') => {
-    setUnit(newUnit);
+  const handleUnitChange = (newUnit: 'metric' | 'lb') => {
+    dispatch({ type: 'SET_BODY_UNIT', payload: { unitType: 'weight', unit: newUnit } });
   };
 
 
@@ -110,20 +107,20 @@ const Weight = ({ question }: { question: Question }) => {
               id={`${question.id}-weight`}
               type="number"
               inputMode='decimal'
-              value={displayWeight}
-              onChange={onWeightInputChange}
-              placeholder={unit === 'kg' ? 'e.g., 70' : 'e.g., 154'}
+              value={displayValue}
+              onChange={(e) => handleViewChange(e.target.value)}
+              placeholder={unitWeight === 'metric' ? 'e.g., 70' : 'e.g., 154'}
               className="text-center text-lg h-12"
             />
             <RadioGroup
-              value={unit}
-              onValueChange={onUnitChange}
+              value={unitWeight}
+              onValueChange={handleUnitChange}
               className="flex rounded-md border p-1"
             >
-              <RadioGroupItem value="kg" id="kg" className="sr-only" />
-              <Label htmlFor="kg" className={cn("px-3 py-1.5 rounded-md text-sm cursor-pointer", unit === 'kg' && "bg-muted font-semibold")}>kg</Label>
-              <RadioGroupItem value="lb" id="lb" className="sr-only" />
-              <Label htmlFor="lb" className={cn("px-3 py-1.5 rounded-md text-sm cursor-pointer", unit === 'lb' && "bg-muted font-semibold")}>lb</Label>
+              <RadioGroupItem value="metric" id="kg" className="sr-only" />
+              <Label htmlFor="kg" className={cn("px-3 py-1.5 rounded-md text-sm cursor-pointer", unitWeight === 'metric' && "bg-muted font-semibold")}>kg</Label>
+              <RadioGroupItem value="imperial" id="lb" className="sr-only" />
+              <Label htmlFor="lb" className={cn("px-3 py-1.5 rounded-md text-sm cursor-pointer", unitWeight === 'imperial' && "bg-muted font-semibold")}>lb</Label>
             </RadioGroup>
         </div>
     </div>

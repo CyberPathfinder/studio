@@ -1,7 +1,18 @@
 
+
 const KG_TO_LB = 2.20462;
 const CM_TO_IN = 0.393701;
-const FT_TO_CM = 30.48;
+
+/**
+ * Rounds a number to a specified number of decimal places.
+ * @param value The number to round.
+ * @returns The rounded number.
+ */
+export const roundToTwo = (value: number): number => {
+  if (isNaN(value) || value === null) return 0;
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+};
+
 
 /**
  * Converts a weight value from a source unit to a target unit.
@@ -28,11 +39,11 @@ export const convertWeight = (value: number, fromUnit: 'kg' | 'lb', toUnit: 'kg'
  * @param cm The height in centimeters.
  * @returns An object with feet and inches.
  */
-export const convertCmToFtIn = (cm: number): { feet: number, inches: number } => {
+export const convertCmToFtIn = (cm: number | null | undefined): { feet: number, inches: number } => {
     if (!cm) return { feet: 0, inches: 0 };
     const totalInches = cm * CM_TO_IN;
     const feet = Math.floor(totalInches / 12);
-    const inches = Math.round(totalInches % 12);
+    const inches = roundToTwo(totalInches % 12);
     return { feet, inches };
 };
 
@@ -46,6 +57,20 @@ export const convertFtInToCm = (feet: number, inches: number): number => {
     const totalInches = (feet || 0) * 12 + (inches || 0);
     return totalInches / CM_TO_IN;
 }
+
+/**
+ * Normalizes inches to feet and inches. E.g. 5ft 14in -> 6ft 2in
+ * @param feet 
+ * @param inches 
+ * @returns 
+ */
+export const normalizeInches = (feet: number, inches: number): { normalizedFeet: number, normalizedInches: number } => {
+    const extraFeet = Math.floor(inches / 12);
+    return {
+        normalizedFeet: feet + extraFeet,
+        normalizedInches: inches % 12,
+    };
+};
 
 /**
  * Calculates BMI from weight in kg and height in cm.
@@ -65,20 +90,10 @@ export const calculateBmi = (weightKg: number, heightCm: number): number | null 
  * @param healthyBmiRange The BMI range considered healthy.
  * @returns A tuple [minWeight, maxWeight] in kg.
  */
-export const getHealthyWeightRange = (heightCm: number, healthyBmiRange: [number, number] = [18.5, 25]): [number, number] => {
+export const getHealthyWeightRange = (heightCm: number | undefined, healthyBmiRange: [number, number] = [18.5, 25]): [number, number] => {
     if (!heightCm || heightCm <= 0) return [0, 0];
     const heightM = heightCm / 100;
     const minWeight = healthyBmiRange[0] * (heightM * heightM);
     const maxWeight = healthyBmiRange[1] * (heightM * heightM);
     return [roundToTwo(minWeight), roundToTwo(maxWeight)];
 }
-
-/**
- * Rounds a number to a specified number of decimal places.
- * @param value The number to round.
- * @returns The rounded number.
- */
-export const roundToTwo = (value: number): number => {
-  if (isNaN(value)) return 0;
-  return Math.round((value + Number.EPSILON) * 100) / 100;
-};
