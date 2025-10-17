@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from 'react';
@@ -21,6 +20,8 @@ export default function DashboardPage() {
   const firestore = useFirestore();
   const router = useRouter();
 
+  // The useMemoFirebase hook correctly waits for `user` and `firestore` to be available.
+  // If they are not, it returns `null`, and `useDoc` will wait.
   const intakeRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return doc(firestore, `users/${user.uid}/intake/initial`);
@@ -28,6 +29,7 @@ export default function DashboardPage() {
 
   const { data: intakeData, isLoading: isIntakeLoading, error: intakeError } = useDoc(intakeRef);
 
+  // Show a loader while authentication is in progress or the initial fetch is happening.
   if (isUserLoading || (isIntakeLoading && !intakeData && !intakeError)) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -36,12 +38,13 @@ export default function DashboardPage() {
     );
   }
 
+  // If loading is finished and there's no user, redirect to login.
   if (!user) {
     router.push('/login');
     return null;
   }
 
-  // Handle permission errors gracefully
+  // Handle permission errors gracefully.
   if (intakeError) {
      return (
         <div className="container mx-auto max-w-5xl py-12 px-4 text-center">
@@ -56,8 +59,8 @@ export default function DashboardPage() {
     );
   }
 
-
-  // Handle case where intake document doesn't exist
+  // Handle the case where the intake document doesn't exist (not-found).
+  // This is a normal state for a new user.
   if (!isIntakeLoading && !intakeData) {
     return (
       <div className="container mx-auto max-w-5xl py-12 px-4 text-center">
