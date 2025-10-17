@@ -2,9 +2,32 @@
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Progress } from '@/components/ui/progress';
-import { getLabel } from '@/lib/i18n';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { evaluateBranchingLogic } from '@/lib/quiz-engine/utils';
+import { formatDistanceToNow } from 'date-fns';
+
+const AutosaveIndicator = () => {
+    const { state } = useQuizEngine();
+    const { isDirty, lastSaved } = state;
+    const [relativeTime, setRelativeTime] = useState('');
+
+    useEffect(() => {
+        if (lastSaved) {
+            const update = () => setRelativeTime(formatDistanceToNow(lastSaved, { addSuffix: true }));
+            update();
+            const interval = setInterval(update, 10000); // update every 10 seconds
+            return () => clearInterval(interval);
+        }
+    }, [lastSaved]);
+
+    if (isDirty) {
+        return <span className='text-xs text-muted-foreground'>Saving...</span>;
+    }
+    if (lastSaved) {
+        return <span className='text-xs text-muted-foreground'>Saved {relativeTime}</span>
+    }
+    return <span className='text-xs text-muted-foreground'>~5-7 min remaining</span>
+}
 
 const QuizProgress = () => {
   const { state } = useQuizEngine();
@@ -33,7 +56,7 @@ const QuizProgress = () => {
         <p className="text-sm font-semibold text-foreground">
             {currentSection.i18n?.en.title || currentSection.title}
         </p>
-        <p className='text-xs text-muted-foreground'>~5-7 min remaining</p>
+        <AutosaveIndicator />
       </div>
       <Progress value={progressPercentage} className="h-2" />
     </div>

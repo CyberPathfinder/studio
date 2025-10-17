@@ -9,6 +9,7 @@ export interface QuizState {
   currentQuestionIndex: number;
   status: 'loading' | 'in-progress' | 'completed';
   isDirty: boolean; // Has been modified since last save
+  lastSaved: Date | null;
   // Computed properties
   currentQuestion: Question | null;
   currentSection: Section | null;
@@ -25,6 +26,7 @@ export const getInitialState = (config: QuizConfig): QuizState => {
         currentQuestionIndex: -1,
         status: 'loading',
         isDirty: false,
+        lastSaved: null,
         // Computed
         currentQuestion: null,
         currentSection: null,
@@ -96,6 +98,7 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
     
     case 'SAVE_COMPLETE':
       newState.isDirty = false;
+      newState.lastSaved = new Date();
       break;
       
     default:

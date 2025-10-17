@@ -1,9 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useAnalytics } from '@/hooks/use-analytics';
-import { useFirebase } from '@/firebase';
+import { useFirebase } from '@/firebase/provider';
 import { getQuizDraft, saveQuizDraft } from '@/firebase/quiz';
-import { useQuizEngine, QuizProvider } from '@/hooks/useQuizEngine';
+import { useQuizEngine, QuizProvider } from '@/hooks/useQuizEngine.tsx';
 import quizConfig from '@/data/questions.json';
 import ResumePrompt from './ResumePrompt';
 import QuizEngine from './QuizEngine';
@@ -88,7 +88,7 @@ const QuizClientInternal = () => {
     setDraftToResume(null);
   };
 
-  if (!isInitialized && !showResumePrompt) {
+  if (!isInitialized) {
     return (
         <div className="flex min-h-screen items-center justify-center">
             <div className="text-center">
@@ -98,11 +98,12 @@ const QuizClientInternal = () => {
     );
   }
 
-  if (showResumePrompt) {
-    return <ResumePrompt onResume={handleResume} />;
-  }
-
-  return <QuizEngine />;
+  return (
+    <div>
+        {showResumePrompt && <ResumePrompt onResume={handleResume} />}
+        <QuizEngine />
+    </div>
+  );
 };
 
 const QuizClient = () => (
