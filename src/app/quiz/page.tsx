@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import QuizClient from '@/components/quiz/QuizClient';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { QuizLayout } from '@/components/quiz/QuizLayout';
 
 function QuizLoadingSkeleton() {
     return (
@@ -27,7 +28,9 @@ function QuizLoadingSkeleton() {
 export default function QuizPage() {
   return (
     <Suspense fallback={<QuizLoadingSkeleton />}>
-      <QuizClient />
+      <QuizLayout>
+        <QuizClient />
+      </QuizLayout>
     </Suspense>
   );
 }

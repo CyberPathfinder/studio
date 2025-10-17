@@ -88,6 +88,13 @@
   .container {
     @apply mx-auto max-w-7xl;
   }
+
+  .scroll-shadow-y {
+     mask-image: linear-gradient(to bottom, transparent 0, hsl(var(--background)) 1rem, hsl(var(--background)) calc(100% - 1rem), transparent 100%);
+  }
+  .dark .scroll-shadow-y {
+     mask-image: linear-gradient(to bottom, transparent 0, hsl(var(--background)) 1rem, hsl(var(--background)) calc(100% - 1rem), transparent 100%);
+  }
 }
 
 
