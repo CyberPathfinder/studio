@@ -19,9 +19,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { loadStripe } from '@stripe/stripe-js';
+import { stripePublicKey } from '@/config/stripe-client';
 import SmartFeedbackCard from '../dashboard/SmartFeedbackCard';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
+const stripePromise = loadStripe(stripePublicKey);
 
 const signUpSchema = z.object({
   email: z.string().email({ message: 'Пожалуйста, введите корректный email.' }),

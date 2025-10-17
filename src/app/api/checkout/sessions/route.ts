@@ -1,11 +1,12 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import Stripe from 'stripe';
-import { doc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase/server'; // Assumes server-side initialization
 import { logger } from '@/lib/logger';
+import { stripePriceId, stripeSecretKey } from '@/config/stripe-server';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(stripeSecretKey, {
   apiVersion: '2024-06-20',
 });
 
@@ -21,8 +22,6 @@ export async function POST(req: NextRequest) {
     }
 
     const origin = req.nextUrl.origin;
-
-    const priceId = 'price_1PgQ7N2N3N4N5N6Nabcdefg'; // Replace with your actual Stripe Price ID for the plan
 
     // Create a payment document in Firestore before creating the Stripe session
     // This allows us to have a record of the intent to purchase.
@@ -41,7 +40,7 @@ export async function POST(req: NextRequest) {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: priceId,
+          price: stripePriceId,
           quantity: 1,
         },
       ],
