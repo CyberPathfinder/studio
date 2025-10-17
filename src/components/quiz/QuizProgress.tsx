@@ -10,10 +10,10 @@ const AutosaveIndicator = () => {
     const { state } = useQuizEngine();
     const { isDirty, lastSaved } = state;
     const [relativeTime, setRelativeTime] = useState('');
-    const [isClient, setIsClient] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setIsClient(true);
+        setMounted(true);
     }, []);
 
     useEffect(() => {
@@ -25,16 +25,18 @@ const AutosaveIndicator = () => {
         }
     }, [lastSaved]);
 
-    if (!isClient) {
-        return <span className='text-xs text-muted-foreground'>~5-7 min remaining</span>;
-    }
-    
     if (isDirty) {
         return <span className='text-xs text-muted-foreground'>Saving...</span>;
     }
+
     if (lastSaved) {
+        if (!mounted) {
+            return <span className='text-xs text-muted-foreground'>Saved</span>;
+        }
         return <span className='text-xs text-muted-foreground'>Saved {relativeTime}</span>
     }
+    
+    // Default message when not saving and no save has occurred yet.
     return <span className='text-xs text-muted-foreground'>~5-7 min remaining</span>
 }
 
