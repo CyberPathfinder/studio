@@ -62,7 +62,7 @@ const QuizSummarySidebar = () => {
                                             )}
                                         >
                                             <Icon className={cn("h-4 w-4 mt-0.5 flex-shrink-0", iconColor)} />
-                                            <span className="flex-1">{getLabel(q)}</span>
+                                            <span className="flex-1 text-wrap">{getLabel(q)}</span>
                                             {!isFuture && <Edit className="h-4 w-4 invisible group-hover:visible flex-shrink-0" />}
                                         </button>
                                     </li>
@@ -177,7 +177,7 @@ const QuizEngine = () => {
             </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-            <div className="relative flex min-h-screen flex-col items-center justify-center bg-muted/40 md:p-4">
+            <div className="relative flex flex-col items-center justify-start bg-muted/40 md:justify-center md:min-h-screen p-4">
                 <div className="absolute top-4 right-4 z-20 hidden md:block">
                     <SidebarTrigger />
                 </div>
@@ -185,10 +185,10 @@ const QuizEngine = () => {
                     <QuizSummarySidebar />
                 </div>
                 
-                <Card className="w-full max-w-2xl overflow-hidden shadow-md rounded-2xl flex flex-col h-screen md:h-auto md:max-h-[90vh]">
-                    <div className="p-6 md:p-8 flex-grow overflow-y-auto">
+                <Card className="w-full max-w-2xl overflow-hidden shadow-md rounded-2xl flex flex-col">
+                    <div className="p-6 md:p-8 pb-24 md:pb-8">
                         <QuizProgress />
-                        <div className="relative mt-8 min-h-[28rem] flex items-center justify-center">
+                        <div className="relative mt-8 flex items-center justify-center">
                             <AnimatePresence mode="wait">
                             <motion.div
                                 key={state.currentQuestionId}
@@ -201,11 +201,15 @@ const QuizEngine = () => {
                                 {QuestionComponent ? <QuestionComponent question={currentQuestion} /> : <div>Unknown question type: {currentQuestion.type}</div>}
                             </motion.div>
                             </AnimatePresence>
+                             {/* This div is a spacer to define the minimum height of the card based on question content */}
+                             <div className="min-h-[28rem] invisible">
+                                {QuestionComponent ? <QuestionComponent question={currentQuestion} /> : <div>Unknown question type: {currentQuestion.type}</div>}
+                            </div>
                         </div>
                     </div>
                     <div className={cn(
                         "bg-muted/60 p-6 border-t",
-                        "md:relative",
+                        "md:relative", // Stays at bottom of card on desktop
                         isMobile && "fixed bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm pb-[calc(1rem+env(safe-area-inset-bottom))]"
                     )}>
                         <QuizControls />
