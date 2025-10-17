@@ -4,22 +4,41 @@ import Stripe from 'stripe';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase/server'; // Assumes server-side initialization
 import { logger } from '@/lib/logger';
-import { env } from '@/config/env';
+import { getServerEnv } from '@/config/env';
 
-// Validate server environment variables
-if (!env.server.success) {
-    logger.error('Stripe server environment variables are not set.', env.server.error.flatten());
+const serverEnvPromise = getServerEnv();
+
+let stripe: Stripe | null = null;
+let hasLoggedInvalidEnv = false;
+
+async function getStripe() {
+  const env = await serverEnvPromise;
+
+  if (!env.success) {
+    if (!hasLoggedInvalidEnv) {
+      hasLoggedInvalidEnv = true;
+      logger.error('Stripe server environment variables are not set.', env.error.flatten());
+    }
+    return null;
+  }
+
+  if (!stripe) {
+    stripe = new Stripe(env.data.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-06-20',
+    });
+  }
+
+  return stripe;
 }
-
-const stripe = env.server.success ? new Stripe(env.server.data.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-06-20',
-}) : null;
 
 // Initialize Firebase Admin for server-side operations
 const { firestore } = initializeFirebase();
 
 export async function POST(req: NextRequest) {
-  if (!stripe || !env.server.success) {
+  const env = await serverEnvPromise;
+  const stripe = await getStripe();
+
+  if (!stripe || !env.success) {
     return NextResponse.json({ error: 'Stripe is not configured. Missing API keys.' }, { status: 500 });
   }
 
@@ -49,7 +68,7 @@ export async function POST(req: NextRequest) {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: env.server.data.STRIPE_PRICE_ID,
+          price: env.data.STRIPE_PRICE_ID,
           quantity: 1,
         },
       ],
