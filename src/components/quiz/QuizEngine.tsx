@@ -89,7 +89,7 @@ const QuizEngine = () => {
           <div className={cn(
               "bg-muted/60 p-6 border-t mt-auto",
               "md:relative", // Stays at bottom of card on desktop
-              isMobile && "fixed bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm pb-[calc(1rem+env(safe-area-inset-bottom))]"
+              isMobile && "fixed bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
           )}>
               <QuizControls />
           </div>
