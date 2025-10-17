@@ -177,7 +177,7 @@ const QuizEngine = () => {
             </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-            <div className="relative flex flex-col items-center justify-start bg-muted/40 md:justify-center md:min-h-screen p-4">
+            <div className="relative flex flex-col items-center justify-start bg-muted/40 md:justify-center min-h-screen p-4">
                 <div className="absolute top-4 right-4 z-20 hidden md:block">
                     <SidebarTrigger />
                 </div>
@@ -188,7 +188,7 @@ const QuizEngine = () => {
                 <Card className="w-full max-w-2xl overflow-hidden shadow-md rounded-2xl flex flex-col">
                     <div className="p-6 md:p-8 pb-24 md:pb-8">
                         <QuizProgress />
-                        <div className="relative mt-8 flex items-center justify-center">
+                        <div className="relative mt-8 h-[28rem] flex items-center justify-center">
                             <AnimatePresence mode="wait">
                             <motion.div
                                 key={state.currentQuestionId}
@@ -201,10 +201,6 @@ const QuizEngine = () => {
                                 {QuestionComponent ? <QuestionComponent question={currentQuestion} /> : <div>Unknown question type: {currentQuestion.type}</div>}
                             </motion.div>
                             </AnimatePresence>
-                             {/* This div is a spacer to define the minimum height of the card based on question content */}
-                             <div className="min-h-[28rem] invisible">
-                                {QuestionComponent ? <QuestionComponent question={currentQuestion} /> : <div>Unknown question type: {currentQuestion.type}</div>}
-                            </div>
                         </div>
                     </div>
                     <div className={cn(
