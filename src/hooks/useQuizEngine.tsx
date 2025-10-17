@@ -40,7 +40,9 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
 
   const handleAnswerChange = useCallback((questionId: string, value: any, analyticsKey?: string) => {
     dispatch({ type: 'SET_ANSWER', payload: { questionId, value } });
-    debouncedTrackAnswer(analyticsKey || questionId, value);
+    if (analyticsKey) {
+        debouncedTrackAnswer(analyticsKey, value);
+    }
   }, [debouncedTrackAnswer]);
 
   const completeQuiz = useCallback(() => {

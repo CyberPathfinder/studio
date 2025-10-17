@@ -60,7 +60,7 @@
       "order": 5,
       "type": "computed_bmi",
       "label": "Your BMI",
-      "description": "BMI is an estimate used to personalize recommendations.",
+      "description": "BMI is an estimate we use to personalize your plan.",
       "branching": { "show_if": "answers['height'] && answers['weight']" },
       "analytics_key": "bmi"
     },
@@ -136,7 +136,8 @@
         { "value": "beginner", "label": "😊 Beginner" },
         { "value": "basic", "label": "😎 Some basic knowledge" },
         { "value": "experienced", "label": "😳 Well experienced" }
-      ]
+      ],
+      "analytics_key": "med_knowledge"
     },
     {
       "id": "med_info",
@@ -167,14 +168,16 @@
         { "value": "countryside", "label": "The countryside" },
         { "value": "city", "label": "A major city" },
         { "value": "suburbs", "label": "The suburbs" }
-      ]
+      ],
+      "analytics_key": "living_area"
     },
     {
       "id": "lost_before",
       "section": "habits",
       "order": 16,
       "type": "yes_no",
-      "label": "Have you successfully lost weight before but found it hard to keep the results?"
+      "label": "Have you successfully lost weight before but found it hard to keep the results?",
+      "analytics_key": "lost_before"
     },
     {
       "id": "med_diff",
@@ -224,7 +227,8 @@
         { "value": "moderate", "label": "🏃‍♂️ Moderately active" },
         { "value": "active", "label": "🚴 Active daily" }
       ],
-      "validation": { "required": true }
+      "validation": { "required": true },
+      "analytics_key": "activity_level"
     },
     {
       "id": "ideal_when",
@@ -237,7 +241,8 @@
         { "value": "1to2", "label": "1 to 2 years ago" },
         { "value": "gt3", "label": "More than 3 years ago" },
         { "value": "never", "label": "Never" }
-      ]
+      ],
+      "analytics_key": "ideal_weight_time"
     },
     {
       "id": "size_now",
@@ -255,7 +260,8 @@
         { "value": "s", "label": "S" },
         { "value": "xs", "label": "XS" },
         { "value": "dont_know", "label": "I don’t know" }
-      ]
+      ],
+      "analytics_key": "clothing_size_now"
     },
     {
       "id": "size_goal",
@@ -273,7 +279,8 @@
         { "value": "s", "label": "S" },
         { "value": "xs", "label": "XS" },
         { "value": "dont_know", "label": "I don’t know" }
-      ]
+      ],
+      "analytics_key": "clothing_size_goal"
     },
     {
       "id": "eating_habits",
@@ -286,7 +293,8 @@
         { "value": "similar", "label": "I eat similar foods, with some variation" },
         { "value": "rotate", "label": "I rotate between familiar foods" },
         { "value": "experiment", "label": "I like to experiment with different foods" }
-      ]
+      ],
+      "analytics_key": "eating_habits"
     },
     {
       "id": "cooking_skill",
@@ -298,7 +306,8 @@
         { "value": "expert", "label": "I’m an expert cook" },
         { "value": "learning", "label": "I’m learning to be a better cook" },
         { "value": "novice", "label": "I don’t know how to cook yet" }
-      ]
+      ],
+      "analytics_key": "cooking_skill"
     },
     {
       "id": "food_prefs",
@@ -323,7 +332,8 @@
         { "value": "tofu", "label": "Tofu" },
         { "value": "cottage_cheese", "label": "Cottage Cheese" }
       ],
-      "validation": { "required": true, "minSelected": 5 }
+      "validation": { "required": true, "minSelected": 5 },
+      "analytics_key": "food_preferences"
     },
     {
       "id": "meat_prefs",
@@ -341,7 +351,8 @@
         { "value": "fish", "label": "Fish" },
         { "value": "lamb", "label": "Lamb" },
         { "value": "vegetarian", "label": "I’m a vegetarian" }
-      ]
+      ],
+      "analytics_key": "meat_preferences"
     },
     {
       "id": "allergies",
@@ -359,7 +370,8 @@
         { "value": "fish", "label": "Fish" },
         { "value": "citrus", "label": "Citrus" },
         { "value": "prefer_not_to_answer", "label": "Prefer Not To Answer" }
-      ]
+      ],
+      "analytics_key": "allergies"
     },
     {
       "id": "water_intake",
@@ -372,21 +384,24 @@
         { "value": "lt2", "label": "Less than 2 glasses" },
         { "value": "3to6", "label": "About 3–6 glasses" },
         { "value": "gt6", "label": "More than 6 glasses" }
-      ]
+      ],
+      "analytics_key": "water_intake"
     },
     {
       "id": "weekend_hard",
       "section": "habits",
       "order": 31,
       "type": "yes_no",
-      "label": "Is it hard for you to make healthy choices during the weekend?"
+      "label": "Is it hard for you to make healthy choices during the weekend?",
+      "analytics_key": "weekend_difficulty"
     },
     {
       "id": "same_time_meals",
       "section": "habits",
       "order": 32,
       "type": "yes_no",
-      "label": "Do you typically eat meals around the same time each day?"
+      "label": "Do you typically eat meals around the same time each day?",
+      "analytics_key": "consistent_meal_times"
     },
     {
       "id": "sleep_quality",
@@ -398,7 +413,8 @@
         { "value": "trouble_falling", "label": "I have trouble falling asleep" },
         { "value": "varies", "label": "It varies" },
         { "value": "sleep_well", "label": "I sleep well most nights" }
-      ]
+      ],
+      "analytics_key": "sleep_quality"
     },
     {
       "id": "work_schedule",
@@ -415,7 +431,8 @@
         { "value": "seasonal", "label": "Seasonal" },
         { "value": "retired", "label": "Retired" },
         { "value": "other", "label": "Other" }
-      ]
+      ],
+      "analytics_key": "work_schedule"
     },
     {
       "id": "health_risks",
@@ -432,7 +449,8 @@
         { "value": "kidney_disease", "label": "Kidney Disease" },
         { "value": "depression", "label": "Depression" },
         { "value": "none_of_these", "label": "None Of These" }
-      ]
+      ],
+      "analytics_key": "health_risks"
     },
     {
       "id": "energy_levels",
@@ -446,7 +464,8 @@
         { "value": "low", "label": "Low" },
         { "value": "very_low", "label": "Very low" },
         { "value": "varies", "label": "It varies day to day" }
-      ]
+      ],
+      "analytics_key": "energy_levels"
     },
     {
       "id": "mobility_limited",
@@ -459,7 +478,8 @@
         { "value": "slightly", "label": "Yes, slightly" },
         { "value": "significantly", "label": "Yes, significantly" },
         { "value": "temporarily", "label": "Yes, temporarily" }
-      ]
+      ],
+      "analytics_key": "mobility_limitations"
     },
     {
       "id": "need_help_activities",
@@ -472,7 +492,8 @@
         { "value": "sometimes", "label": "Yes, sometimes" },
         { "value": "often", "label": "Yes, often" },
         { "value": "always", "label": "Yes, always" }
-      ]
+      ],
+      "analytics_key": "activity_assistance"
     },
     {
       "id": "miss_activities",
@@ -484,28 +505,32 @@
         { "value": "no", "label": "No, not really" },
         { "value": "few", "label": "Yes, a few" },
         { "value": "many", "label": "Yes, many" }
-      ]
+      ],
+      "analytics_key": "missed_activities"
     },
     {
       "id": "self_esteem",
       "section": "health",
       "order": 40,
       "type": "yes_no",
-      "label": "My weight impacts my self-esteem — do you agree?"
+      "label": "My weight impacts my self-esteem — do you agree?",
+      "analytics_key": "self_esteem_impact"
     },
     {
       "id": "family_concerned",
       "section": "health",
       "order": 41,
       "type": "yes_no",
-      "label": "My family is concerned about my health"
+      "label": "My family is concerned about my health",
+      "analytics_key": "family_concern"
     },
     {
       "id": "motivation_level",
       "section": "health",
       "order": 42,
       "type": "yes_no",
-      "label": "I am highly motivated to reach my target weight"
+      "label": "I am highly motivated to reach my target weight",
+      "analytics_key": "motivation_level"
     },
     {
       "id": "start_with_support",
@@ -518,7 +543,8 @@
         { "value": "friend", "label": "With a friend" },
         { "value": "family", "label": "With a family member" },
         { "value": "solo_want_connection", "label": "On my own but I’d love to connect with someone" }
-      ]
+      ],
+      "analytics_key": "support_system"
     },
     {
       "id": "extra_goals",
@@ -535,7 +561,8 @@
         { "value": "prepare_for_event", "label": "Prepare For Event" },
         { "value": "feel_more_comfortable", "label": "Feel More Comfortable" },
         { "value": "outdoor_activities", "label": "Outdoor Activities" }
-      ]
+      ],
+      "analytics_key": "additional_goals"
     },
     {
       "id": "medications",
@@ -550,7 +577,8 @@
         { "value": "anxiety_medications", "label": "Anxiety Medications" },
         { "value": "other", "label": "Other" },
         { "value": "no", "label": "No" }
-      ]
+      ],
+      "analytics_key": "medications"
     },
     {
       "id": "restrictions_yesno",
@@ -576,14 +604,16 @@
         { "value": "low_fodmap", "label": "Low Fodmap" },
         { "value": "other", "label": "Other" }
       ],
-      "branching": { "show_if": "answers['restrictions_yesno'] === true" }
+      "branching": { "show_if": "answers['restrictions_yesno'] === true" },
+      "analytics_key": "restrictions_details"
     },
     {
       "id": "newsletter_optin",
       "section": "summary",
       "order": 48,
       "type": "yes_no",
-      "label": "Do you want to receive emails with tips and exclusive offers from us?"
+      "label": "Do you want to receive emails with tips and exclusive offers from us?",
+      "analytics_key": "newsletter_optin"
     },
     {
       "id": "signup_lead",
