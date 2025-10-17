@@ -9,10 +9,24 @@ import { roundToTwo } from '@/lib/unit-conversion';
 
 const Prediction = ({ question }: { question: Question }) => {
     const { state } = useQuizEngine();
-    const startWeight = state.answers['weight'];
-    const goalWeight = state.answers['goal_weight'];
+    const startWeight = state.answers.body?.weightKg;
+    const goalWeight = state.answers.body?.goalWeightKg;
 
-    if (!startWeight || !goalWeight) return <div>Missing weight data...</div>;
+    if (!startWeight || !goalWeight) {
+        return (
+            <div className="w-full max-w-lg mx-auto text-center">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline text-2xl">{getLabel(question)}</CardTitle>
+                        {getDescription(question) && <CardDescription>{getDescription(question)}</CardDescription>}
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">We need your current and goal weight to forecast your progress.</p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     const weightLossPerWeek = 0.5; // kg
     const weeks = Math.ceil(Math.abs(startWeight - goalWeight) / weightLossPerWeek);
@@ -27,7 +41,7 @@ const Prediction = ({ question }: { question: Question }) => {
         return {
             date: date.toLocaleDateString('en-us', { month: 'short' }),
             weight: roundToTwo(currentWeight),
-        }
+        };
     });
 
   return (

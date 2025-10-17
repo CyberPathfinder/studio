@@ -25,16 +25,13 @@ const QuizEngine = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             const target = e.target as HTMLElement;
-            // Don't trigger on textareas or buttons to allow normal interaction
-            if(target.nodeName !== 'TEXTAREA' && target.nodeName !== 'BUTTON') {
+            if (target.nodeName !== 'TEXTAREA' && target.nodeName !== 'BUTTON') {
                 e.preventDefault();
-                // This will trigger the `nextQuestion` function via the controls component
-                document.querySelector<HTMLButtonElement>('button[aria-label="Go to next step (Enter)"], button[aria-label="Finish Quiz (Enter)"]')?.click();
+                document.querySelector<HTMLButtonElement>('button[data-quiz-nav="next"]')?.click();
             }
         } else if (e.key === 'Enter' && e.shiftKey) {
             e.preventDefault();
-            // This will trigger the `prevQuestion` function via the controls component
-            document.querySelector<HTMLButtonElement>('button[aria-label="Go to previous step (Shift + Enter)"]')?.click();
+            document.querySelector<HTMLButtonElement>('button[data-quiz-nav="prev"]')?.click();
         }
     };
 
