@@ -18,6 +18,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
 const signUpSchema = z.object({
   email: z.string().email({ message: 'Пожалуйста, введите корректный email.' }),
@@ -32,6 +35,7 @@ const QuizSummary = () => {
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isPlanSaved, setIsPlanSaved] = useState(false);
 
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
@@ -58,11 +62,11 @@ const QuizSummary = () => {
       });
 
       await submitQuiz(newUser.uid);
+      setIsPlanSaved(true);
       toast({
         title: 'Успешно!',
-        description: 'Ваш персональный план генерируется.',
+        description: 'Ваш персональный план сохранен.',
       });
-      // Here you would typically redirect to a dashboard
       
     } catch (error: any) {
       track('sign_up_failure', { error: error.message });
@@ -75,6 +79,61 @@ const QuizSummary = () => {
       setIsLoading(false);
     }
   };
+
+  const handleGoPremium = async () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Not Logged In",
+        description: "You must be logged in to purchase a plan.",
+      });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/checkout/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid: user.uid, planId: 'premium_monthly', intakeVersion: 'v1' }),
+      });
+
+      const { sessionId } = await res.json();
+      if (!sessionId) {
+        throw new Error('Failed to create checkout session.');
+      }
+      
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error('Stripe.js has not loaded yet.');
+      }
+
+      await stripe.redirectToCheckout({ sessionId });
+
+    } catch (error: any) {
+       toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: error.message || "Could not proceed to checkout.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const handleSaveAndContinue = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      await submitQuiz(user.uid);
+      setIsPlanSaved(true);
+      toast({ title: "Успешно!", description: "Ваш план был сохранен."})
+    } catch (error) {
+       toast({ variant: "destructive", title: "Ошибка", "description": "Не удалось сохранить ваш план."})
+    } finally {
+        setIsLoading(false);
+    }
+  }
+
 
   const { body, diet_style, name, age } = state.answers;
   const { heightCm, weightKg, goalWeightKg, unitHeight, unitWeight } = body || {};
@@ -193,21 +252,27 @@ const QuizSummary = () => {
         {user && (
             <div className="bg-muted/50 p-6 rounded-lg flex flex-col items-center justify-center">
                 <h3 className="font-bold text-lg mb-4 text-center">Все верно?</h3>
-                <p className="text-muted-foreground text-center mb-6">Нажмите ниже, чтобы сохранить свой план и начать!</p>
-                <Button 
-                    onClick={() => {
-                        setIsLoading(true);
-                        submitQuiz(user.uid)
-                        .then(() => toast({ title: "Успешно!", description: "Ваш план был сохранен."}))
-                        .catch(() => toast({ variant: "destructive", title: "Ошибка", "description": "Не удалось сохранить ваш план."}))
-                        .finally(() => setIsLoading(false));
-                    }} 
-                    className="w-full" 
-                    disabled={isLoading}
-                >
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Завершить и сохранить план
-                </Button>
+                {!isPlanSaved ? (
+                  <>
+                    <p className="text-muted-foreground text-center mb-6">Нажмите ниже, чтобы сохранить свой план и начать!</p>
+                    <Button 
+                        onClick={handleSaveAndContinue}
+                        className="w-full" 
+                        disabled={isLoading}
+                    >
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Завершить и сохранить план
+                    </Button>
+                  </>
+                ) : (
+                    <>
+                      <p className="text-muted-foreground text-center mb-6">Ваш план сохранен! Перейдите на Premium, чтобы получить доступ ко всем функциям.</p>
+                      <Button onClick={handleGoPremium} className="w-full" disabled={isLoading}>
+                          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Оформить Premium
+                      </Button>
+                    </>
+                )}
             </div>
         )}
 
