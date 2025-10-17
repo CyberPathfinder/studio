@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import QuizProgress from './QuizProgress';
 import QuizControls from './QuizControls';
 import * as QuestionComponents from './questions';
-import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from '../ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/sidebar';
 import { VivaFormLogo } from '../icons/logo';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
@@ -23,59 +23,75 @@ import { useIsMobile } from '@/hooks/use-mobile';
 const QuizSummarySidebar = () => {
     const { state, jumpToQuestion } = useQuizEngine();
     const { answers, config } = state;
+    const isMobile = useIsMobile();
 
     const answeredQuestionIds = new Set(Object.keys(answers).filter(k => answers[k] !== null && answers[k] !== undefined && answers[k] !== ''));
 
     const content = (
         <ScrollArea className="h-full">
-            <SidebarMenu>
-                {config.sections.map((section) => (
-                    <SidebarMenuItem key={section.id} className="p-2">
-                        <h4 className="font-semibold text-sm mb-2 px-2">{section.i18n?.en.title || section.title}</h4>
-                        <ul className="flex flex-col gap-1">
-                            {config.questions
-                                .filter((q) => evaluateBranchingLogic(q.branching, answers) && q.section === section.id)
-                                .map((q) => {
-                                const isAnswered = answeredQuestionIds.has(q.id);
-                                const isCurrent = q.id === state.currentQuestionId;
-                                const isFuture = !isAnswered && !isCurrent;
+            <Accordion type="multiple" defaultValue={config.sections.map(s => s.id)} className="w-full">
+                {config.sections
+                    .filter(section => config.questions.some(q => q.section === section.id && evaluateBranchingLogic(q.branching, answers)))
+                    .map((section) => {
+                    
+                    const sectionQuestions = config.questions.filter((q) => evaluateBranchingLogic(q.branching, answers) && q.section === section.id);
+                    const answeredCount = sectionQuestions.filter(q => answeredQuestionIds.has(q.id)).length;
 
-                                let Icon = Circle;
-                                if (isAnswered) Icon = CheckCircle;
-                                if (isFuture) Icon = Lock;
+                    return (
+                    <AccordionItem value={section.id} key={section.id} className="border-none">
+                        <AccordionTrigger className="px-4 py-2 text-sm font-semibold hover:no-underline hover:bg-sidebar-accent/50 rounded-md">
+                           <div className="flex-1 text-left">{section.i18n?.en.title || section.title}</div>
+                           <div className="flex items-center gap-1.5 ml-2">
+                                {sectionQuestions.map(q => (
+                                    <div key={q.id} className={cn(
+                                        "w-2 h-2 rounded-full",
+                                        answeredQuestionIds.has(q.id) ? "bg-primary/80" : "bg-muted-foreground/30"
+                                    )}></div>
+                                ))}
+                           </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-0">
+                            <ul className="flex flex-col gap-1 pt-1">
+                                {sectionQuestions.map((q) => {
+                                    const isAnswered = answeredQuestionIds.has(q.id);
+                                    const isCurrent = q.id === state.currentQuestionId;
+                                    const isFuture = !isAnswered && !isCurrent;
 
-                                let iconColor = "text-muted-foreground";
-                                if (isAnswered) iconColor = "text-primary";
-                                if (isCurrent) iconColor = "text-primary";
+                                    let Icon = Circle;
+                                    if (isAnswered) Icon = CheckCircle;
+                                    if (isFuture) Icon = Lock;
 
+                                    let iconColor = "text-muted-foreground/60";
+                                    if (isAnswered) iconColor = "text-primary/80";
+                                    if (isCurrent) iconColor = "text-primary";
 
-                                return (
-                                    <li key={q.id} className="group">
-                                        <button 
-                                            onClick={() => !isFuture && jumpToQuestion(q.id)}
-                                            disabled={isFuture}
-                                            className={cn(
-                                                "w-full text-left text-sm p-2 rounded-md flex items-start gap-2",
-                                                !isFuture && "hover:bg-sidebar-accent",
-                                                isCurrent && "bg-sidebar-accent font-semibold",
-                                                isFuture && "cursor-not-allowed opacity-60"
-                                            )}
-                                        >
-                                            <Icon className={cn("h-4 w-4 mt-0.5 flex-shrink-0", iconColor)} />
-                                            <span className="flex-1 text-wrap">{getLabel(q)}</span>
-                                            {!isFuture && <Edit className="h-4 w-4 invisible group-hover:visible flex-shrink-0" />}
-                                        </button>
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </SidebarMenuItem>
-                ))}
-            </SidebarMenu>
+                                    return (
+                                        <li key={q.id} className="group px-2">
+                                            <button 
+                                                onClick={() => !isFuture && jumpToQuestion(q.id)}
+                                                disabled={isFuture}
+                                                className={cn(
+                                                    "w-full text-left text-sm p-2 rounded-md flex items-start gap-2.5 relative",
+                                                    !isFuture && "hover:bg-sidebar-accent",
+                                                    isCurrent && "bg-sidebar-accent font-semibold",
+                                                    isFuture && "cursor-not-allowed opacity-60"
+                                                )}
+                                            >
+                                                {isCurrent && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4/5 w-0.5 bg-primary rounded-full"></div>}
+                                                <Icon className={cn("h-4 w-4 mt-0.5 flex-shrink-0", iconColor)} />
+                                                <span className="flex-1 text-wrap">{getLabel(q)}</span>
+                                                {!isFuture && <Edit className="h-4 w-4 invisible group-hover:visible flex-shrink-0" />}
+                                            </button>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </AccordionContent>
+                    </AccordionItem>
+                )})}
+            </Accordion>
         </ScrollArea>
     );
-
-    const isMobile = useIsMobile();
 
     if (isMobile) {
         return (
@@ -100,7 +116,7 @@ const QuizSummarySidebar = () => {
     }
 
     return (
-        <SidebarContent>
+        <SidebarContent className="p-0">
            {content}
         </SidebarContent>
     )
