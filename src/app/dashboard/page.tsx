@@ -38,14 +38,14 @@ export default function DashboardPage() {
   const { data: intakeData, isLoading: isIntakeLoading, error: intakeError } = useDoc(intakeRef);
 
   // Show a loader while authentication is in progress or the initial fetch is happening.
-  if (isUserLoading || !user) {
+  if (isUserLoading || (isIntakeLoading && !intakeError)) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
   }
-
+  
   // Handle permission errors gracefully.
   if (intakeError) {
      return (
@@ -60,17 +60,9 @@ export default function DashboardPage() {
         </div>
     );
   }
-
+  
   // Handle the case where the intake document doesn't exist (not-found).
   // This is a normal state for a new user.
-  if (isIntakeLoading && !intakeData) {
-      return (
-        <div className="flex min-h-[60vh] items-center justify-center">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        </div>
-    );
-  }
-  
   if (!intakeData) {
     return (
       <div className="container mx-auto max-w-5xl py-12 px-4 text-center">
@@ -102,7 +94,7 @@ export default function DashboardPage() {
       </div>
       <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-3">
         <div className="lg:col-span-1 space-y-6">
-          <ProfileCard user={user} />
+          <ProfileCard user={user!} />
           <AccessStatusCard />
         </div>
         <div className="lg:col-span-2 space-y-6">
