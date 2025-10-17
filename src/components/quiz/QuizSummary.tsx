@@ -244,7 +244,8 @@ const QuizSummary = () => {
         {/* Sign Up Form for unauthenticated users */}
         {!user && (
           <div className="bg-muted/50 p-6 rounded-lg">
-            <h3 className="font-bold text-lg mb-4">Создайте аккаунт, чтобы сохранить</h3>
+            <h3 className="font-bold text-lg mb-2">Создайте аккаунт, чтобы сохранить ваш план</h3>
+            <p className="text-sm text-muted-foreground mb-4">Создание аккаунта позволит вам отслеживать свой прогресс и получать доступ к персонализированным функциям.</p>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSignUp)} className="space-y-4">
                 <FormField
@@ -294,20 +295,6 @@ const QuizSummary = () => {
                 </Button>
               </form>
             </Form>
-            <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-muted/50 px-2 text-muted-foreground">
-                        ИЛИ
-                    </span>
-                </div>
-            </div>
-            <Button variant="secondary" className="w-full" onClick={handleGuestContinue} disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Продолжить без аккаунта
-            </Button>
           </div>
         )}
         {/* CTA for authenticated users */}
@@ -346,5 +333,3 @@ const QuizSummary = () => {
 };
 
 export default QuizSummary;
-
-    
