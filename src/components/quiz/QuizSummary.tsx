@@ -13,6 +13,7 @@ import { Label } from '../ui/label';
 import { Edit, Loader2 } from 'lucide-react';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getLabel } from '@/lib/i18n';
+import { convertCmToFtIn, convertWeight, roundToTwo } from '@/lib/unit-conversion';
 
 const QuizSummary = () => {
   const { state, jumpToQuestion, submitQuiz } = useQuizEngine();
@@ -30,11 +31,11 @@ const QuizSummary = () => {
     e.preventDefault();
     setError('');
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError('Пароль должен содержать не менее 8 символов.');
       return;
     }
     if (!consent) {
-      setError('You must agree to the terms.');
+      setError('Вы должны согласиться с условиями.');
       return;
     }
 
@@ -48,32 +49,32 @@ const QuizSummary = () => {
       
       track('sign_up_success', { uid: newUser.uid });
       toast({
-        title: 'Account Created!',
-        description: 'Your account has been successfully created.',
+        title: 'Аккаунт создан!',
+        description: 'Ваш аккаунт был успешно создан.',
       });
 
       await submitQuiz(newUser.uid);
       toast({
-        title: 'Success!',
-        description: 'Your personalized plan is being generated.',
+        title: 'Успешно!',
+        description: 'Ваш персональный план генерируется.',
       });
       // Here you would typically redirect to a dashboard
       
     } catch (error: any) {
       track('sign_up_failure', { error: error.message });
       if (error.code === 'auth/email-already-in-use') {
-        setError('This email address is already in use.');
+        setError('Этот адрес электронной почты уже используется.');
         toast({
           variant: 'destructive',
-          title: 'Sign Up Failed',
-          description: 'This email is already in use. Please try another email or log in.',
+          title: 'Ошибка регистрации',
+          description: 'Этот email уже используется. Пожалуйста, попробуйте другой или войдите в систему.',
         });
       } else {
-        setError('An unexpected error occurred. Please try again.');
+        setError('Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.');
         toast({
           variant: 'destructive',
-          title: 'Sign Up Failed',
-          description: 'An unexpected error occurred. Please try again.',
+          title: 'Ошибка регистрации',
+          description: 'Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.',
         });
       }
     } finally {
@@ -81,121 +82,107 @@ const QuizSummary = () => {
     }
   };
 
-  const renderAnswer = (questionId: string) => {
-    let answer;
-    if(questionId.startsWith('body.')) {
-        const key = questionId.split('.')[1] as keyof typeof state.answers.body;
-        answer = state.answers.body?.[key];
-    } else {
-        answer = state.answers[questionId];
-    }
+  const { body, diet_style, name, age } = state.answers;
+  const { heightCm, weightKg, goalWeightKg, unitHeight, unitWeight } = body || {};
 
-    if (answer === undefined || answer === null) return <span className="text-muted-foreground">Not answered</span>;
-    if (typeof answer === 'boolean') return answer ? 'Yes' : 'No';
-    if (Array.isArray(answer)) return answer.join(', ');
-    if (typeof answer === 'object') return JSON.stringify(answer);
-    return String(answer);
-  };
+  const displayHeight = unitHeight === 'metric' 
+    ? `${roundToTwo(heightCm || 0)} cm`
+    : `${convertCmToFtIn(heightCm).feet} ft ${convertCmToFtIn(heightCm).inches} in`;
   
+  const displayWeight = unitWeight === 'metric'
+    ? `${roundToTwo(weightKg || 0)} kg`
+    : `${roundToTwo(convertWeight(weightKg || 0, 'kg', 'lb'))} lb`;
+    
+  const displayGoalWeight = unitWeight === 'metric'
+    ? `${roundToTwo(goalWeightKg || 0)} kg`
+    : `${roundToTwo(convertWeight(goalWeightKg || 0, 'kg', 'lb'))} lb`;
+
+
+  const summaryItems = [
+      { id: 'height', label: 'Рост', value: displayHeight },
+      { id: 'weight', label: 'Текущий вес', value: displayWeight },
+      { id: 'goal_weight', label: 'Целевой вес', value: displayGoalWeight },
+      { id: 'bmi_calc', label: 'ИМТ', value: state.answers.bmi_calc },
+      ...(name ? [{ id: 'name', label: 'Имя', value: name }] : []),
+      ...(age ? [{ id: 'age', label: 'Возраст', value: age }] : []),
+      ...(diet_style ? [{ id: 'diet_style', label: 'Стиль диеты', value: diet_style }] : []),
+  ].filter(item => item.value !== undefined && item.value !== null && item.value !== '');
+
   if (isUserLoading) {
       return <Card className="p-8"><Loader2 className="animate-spin" /></Card>;
   }
 
-  const questionsToShow = state.config.questions.filter(q => {
-      if (q.id === 'height' || q.id === 'weight' || q.id === 'goal_weight') return false; // Handled by body object
-      return state.answers[q.id] !== undefined;
-  });
-
-  const bodyAnswers = [
-      { id: 'height', label: 'Height (cm)', value: state.answers.body?.heightCm?.toFixed(1) },
-      { id: 'weight', label: 'Weight (kg)', value: state.answers.body?.weightKg?.toFixed(1) },
-      { id: 'goal_weight', label: 'Goal Weight (kg)', value: state.answers.body?.goalWeightKg?.toFixed(1) },
-      { id: 'bmi_calc', label: 'BMI', value: state.answers['bmi_calc'] },
-  ].filter(item => item.value);
-
   return (
     <Card className="w-full max-w-4xl shadow-md rounded-2xl">
       <CardHeader>
-        <CardTitle className="font-headline text-3xl">Confirm Your Plan</CardTitle>
-        <CardDescription>Review your answers below. You can edit them before saving your plan.</CardDescription>
+        <CardTitle className="font-headline text-3xl">Подтвердите свой план</CardTitle>
+        <CardDescription>Проверьте свои ответы ниже. Вы можете их отредактировать, прежде чем сохранять свой план.</CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-6">
-          <h3 className="font-bold text-lg border-b pb-2">Your Answers</h3>
+          <h3 className="font-bold text-lg border-b pb-2">Ваши ответы</h3>
           <div className="space-y-4 max-h-96 overflow-y-auto pr-4">
-          {bodyAnswers.map((item) => (
-            <div key={item.id} className="text-sm">
-                <div className="flex justify-between items-center">
-                    <p className="font-semibold text-muted-foreground">{item.label}</p>
-                    <Button variant="ghost" size="sm" onClick={() => jumpToQuestion(item.id)}>
-                    <Edit className="h-3 w-3 mr-1" />
-                    Edit
-                    </Button>
+            {summaryItems.map((item) => (
+                <div key={item.id} className="text-sm">
+                    <div className="flex justify-between items-center">
+                        <p className="font-semibold text-muted-foreground">{item.label}</p>
+                        <Button variant="ghost" size="sm" onClick={() => jumpToQuestion(item.id)}>
+                        <Edit className="h-3 w-3 mr-1" />
+                        Ред.
+                        </Button>
+                    </div>
+                    <p className="text-foreground text-base">{item.value}</p>
                 </div>
-                <p className="text-foreground text-base">{item.value}</p>
-            </div>
-          ))}
-          {questionsToShow.map((q) => (
-            <div key={q.id} className="text-sm">
-              <div className="flex justify-between items-center">
-                <p className="font-semibold text-muted-foreground">{getLabel(q)}</p>
-                <Button variant="ghost" size="sm" onClick={() => jumpToQuestion(q.id)}>
-                  <Edit className="h-3 w-3 mr-1" />
-                  Edit
-                </Button>
-              </div>
-              <p className="text-foreground text-base">{renderAnswer(q.id)}</p>
-            </div>
-          ))}
+            ))}
           </div>
         </div>
         
         {/* Sign Up Form for unauthenticated users */}
         {!user && (
           <div className="bg-muted/50 p-6 rounded-lg">
-            <h3 className="font-bold text-lg mb-4">Create Your Account to Save</h3>
+            <h3 className="font-bold text-lg mb-4">Создайте аккаунт, чтобы сохранить</h3>
             <form onSubmit={handleSignUp} className="space-y-4">
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Пароль</Label>
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox id="consent" checked={consent} onCheckedChange={(c) => setConsent(c as boolean)} />
-                <Label htmlFor="consent" className="text-sm font-normal">I agree to the terms and conditions.</Label>
+                <Label htmlFor="consent" className="text-sm font-normal">Я согласен с условиями использования.</Label>
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save My Plan
+                Сохранить мой план
               </Button>
             </form>
             <p className="text-xs text-muted-foreground mt-4 text-center">
-                <Button variant="link" className="text-xs p-0 h-auto" disabled>Continue without account</Button>
+                <Button variant="link" className="text-xs p-0 h-auto" disabled>Продолжить без аккаунта</Button>
             </p>
           </div>
         )}
         {/* CTA for authenticated users */}
         {user && (
             <div className="bg-muted/50 p-6 rounded-lg flex flex-col items-center justify-center">
-                <h3 className="font-bold text-lg mb-4 text-center">Everything look correct?</h3>
-                <p className="text-muted-foreground text-center mb-6">Click below to save your plan and get started!</p>
+                <h3 className="font-bold text-lg mb-4 text-center">Все верно?</h3>
+                <p className="text-muted-foreground text-center mb-6">Нажмите ниже, чтобы сохранить свой план и начать!</p>
                 <Button 
                     onClick={() => {
                         setIsLoading(true);
                         submitQuiz(user.uid)
-                        .then(() => toast({ title: "Success!", description: "Your plan has been saved."}))
-                        .catch(() => toast({ variant: "destructive", title: "Error", "description": "Could not save your plan."}))
+                        .then(() => toast({ title: "Успешно!", description: "Ваш план был сохранен."}))
+                        .catch(() => toast({ variant: "destructive", title: "Ошибка", "description": "Не удалось сохранить ваш план."}))
                         .finally(() => setIsLoading(false));
                     }} 
                     className="w-full" 
                     disabled={isLoading}
                 >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Finish & Save Plan
+                    Завершить и сохранить план
                 </Button>
             </div>
         )}
