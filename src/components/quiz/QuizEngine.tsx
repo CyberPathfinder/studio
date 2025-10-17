@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -71,20 +72,22 @@ const QuizEngine = () => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 const target = e.target as HTMLElement;
+                // Don't trigger on textareas or buttons to allow normal interaction
                 if(target.nodeName !== 'TEXTAREA' && target.nodeName !== 'BUTTON') {
                     e.preventDefault();
-                    // This will trigger the `nextQuestion` function from the controls
-                    document.querySelector<HTMLButtonElement>('button[aria-label="Go to next step (Enter)"]')?.click();
+                    // This will trigger the `nextQuestion` function via the controls component
+                    document.querySelector<HTMLButtonElement>('button[aria-label="Go to next step (Enter)"], button[aria-label="Finish Quiz (Enter)"]')?.click();
                 }
             } else if (e.key === 'Enter' && e.shiftKey) {
                 e.preventDefault();
+                // This will trigger the `prevQuestion` function via the controls component
                 document.querySelector<HTMLButtonElement>('button[aria-label="Go to previous step (Shift + Enter)"]')?.click();
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [nextQuestion, prevQuestion]);
+    }, []); // Empty dependency array means this effect runs once on mount
 
   if (state.status === 'completed') {
     return (
@@ -135,25 +138,25 @@ const QuizEngine = () => {
                     <SidebarTrigger />
                 </div>
                 
-                <Card className="w-full max-w-2xl overflow-hidden shadow-2xl">
-                    <div className="p-8">
-                    <QuizProgress />
-                    <div className="relative mt-8 h-[28rem] flex items-center justify-center">
-                        <AnimatePresence mode="wait">
-                        <motion.div
-                            key={state.currentQuestionId}
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -50 }}
-                            transition={{ duration: 0.3 }}
-                            className="absolute w-full"
-                        >
-                            {QuestionComponent ? <QuestionComponent question={currentQuestion} /> : <div>Unknown question type: {currentQuestion.type}</div>}
-                        </motion.div>
-                        </AnimatePresence>
+                <Card className="w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col">
+                    <div className="p-8 flex-grow">
+                        <QuizProgress />
+                        <div className="relative mt-8 h-[28rem] flex items-center justify-center">
+                            <AnimatePresence mode="wait">
+                            <motion.div
+                                key={state.currentQuestionId}
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -50 }}
+                                transition={{ duration: 0.3 }}
+                                className="absolute w-full"
+                            >
+                                {QuestionComponent ? <QuestionComponent question={currentQuestion} /> : <div>Unknown question type: {currentQuestion.type}</div>}
+                            </motion.div>
+                            </AnimatePresence>
+                        </div>
                     </div>
-                    </div>
-                    <div className="bg-muted/60 p-4 border-t flex justify-center">
+                    <div className="bg-muted/60 p-4 border-t">
                         <QuizControls />
                     </div>
                 </Card>
