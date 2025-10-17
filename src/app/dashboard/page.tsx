@@ -11,6 +11,7 @@ import Link from 'next/link';
 import ProfileCard from '@/components/dashboard/ProfileCard';
 import MeasurementsCard from '@/components/dashboard/MeasurementsCard';
 import AccessStatusCard from '@/components/dashboard/AccessStatusCard';
+import SmartFeedbackCard from '@/components/dashboard/SmartFeedbackCard';
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -64,9 +65,14 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">Here's an overview of your wellness journey.</p>
       </div>
       <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-3">
-        <ProfileCard user={user} />
-        <MeasurementsCard intakeData={intakeData} />
-        <AccessStatusCard />
+        <div className="lg:col-span-1 space-y-6">
+          <ProfileCard user={user} />
+          <AccessStatusCard />
+        </div>
+        <div className="lg:col-span-2 space-y-6">
+          <MeasurementsCard intakeData={intakeData} />
+          <SmartFeedbackCard bmi={intakeData.measures.bmi} intakeData={intakeData} />
+        </div>
       </div>
     </div>
   );

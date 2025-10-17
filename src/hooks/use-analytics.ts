@@ -16,7 +16,8 @@ export type EventName =
   | 'sign_up_attempt'
   | 'sign_up_success'
   | 'sign_up_failure'
-  | 'intake_saved';
+  | 'intake_saved'
+  | 'smart_feedback_view';
 
 // Defines the structure for analytics mapping for each service
 type AnalyticsMapping = {
@@ -74,6 +75,14 @@ const eventMap: Record<EventName, AnalyticsMapping> = {
   intake_saved: {
     gtag: () => ({ action: 'intake_saved', category: 'conversion', label: 'User intake data was saved' }),
   },
+  smart_feedback_view: {
+     gtag: (payload: { bmiBand: string, tipsCount: number }) => ({
+        action: 'smart_feedback_view',
+        category: 'engagement',
+        label: `BMI Band: ${payload.bmiBand}`,
+        value: payload.tipsCount,
+     })
+  }
 };
 
 export const useAnalytics = () => {

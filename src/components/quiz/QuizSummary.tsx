@@ -19,6 +19,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { loadStripe } from '@stripe/stripe-js';
+import SmartFeedbackCard from '../dashboard/SmartFeedbackCard';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
@@ -137,6 +138,7 @@ const QuizSummary = () => {
 
   const { body, diet_style, name, age } = state.answers;
   const { heightCm, weightKg, goalWeightKg, unitHeight, unitWeight } = body || {};
+  const bmi = state.answers.bmi_calc;
 
   const displayHeight = unitHeight === 'metric' 
     ? `${roundToTwo(heightCm || 0)} cm`
@@ -164,6 +166,14 @@ const QuizSummary = () => {
   if (isUserLoading) {
       return <Card className="p-8"><Loader2 className="animate-spin" /></Card>;
   }
+
+  const intakeData = {
+    measures: {
+      bmi,
+      weight_kg: weightKg,
+      goal_weight_kg: goalWeightKg,
+    },
+  };
 
   return (
     <Card className="w-full max-w-4xl shadow-md rounded-2xl">
@@ -250,11 +260,13 @@ const QuizSummary = () => {
         )}
         {/* CTA for authenticated users */}
         {user && (
-            <div className="bg-muted/50 p-6 rounded-lg flex flex-col items-center justify-center">
-                <h3 className="font-bold text-lg mb-4 text-center">Все верно?</h3>
+            <div className="bg-muted/50 p-6 rounded-lg flex flex-col items-center justify-center space-y-6">
                 {!isPlanSaved ? (
                   <>
-                    <p className="text-muted-foreground text-center mb-6">Нажмите ниже, чтобы сохранить свой план и начать!</p>
+                    <div className='text-center'>
+                      <h3 className="font-bold text-lg mb-2">Все верно?</h3>
+                      <p className="text-muted-foreground text-center">Нажмите ниже, чтобы сохранить свой план и начать!</p>
+                    </div>
                     <Button 
                         onClick={handleSaveAndContinue}
                         className="w-full" 
@@ -266,7 +278,7 @@ const QuizSummary = () => {
                   </>
                 ) : (
                     <>
-                      <p className="text-muted-foreground text-center mb-6">Ваш план сохранен! Перейдите на Premium, чтобы получить доступ ко всем функциям.</p>
+                      <SmartFeedbackCard bmi={bmi} intakeData={intakeData} />
                       <Button onClick={handleGoPremium} className="w-full" disabled={isLoading}>
                           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                           Оформить Premium
