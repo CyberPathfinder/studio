@@ -5,6 +5,15 @@ This is a NextJS starter in Firebase Studio.
 
 To get started, take a look at src/app/page.tsx.
 
+## Firebase Admin Credentials
+
+Server-side Firebase features require a service account. Provide the credentials securely by adding one of the following secrets before running the app:
+
+* `FIREBASE_SERVICE_ACCOUNT` &mdash; set this environment variable to the raw JSON of your Firebase service account (recommended for deployment platforms that manage secrets).
+* `GOOGLE_APPLICATION_CREDENTIALS` &mdash; point this environment variable to the absolute path of the downloaded service-account JSON file.
+
+Without one of these variables, the server SDK will not start.
+
 ## Analytics Setup
 
 This project is configured to support Google Analytics (GA4) and Meta Pixel tracking. To enable them, create a `.env.local` file in the root of your project and add the following environment variables:
