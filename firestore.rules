@@ -1,136 +1,110 @@
 /**
- * @fileoverview Firestore Security Rules for the Quiz Engine application.
- *
- * Core Philosophy:
- * This ruleset employs a strict path-based ownership model for user-specific data
- * (quiz responses and drafts) while allowing public read access to quiz definitions.
- *
- * Data Structure:
- * - /quizzes/{quizId}: Publicly readable quiz definitions.
- * - /quizzes/{quizId}/questions/{questionId}: Publicly readable question definitions.
- * - /users/{userId}/quiz_responses/{quizResponseId}: User-specific quiz responses.
- * - /users/{userId}/quiz_responses/{quizResponseId}/question_responses/{questionResponseId}: User-specific question responses.
- * - /users/{userId}/intake_drafts/{quizId}: User-specific quiz drafts for resuming flows.
- *
- * Key Security Decisions:
- * - Quiz definitions and questions are publicly readable.
- * - Quiz responses and drafts are strictly user-owned.
- * - Listing of quiz responses and drafts is only allowed for the owner.
- * - Schema validation is relaxed to allow for rapid prototyping.
- *
- * Denormalization for Authorization:
- * - Path-based ownership is used to avoid `get()` calls for authorization.
- *   The `userId` is embedded in the path for quiz responses and drafts,
- *   eliminating the need to read the document to determine ownership.
- *
- * Structural Segregation:
- * - Quiz definitions are stored in a top-level collection (/quizzes) separate
- *   from user-specific data (under /users/{userId}), enabling public read access
- *   to quiz definitions without exposing user data.
+ * @description This ruleset enforces a strict user-ownership model, allowing users to read and write only their own data within the /users collection and its subcollections. Quiz data is publicly readable.
+ * @dataStructure Data is organized hierarchically under /users/{userId}, with subcollections for quiz_responses and intake_drafts. Quizzes are stored in a top-level /quizzes collection.
+ * @keySecurityDecisions User listing is disallowed. All write operations are restricted to the owner of the data. Data required for authorization is implicitly denormalized by using path-based ownership.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows public read access to quiz definitions. Only the owner can modify the data.
+     * @description Allows anyone to read quiz definitions.
      * @path /quizzes/{quizId}
-     * @allow get, list: if true;
-     * @allow create: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @principle Allows public reads, restricts writes to the owner.
+     * @allow (get, list)
+     * @deny None. This collection is intended for public read access.
+     * @principle Allows public read access to quiz definitions.
      */
     match /quizzes/{quizId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if false;  // CRITICAL: Cannot implement owner-only writes. The 'Quiz' entity is missing an 'ownerId' or 'authorId' field.
-      allow update: if false;  // CRITICAL: Cannot implement owner-only writes. The 'Quiz' entity is missing an 'ownerId' or 'authorId' field.
-      allow delete: if false;  // CRITICAL: Cannot implement owner-only writes. The 'Quiz' entity is missing an 'ownerId' or 'authorId' field.
+      allow get, list: if true;
+      allow create, update, delete: if false;
     }
 
     /**
-     * @description Allows public read access to question definitions. Only the owner can modify the data.
+     * @description Allows anyone to read questions for a specific quiz.
      * @path /quizzes/{quizId}/questions/{questionId}
-     * @allow get, list: if true;
-     * @allow create: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @principle Allows public reads, restricts writes to the owner.
+     * @allow (get, list)
+     * @deny None. This collection is intended for public read access.
+     * @principle Allows public read access to quiz questions.
      */
     match /quizzes/{quizId}/questions/{questionId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if false; // CRITICAL: Cannot implement owner-only writes. The 'Question' entity is missing an 'ownerId' or 'authorId' field.
-      allow update: if false; // CRITICAL: Cannot implement owner-only writes. The 'Question' entity is missing an 'ownerId' or 'authorId' field.
-      allow delete: if false; // CRITICAL: Cannot implement owner-only writes. The 'Question' entity is missing an 'ownerId' or 'authorId' field.
+      allow get, list: if true;
+      allow create, update, delete: if false;
     }
 
     /**
-     * @description Allows the owner to read, create, update, and delete their quiz responses.
+     * @description Enforces user-ownership for quiz responses. Only the user with the matching {userId} can read or write quiz responses in this collection.
      * @path /users/{userId}/quiz_responses/{quizResponseId}
-     * @allow get: if isOwner(userId);
-     * @allow list: if isOwner(userId);
-     * @allow create: if isOwner(userId);
-     * @allow update: if isExistingOwner(userId);
-     * @allow delete: if isExistingOwner(userId);
-     * @principle Enforces document ownership for all operations.
+     * @allow (create) A user with request.auth.uid == "user123" can create a document at /users/user123/quiz_responses/qr456.
+     * @allow (get, list, update, delete) A user with request.auth.uid == "user123" can read, list, update, or delete a document at /users/user123/quiz_responses/qr456.
+     * @deny (create, update, delete) A user with request.auth.uid == "otherUser" cannot create, update, or delete a document at /users/user123/quiz_responses/qr456.
+     * @deny (get, list) A user with request.auth.uid == "otherUser" cannot read or list documents in /users/user123/quiz_responses.
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /users/{userId}/quiz_responses/{quizResponseId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
+      allow get, list: if isOwner(userId);
       allow create: if isOwner(userId);
       allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
     }
 
     /**
-     * @description Allows the owner to read, create, update, and delete their question responses.
+     * @description Enforces user-ownership for question responses. Only the user with the matching {userId} can read or write question responses in this collection.
      * @path /users/{userId}/quiz_responses/{quizResponseId}/question_responses/{questionResponseId}
-     * @allow get: if isOwner(userId);
-     * @allow list: if isOwner(userId);
-     * @allow create: if isOwner(userId);
-     * @allow update: if isExistingOwner(userId);
-     * @allow delete: if isExistingOwner(userId);
-     * @principle Enforces document ownership for all operations.
+     * @allow (create) A user with request.auth.uid == "user123" can create a document at /users/user123/quiz_responses/qr456/question_responses/qnr789.
+     * @allow (get, list, update, delete) A user with request.auth.uid == "user123" can read, list, update, or delete a document at /users/user123/quiz_responses/qr456/question_responses/qnr789.
+     * @deny (create, update, delete) A user with request.auth.uid == "otherUser" cannot create, update, or delete a document at /users/user123/quiz_responses/qr456/question_responses/qnr789.
+     * @deny (get, list) A user with request.auth.uid == "otherUser" cannot read or list documents in /users/user123/quiz_responses/qr456/question_responses.
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /users/{userId}/quiz_responses/{quizResponseId}/question_responses/{questionResponseId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
+      allow get, list: if isOwner(userId);
       allow create: if isOwner(userId);
       allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
     }
 
-    /**
-     * @description Allows the owner to read, create, update, and delete their quiz drafts.
-     * @path /users/{userId}/intake_drafts/{quizId}
-     * @allow get: if isOwner(userId);
-     * @allow list: if isOwner(userId);
-     * @allow create: if isOwner(userId);
-     * @allow update: if isExistingOwner(userId);
-     * @allow delete: if isExistingOwner(userId);
-     * @principle Enforces document ownership for all operations.
-     */
+     /**
+      * @description Enforces user-ownership for quiz drafts. Only the user with the matching {userId} can read or write quiz drafts in this collection.
+      * @path /users/{userId}/intake_drafts/{quizId}
+      * @allow (create) A user with request.auth.uid == "user123" can create a document at /users/user123/intake_drafts/quiz789.
+      * @allow (get, list, update, delete) A user with request.auth.uid == "user123" can read, list, update, or delete a document at /users/user123/intake_drafts/quiz789.
+      * @deny (create, update, delete) A user with request.auth.uid == "otherUser" cannot create, update, or delete a document at /users/user123/intake_drafts/quiz789.
+      * @deny (get, list) A user with request.auth.uid == "otherUser" cannot read or list documents in /users/user123/intake_drafts.
+      * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
+      */
     match /users/{userId}/intake_drafts/{quizId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
+      allow get, list: if isOwner(userId);
       allow create: if isOwner(userId);
       allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
-    }
-
-    // --- Helper functions ---
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
     }
   }
+
+  /**
+   * @description Checks if the request is made by the owner of the document.
+   * @param userId The user ID from the path.
+   * @return True if the user is signed in and their UID matches the userId, false otherwise.
+   */
+  function isOwner(userId) {
+    return isSignedIn() && request.auth.uid == userId;
+    // If we later want to require email verification:
+    // return request.auth != null && request.auth.uid == userId && request.auth.token.email_verified == true;
+  }
+
+  /**
+   * @description Checks if the request is made by a signed-in user.
+   * @return True if the user is signed in, false otherwise.
+   */
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+    /**
+     * @description Checks if the request is made by the owner of an *existing* document.
+     * @param userId The user ID from the path.
+     * @return True if the user is signed in, their UID matches the userId, and the document exists.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
 }
