@@ -61,6 +61,36 @@ service cloud.firestore {
     }
 
     /**
+     * @description Allows a user to manage the root profile document stored at /users/{userId}.
+     * @path /users/{userId}
+     * @allow (get, create, update, delete) - Only the user with ID {userId} can manage their root profile document.
+     * @deny (list) - Listing all users is disallowed to protect privacy.
+     * @principle Enforces document ownership while preventing user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId) && resource != null;
+      allow list: if false;
+    }
+
+    /**
+     * @description Enforces strict user-ownership for stored intake results.
+     * @path /users/{userId}/intake/{intakeDocId}
+     * @allow (get, list, create, update, delete) - Only the user with ID {userId} can perform these actions.
+     * @deny (get, list, create, update, delete) - Any other user attempting these actions will be denied.
+     * @principle Keeps health intake data private to the owner.
+     */
+    match /users/{userId}/intake/{intakeDocId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) && resource != null;
+      allow delete: if isOwner(userId) && resource != null;
+    }
+
+    /**
      * @description Enforces strict user-ownership for quiz responses.
      * @path /users/{userId}/quiz_responses/{quizResponseId}
      * @allow (get, list, create, update, delete) - Only the user with ID {userId} can perform these actions.
