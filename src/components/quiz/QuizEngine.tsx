@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
 import QuizSummary from './QuizSummary';
-import { getLabel, getOptions } from '@/lib/i18n';
+import { getLabel } from '@/lib/i18n';
 
 
 const QuizSummarySidebar = () => {

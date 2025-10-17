@@ -2,12 +2,12 @@
 {
   "quizId": "vivaform_intake_v1",
   "sections": [
-    { "id": "profile", "title": "Profile" },
-    { "id": "body", "title": "Body" },
-    { "id": "diet", "title": "Diet Style" },
-    { "id": "habits", "title": "Habits & Lifestyle" },
-    { "id": "health", "title": "Health" },
-    { "id": "summary", "title": "Summary" }
+    { "id": "profile", "title": "Profile", "order": 1 },
+    { "id": "body", "title": "Body", "order": 2 },
+    { "id": "diet", "title": "Diet Style", "order": 3 },
+    { "id": "habits", "title": "Habits & Lifestyle", "order": 4 },
+    { "id": "health", "title": "Health", "order": 5 },
+    { "id": "summary", "title": "Summary", "order": 6 }
   ],
   "questions": [
     {
@@ -183,7 +183,7 @@
       "type": "message",
       "label": "Mediterranean is different",
       "description": "Many people lose weight at first but struggle to maintain it. Mediterranean-style eating focuses on sustainable habits.",
-      "branching": { "show_if": "answers['diet_style']=='mediterranean' && answers['lost_before']" }
+      "branching": { "show_if": "answers['diet_style']=='mediterranean' && answers['lost_before'] === true" }
     },
     {
       "id": "plan_calculating",
@@ -576,7 +576,7 @@
         { "value": "low_fodmap", "label": "Low Fodmap" },
         { "value": "other", "label": "Other" }
       ],
-      "branching": { "show_if": "answers['restrictions_yesno']" }
+      "branching": { "show_if": "answers['restrictions_yesno'] === true" }
     },
     {
       "id": "newsletter_optin",

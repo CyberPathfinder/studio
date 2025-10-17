@@ -16,5 +16,5 @@ export const getHint = (question: Question, lang: 'en' | 'ru' = 'en'): string | 
 }
 
 export const getOptions = (question: Question, lang: 'en' | 'ru' = 'en'): QuestionOption[] | undefined => {
-    return question.i1bn?.[lang]?.options || question.options;
+    return question.i18n?.[lang]?.options || question.options;
 }

@@ -2,7 +2,6 @@
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Question } from '@/lib/quiz-engine/config';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { getLabel, getDescription, getHint } from '@/lib/i18n';
@@ -13,7 +12,7 @@ const TextInput = ({ question }: { question: Question }) => {
   const answer = state.answers[question.id];
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-md mx-auto">
       <CardHeader className="text-center p-0 mb-8">
         <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
         {getDescription(question) && <CardDescription>{getDescription(question)}</CardDescription>}
