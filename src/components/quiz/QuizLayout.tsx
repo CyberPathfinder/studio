@@ -37,7 +37,7 @@ const QuizSummarySidebar = () => {
     const { toast } = useToast();
     const { answers, config } = state;
 
-    const answeredQuestionIds = new Set(Object.keys(answers).filter(k => answers[k] !== null && answers[k] !== undefined && answers[k] !== ''));
+    const answeredQuestionIds = new Set(Object.keys(answers).filter(k => k !== 'body' && answers[k] !== null && answers[k] !== undefined && answers[k] !== ''));
 
     const handleSaveAndExit = () => {
         toast({ title: "Progress Saved", description: "Your progress has been saved. You can continue later."});
@@ -59,7 +59,17 @@ const QuizSummarySidebar = () => {
                         const sectionQuestions = config.questions.filter((q) => evaluateBranchingLogic(q.branching, answers) && q.section === section.id);
                         if (sectionQuestions.length === 0) return null;
 
-                        const answeredInSection = sectionQuestions.filter(q => answeredQuestionIds.has(q.id)).length;
+                        const answeredInSection = sectionQuestions.filter(q => {
+                            if (q.id === 'height') {
+                                const heightCm = answers.body?.heightCm;
+                                return heightCm && heightCm >= 120 && heightCm <= 230;
+                            }
+                            if (q.id === 'weight') {
+                                const weightKg = answers.body?.weightKg;
+                                return weightKg && weightKg >= 35 && weightKg <= 300;
+                            }
+                            return answeredQuestionIds.has(q.id);
+                        }).length;
                         const totalInSection = sectionQuestions.length;
 
                         return (
@@ -78,7 +88,16 @@ const QuizSummarySidebar = () => {
                             <AccordionContent className="pb-0">
                                 <ul className="flex flex-col gap-1 pt-1">
                                     {sectionQuestions.map((q) => {
-                                        const isAnswered = answeredQuestionIds.has(q.id);
+                                        let isAnswered = answeredQuestionIds.has(q.id);
+
+                                        if (q.id === 'height') {
+                                            const heightCm = answers.body?.heightCm;
+                                            isAnswered = !!(heightCm && heightCm >= 120 && heightCm <= 230);
+                                        } else if (q.id === 'weight') {
+                                            const weightKg = answers.body?.weightKg;
+                                            isAnswered = !!(weightKg && weightKg >= 35 && weightKg <= 300);
+                                        }
+                                        
                                         const isCurrent = q.id === state.currentQuestionId;
                                         const canJump = isAnswered || isCurrent;
 
