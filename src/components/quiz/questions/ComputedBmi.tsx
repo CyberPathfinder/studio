@@ -21,8 +21,8 @@ const ComputedBmi = ({ question }: { question: Question }) => {
   }, [heightInM, weightInKg]);
 
   useEffect(() => {
-    // Update the answer in the quiz state
-    if (bmi !== null && state.answers[question.id] !== bmi) {
+    // Update the answer in the quiz state if it has changed
+    if (state.answers[question.id] !== bmi) {
         handleAnswerChange(question.id, bmi, question.analytics_key);
     }
   }, [bmi, handleAnswerChange, question.id, question.analytics_key, state.answers]);

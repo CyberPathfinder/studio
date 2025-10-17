@@ -2,12 +2,12 @@
 {
   "quizId": "vivaform_intake_v1",
   "sections": [
-    { "id": "profile", "title": "Profile", "order": 1 },
-    { "id": "body", "title": "Body", "order": 2 },
-    { "id": "diet", "title": "Diet Style", "order": 3 },
-    { "id": "habits", "title": "Habits & Lifestyle", "order": 4 },
-    { "id": "health", "title": "Health", "order": 5 },
-    { "id": "summary", "title": "Summary", "order": 6 }
+    { "id": "profile", "title": "Profile" },
+    { "id": "body", "title": "Body" },
+    { "id": "diet", "title": "Diet Style" },
+    { "id": "habits", "title": "Habits & Lifestyle" },
+    { "id": "health", "title": "Health" },
+    { "id": "summary", "title": "Summary" }
   ],
   "questions": [
     {
@@ -60,7 +60,7 @@
       "order": 5,
       "type": "computed_bmi",
       "label": "Your BMI",
-      "hint": "We’ll use BMI to personalize your plan.",
+      "description": "BMI is an estimate used to personalize recommendations.",
       "branching": { "show_if": "answers['height'] && answers['weight']" },
       "analytics_key": "bmi"
     },
