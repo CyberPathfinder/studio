@@ -62,7 +62,7 @@ const TextInput = ({ question }: { question: Question }) => {
             render={({ field }) => (
               <FormItem>
                 <div className="flex items-center justify-center">
-                    <FormLabel htmlFor={question.id} className="text-xl">{getLabel(question)}</FormLabel>
+                    <FormLabel htmlFor={question.id} className="text-xl sr-only">{getLabel(question)}</FormLabel>
                     {description && (
                         <Popover>
                             <PopoverTrigger asChild>
@@ -81,6 +81,7 @@ const TextInput = ({ question }: { question: Question }) => {
                         placeholder={hint || ''}
                         className="h-12 text-lg text-center"
                         {...field}
+                        value={field.value ?? ''}
                     />
                 </FormControl>
                  <FormMessage className={cn(hint && "hidden")}/>

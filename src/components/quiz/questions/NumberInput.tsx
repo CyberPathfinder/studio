@@ -29,7 +29,7 @@ const NumberInput = ({ question }: { question: Question }) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      value: answer,
+      value: answer ?? '',
     },
   });
 
@@ -85,6 +85,7 @@ const NumberInput = ({ question }: { question: Question }) => {
                     step={question.validation?.step}
                     className="text-center text-lg h-12"
                     {...field}
+                    value={field.value ?? ''}
                   />
                 </FormControl>
                 <FormMessage className={cn(hint && "hidden")}/>
@@ -99,4 +100,3 @@ const NumberInput = ({ question }: { question: Question }) => {
 };
 
 export default NumberInput;
-
