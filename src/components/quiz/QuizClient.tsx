@@ -1,10 +1,14 @@
 'use client';
+
 import { useEffect, useState } from 'react';
-import { useAnalytics } from '@/hooks/use-analytics';
-import { useFirebase } from '@/firebase/provider';
+
+import { useFirebase } from '@/firebase';
 import { getQuizDraft, saveQuizDraft } from '@/firebase/quiz';
-import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
+import { useAnalytics } from '@/hooks/use-analytics';
+import { useQuizEngine } from '@/hooks/useQuizEngine';
+import { logger } from '@/lib/logger';
 import quizConfig from '@/data/questions.json';
+
 import ResumePrompt from './ResumePrompt';
 import QuizEngine from './QuizEngine';
 
@@ -26,7 +30,7 @@ const QuizClient = () => {
   // 1. Initialize the quiz engine immediately on mount.
   useEffect(() => {
     if (!isInitialized) {
-        initializeState({}, null);
+      initializeState({}, null);
     }
   }, [isInitialized, initializeState]);
 
@@ -35,48 +39,72 @@ const QuizClient = () => {
     // Only check for drafts once, and don't run while checking auth state.
     if (isUserLoading) return;
 
-    let draftPromise: Promise<any | null>;
+    let draftPromise: Promise<Record<string, any> | null>;
 
     if (user) {
       draftPromise = getQuizDraft(user.uid, quizConfig.quizId);
     } else {
-      const localDraft = localStorage.getItem(LOCAL_STORAGE_KEY);
-      draftPromise = Promise.resolve(localDraft ? JSON.parse(localDraft) : null);
+      draftPromise = Promise.resolve(null);
+
+      const localDraftRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (localDraftRaw) {
+        try {
+          const parsedDraft = JSON.parse(localDraftRaw) as Record<string, any>;
+          draftPromise = Promise.resolve(parsedDraft);
+        } catch (error) {
+          logger.warn('Failed to parse local quiz draft.', error);
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+        }
+      }
     }
 
-    draftPromise.then((draft) => {
-      if (draft && draft.answers && Object.keys(draft.answers).length > 0) {
-        setDraftToResume(draft);
-        setShowResumePrompt(true);
-      } else {
-        // No draft, so we can track the start event.
-        // If there was a draft, this is handled in `handleResume`.
-        track('quiz_start');
-      }
-    });
+    let isActive = true;
+
+    draftPromise
+      .then((draft) => {
+        if (!isActive) return;
+
+        if (draft && draft.answers && Object.keys(draft.answers).length > 0) {
+          setDraftToResume(draft);
+          setShowResumePrompt(true);
+        } else {
+          // No draft, so we can track the start event.
+          // If there was a draft, this is handled in `handleResume`.
+          track('quiz_start');
+        }
+      })
+      .catch((error) => {
+        logger.error('Failed to load quiz draft.', error);
+      });
+
     // This effect should only run once when the user's auth state is resolved.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, isUserLoading]);
+    return () => {
+      isActive = false;
+    };
+  }, [user, isUserLoading, track]);
 
 
   // 3. Autosave logic (debounced in hook)
   useEffect(() => {
     if (!state.isDirty || isUserLoading || !isInitialized) return;
 
-    const saveData = async () => {
-        const draftData = {
-            answers: state.answers,
-            currentQuestionId: state.currentQuestionId,
-        };
-      if (user) {
-        await saveQuizDraft(user.uid, quizConfig.quizId, draftData);
-      } else {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(draftData));
-      }
-      dispatch({ type: 'SAVE_COMPLETE' });
+    const draftData = {
+      answers: state.answers,
+      currentQuestionId: state.currentQuestionId,
     };
 
-    saveData();
+    void (async () => {
+      try {
+        if (user) {
+          await saveQuizDraft(user.uid, quizConfig.quizId, draftData);
+        } else {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(draftData));
+        }
+        dispatch({ type: 'SAVE_COMPLETE' });
+      } catch (error) {
+        logger.error('Failed to save quiz draft.', error);
+      }
+    })();
   }, [state.answers, user, isUserLoading, state.isDirty, state.currentQuestionId, dispatch, isInitialized]);
 
 
@@ -100,21 +128,20 @@ const QuizClient = () => {
 
   if (!isInitialized) {
     return (
-        <div className="flex min-h-screen items-center justify-center">
-            <div className="text-center">
-                <p>Loading Quiz...</p>
-            </div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <p>Loading Quiz...</p>
         </div>
+      </div>
     );
   }
 
   return (
     <div>
-        {showResumePrompt && <ResumePrompt onResume={handleResume} />}
-        <QuizEngine />
+      {showResumePrompt && <ResumePrompt onResume={handleResume} />}
+      <QuizEngine />
     </div>
   );
 };
-
 
 export default QuizClient;

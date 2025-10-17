@@ -1,6 +1,6 @@
 
 'use client';
-import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
+import { useQuizEngine } from '@/hooks/useQuizEngine';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';

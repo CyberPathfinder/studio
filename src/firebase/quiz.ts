@@ -1,6 +1,7 @@
 
 'use client';
-import { doc, getDoc, setDoc, deleteDoc, writeBatch, Firestore } from 'firebase/firestore';
+
+import { deleteDoc, doc, getDoc, setDoc, writeBatch, type Firestore } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { logger } from '@/lib/logger';
@@ -13,27 +14,31 @@ function getFirestore(): Firestore {
 
 /**
  * Saves a quiz draft to Firestore.
- * This is a non-blocking operation.
+ * The caller can choose to await this Promise or let it resolve in the background.
  * @param userId The user's unique ID.
  * @param quizId The ID of the quiz.
  * @param draftData The data to save.
  */
-export const saveQuizDraft = (
+export const saveQuizDraft = async (
   userId: string,
   quizId: string,
   draftData: any
-) => {
+): Promise<void> => {
   if (!userId) return;
+
   const draftRef = doc(getFirestore(), `users/${userId}/intake_drafts/${quizId}`);
-  setDoc(draftRef, draftData, { merge: true }).catch(error => {
+
+  try {
+    await setDoc(draftRef, draftData, { merge: true });
+  } catch (error) {
     const contextualError = new FirestorePermissionError({
       path: draftRef.path,
       operation: 'write',
       requestResourceData: draftData,
     });
     errorEmitter.emit('permission-error', contextualError);
-    // logger.error("Error saving quiz draft:", error);
-  });
+    throw error;
+  }
 };
 
 /**

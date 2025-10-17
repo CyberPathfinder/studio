@@ -1,6 +1,6 @@
 
 'use client';
-import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
+import { useQuizEngine } from '@/hooks/useQuizEngine';
 import { Question } from '@/lib/quiz-engine/config';
 import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

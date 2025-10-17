@@ -7,7 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, ChevronLeft, Circle, Edit, Lock, LogOut, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useQuizEngine } from "@/hooks/useQuizEngine.tsx";
+import { useQuizEngine } from "@/hooks/useQuizEngine";
 import { getLabel } from "@/lib/i18n";
 import { evaluateBranchingLogic } from "@/lib/quiz-engine/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
