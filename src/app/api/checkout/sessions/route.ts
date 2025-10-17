@@ -23,6 +23,18 @@ export async function POST(req: NextRequest) {
 
     const priceId = 'price_1PgQ7N2N3N4N5N6Nabcdefg'; // Replace with your actual Stripe Price ID for the plan
 
+    // Create a payment document in Firestore before creating the Stripe session
+    // This allows us to have a record of the intent to purchase.
+    // We use a temporary ID that we will replace with the session ID later if needed,
+    // but for this flow, the session ID is what matters.
+    const tempPaymentRef = doc(firestore, `users/${uid}/payments`, 'pending_checkout');
+    await setDoc(tempPaymentRef, {
+        status: 'pending',
+        planId: planId,
+        createdAt: serverTimestamp(),
+    }, { merge: true });
+
+
     // Create a Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -34,7 +46,7 @@ export async function POST(req: NextRequest) {
       ],
       mode: 'payment',
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/checkout/cancel`,
+      cancel_url: `${origin}/checkout/cancel?session_id={CHECKOUT_SESSION_ID}`, // Pass session to cancel page too
       metadata: {
         uid: uid,
         planId: planId,
@@ -46,7 +58,7 @@ export async function POST(req: NextRequest) {
         throw new Error('Failed to create Stripe session.');
     }
 
-    // Create a payment document in Firestore before redirecting
+    // Now, create the specific payment document for this session.
     const paymentRef = doc(firestore, `users/${uid}/payments/${session.id}`);
     await setDoc(paymentRef, {
       status: 'created',
@@ -54,6 +66,10 @@ export async function POST(req: NextRequest) {
       createdAt: serverTimestamp(),
       stripeSessionId: session.id,
     });
+    
+    // Optionally delete the temporary document
+    await setDoc(tempPaymentRef, { status: 'migrated' }, { merge: true });
+
 
     return NextResponse.json({ sessionId: session.id });
 
