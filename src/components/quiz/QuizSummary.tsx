@@ -14,6 +14,16 @@ import { Edit, Loader2 } from 'lucide-react';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getLabel } from '@/lib/i18n';
 import { convertCmToFtIn, convertWeight, roundToTwo } from '@/lib/unit-conversion';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
+
+const signUpSchema = z.object({
+  email: z.string().email({ message: 'Пожалуйста, введите корректный email.' }),
+  password: z.string().min(8, { message: 'Пароль должен содержать не менее 8 символов.' }),
+  consent: z.boolean().refine(val => val === true, { message: 'Вы должны согласиться с условиями.' }),
+});
 
 const QuizSummary = () => {
   const { state, jumpToQuestion, submitQuiz } = useQuizEngine();
@@ -22,29 +32,23 @@ const QuizSummary = () => {
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [consent, setConsent] = useState(false);
-  const [error, setError] = useState('');
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    if (password.length < 8) {
-      setError('Пароль должен содержать не менее 8 символов.');
-      return;
-    }
-    if (!consent) {
-      setError('Вы должны согласиться с условиями.');
-      return;
-    }
+  const form = useForm<z.infer<typeof signUpSchema>>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      consent: false,
+    },
+  });
 
+  const handleSignUp = async (values: z.infer<typeof signUpSchema>) => {
     setIsLoading(true);
     track('sign_up_attempt');
 
     try {
       const auth = getAuth();
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const newUser = userCredential.user;
       
       track('sign_up_success', { uid: newUser.uid });
@@ -63,19 +67,9 @@ const QuizSummary = () => {
     } catch (error: any) {
       track('sign_up_failure', { error: error.message });
       if (error.code === 'auth/email-already-in-use') {
-        setError('Этот адрес электронной почты уже используется.');
-        toast({
-          variant: 'destructive',
-          title: 'Ошибка регистрации',
-          description: 'Этот email уже используется. Пожалуйста, попробуйте другой или войдите в систему.',
-        });
+        form.setError('email', { type: 'manual', message: 'Этот адрес электронной почты уже используется.'});
       } else {
-        setError('Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.');
-        toast({
-          variant: 'destructive',
-          title: 'Ошибка регистрации',
-          description: 'Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.',
-        });
+        form.setError('root', { type: 'manual', message: 'Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.' });
       }
     } finally {
       setIsLoading(false);
@@ -93,9 +87,9 @@ const QuizSummary = () => {
     ? `${roundToTwo(weightKg || 0)} kg`
     : `${roundToTwo(convertWeight(weightKg || 0, 'kg', 'lb'))} lb`;
     
-  const displayGoalWeight = unitWeight === 'metric'
+  const displayGoalWeight = goalWeightKg ? (unitWeight === 'metric'
     ? `${roundToTwo(goalWeightKg || 0)} kg`
-    : `${roundToTwo(convertWeight(goalWeightKg || 0, 'kg', 'lb'))} lb`;
+    : `${roundToTwo(convertWeight(goalWeightKg || 0, 'kg', 'lb'))} lb`) : 'Not set';
 
 
   const summaryItems = [
@@ -106,7 +100,7 @@ const QuizSummary = () => {
       ...(name ? [{ id: 'name', label: 'Имя', value: name }] : []),
       ...(age ? [{ id: 'age', label: 'Возраст', value: age }] : []),
       ...(diet_style ? [{ id: 'diet_style', label: 'Стиль диеты', value: diet_style }] : []),
-  ].filter(item => item.value !== undefined && item.value !== null && item.value !== '');
+  ].filter(item => item.value !== undefined && item.value !== null && item.value !== '' && item.id !== 'goal_weight' || (item.id === 'goal_weight' && goalWeightKg));
 
   if (isUserLoading) {
       return <Card className="p-8"><Loader2 className="animate-spin" /></Card>;
@@ -131,7 +125,7 @@ const QuizSummary = () => {
                         Ред.
                         </Button>
                     </div>
-                    <p className="text-foreground text-base">{item.value}</p>
+                    <p className="text-foreground text-base">{String(item.value)}</p>
                 </div>
             ))}
           </div>
@@ -141,25 +135,55 @@ const QuizSummary = () => {
         {!user && (
           <div className="bg-muted/50 p-6 rounded-lg">
             <h3 className="font-bold text-lg mb-4">Создайте аккаунт, чтобы сохранить</h3>
-            <form onSubmit={handleSignUp} className="space-y-4">
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="password">Пароль</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="consent" checked={consent} onCheckedChange={(c) => setConsent(c as boolean)} />
-                <Label htmlFor="consent" className="text-sm font-normal">Я согласен с условиями использования.</Label>
-              </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Сохранить мой план
-              </Button>
-            </form>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSignUp)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label htmlFor="email">Email</Label>
+                      <FormControl>
+                        <Input id="email" type="email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label htmlFor="password">Пароль</Label>
+                      <FormControl>
+                        <Input id="password" type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="consent"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center space-x-2 pt-2">
+                       <FormControl>
+                          <Checkbox id="consent" checked={field.value} onCheckedChange={field.onChange} />
+                       </FormControl>
+                      <Label htmlFor="consent" className="text-sm font-normal !mt-0">Я согласен с условиями использования.</Label>
+                    </FormItem>
+                  )}
+                />
+                 {form.formState.errors.consent && <FormMessage>{form.formState.errors.consent.message}</FormMessage>}
+                 {form.formState.errors.root && <p className="text-sm text-destructive">{form.formState.errors.root.message}</p>}
+
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Сохранить мой план
+                </Button>
+              </form>
+            </Form>
             <p className="text-xs text-muted-foreground mt-4 text-center">
                 <Button variant="link" className="text-xs p-0 h-auto" disabled>Продолжить без аккаунта</Button>
             </p>
