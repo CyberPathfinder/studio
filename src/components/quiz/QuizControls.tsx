@@ -65,7 +65,8 @@ const QuizControls = () => {
         variant="ghost"
         onClick={prevQuestion}
         disabled={state.isFirstQuestion}
-        aria-label="Go to previous step"
+        aria-label="Go to previous step (Shift + Enter)"
+        data-quiz-nav="prev"
         className={state.isFirstQuestion ? 'invisible' : 'visible'}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -83,12 +84,12 @@ const QuizControls = () => {
             </Button>
         )}
         {state.isLastQuestion ? (
-            <Button onClick={handleNext} aria-label="Finish Quiz" disabled={isNextDisabled}>
+            <Button onClick={handleNext} aria-label="Finish Quiz (Enter)" data-quiz-nav="next" disabled={isNextDisabled}>
                 Finish
                 <Check className="ml-2 h-4 w-4" />
             </Button>
         ) : (
-            <Button onClick={handleNext} aria-label="Go to next step" disabled={isNextDisabled}>
+            <Button onClick={handleNext} aria-label="Go to next step (Enter)" data-quiz-nav="next" disabled={isNextDisabled}>
                 Next
                 <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
