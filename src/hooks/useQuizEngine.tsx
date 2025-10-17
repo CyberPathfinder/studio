@@ -52,13 +52,13 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     const { currentQuestion, answers, isLastQuestion } = state;
     if (!currentQuestion) return { isValid: false, message: 'No current question' };
 
-    if (!skipValidation) {
+    if (!skipValidation && (currentQuestion.type !== 'number' && currentQuestion.type !== 'text')) {
         const { isValid, message } = validateAnswer(currentQuestion, answers[currentQuestion.id]);
         if (!isValid) {
           return { isValid: false, message };
         }
     }
-
+    
     if (isLastQuestion) {
         completeQuiz();
         return; // Explicitly return nothing
@@ -77,7 +77,6 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     
     // If no next question is found (we are on the last visible question), complete the quiz
     completeQuiz();
-    return;
 
   }, [state, config.questions, track, completeQuiz]);
 
