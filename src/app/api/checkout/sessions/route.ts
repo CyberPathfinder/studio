@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { doc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase/server'; // Assumes server-side initialization
+import { logger } from '@/lib/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-06-20',
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ sessionId: session.id });
 
   } catch (error: any) {
-    console.error('Stripe Checkout Session Error:', error);
+    logger.error('Stripe Checkout Session Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

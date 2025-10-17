@@ -14,6 +14,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { VivaFormLogo } from "../icons/logo";
+import { logger } from "@/lib/logger";
 
 const LOCAL_STORAGE_KEY = "vf_sidebar_open";
 
@@ -159,7 +160,7 @@ export const QuizLayout = ({ children }: { children: React.ReactNode }) => {
                 setIsSidebarOpen(JSON.parse(savedState));
             }
         } catch (error) {
-            console.error("Could not parse sidebar state from localStorage", error);
+            logger.error("Could not parse sidebar state from localStorage", error);
         }
     }, []);
 
@@ -169,7 +170,7 @@ export const QuizLayout = ({ children }: { children: React.ReactNode }) => {
             try {
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newState));
             } catch (error) {
-                console.error("Could not save sidebar state to localStorage", error);
+                logger.error("Could not save sidebar state to localStorage", error);
             }
             return newState;
         });

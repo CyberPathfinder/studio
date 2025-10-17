@@ -3,6 +3,7 @@
 import { doc, getDoc, setDoc, deleteDoc, writeBatch, Firestore } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { logger } from '@/lib/logger';
 
 // This is a helper function to get firestore, you might have this in a different place
 function getFirestore(): Firestore {
@@ -31,7 +32,7 @@ export const saveQuizDraft = (
       requestResourceData: draftData,
     });
     errorEmitter.emit('permission-error', contextualError);
-    // console.error("Error saving quiz draft:", error);
+    // logger.error("Error saving quiz draft:", error);
   });
 };
 
@@ -56,7 +57,7 @@ export const getQuizDraft = async (
   } catch (error) {
     // This could be a permission error, but getDoc doesn't provide enough context
     // for our custom error. We'll log it for now.
-    console.error("Error getting quiz draft:", error);
+    logger.error("Error getting quiz draft:", error);
     return null;
   }
 };
@@ -91,7 +92,7 @@ export const saveIntakeData = async (
             requestResourceData: intakeData,
         });
         errorEmitter.emit('permission-error', contextualError);
-        // console.error("Error committing intake data batch:", error);
+        // logger.error("Error committing intake data batch:", error);
         // Re-throw to be caught by the calling function
         throw error;
     });
@@ -112,6 +113,6 @@ export const deleteQuizDraft = async (userId: string, quizId: string) => {
       operation: 'delete',
     });
     errorEmitter.emit('permission-error', contextualError);
-    // console.error("Error deleting quiz draft:", error);
+    // logger.error("Error deleting quiz draft:", error);
   });
 };

@@ -1,9 +1,11 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 /**
  * An invisible component that listens for globally emitted 'permission-error' events.
@@ -21,7 +23,7 @@ export function FirebaseErrorListener() {
             setError(error);
         } else {
             // In production, show a generic toast and log the error
-            console.error('Firestore Permission Error:', error);
+            logger.error('Firestore Permission Error:', error);
             toast({
                 variant: 'destructive',
                 title: 'Permission Denied',

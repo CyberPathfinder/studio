@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { XCircle, Loader2 } from 'lucide-react';
 import { useFirebase } from '@/firebase';
 import { doc, getFirestore, setDoc, serverTimestamp } from 'firebase/firestore';
+import { logger } from '@/lib/logger';
 
 function CancelContent() {
     const searchParams = useSearchParams();
@@ -24,7 +25,7 @@ function CancelContent() {
                     await setDoc(paymentRef, { status: 'cancelled', updatedAt: serverTimestamp() }, { merge: true });
                 } catch (err) {
                     // Log the error but don't block the user. The main goal is to inform them.
-                    console.error("Error updating payment status to cancelled:", err);
+                    logger.error("Error updating payment status to cancelled:", err);
                 }
             };
             updatePaymentStatus();

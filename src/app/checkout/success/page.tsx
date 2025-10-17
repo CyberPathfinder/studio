@@ -10,6 +10,7 @@ import { CheckCircle, Loader2, XCircle } from 'lucide-react';
 import { useFirebase } from '@/firebase';
 import { doc, getFirestore, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useAnalytics } from '@/hooks/use-analytics';
+import { logger } from '@/lib/logger';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -43,7 +44,7 @@ function SuccessContent() {
           planId: 'premium_monthly',
         });
       } catch (err) {
-        console.error("Error updating payment status:", err);
+        logger.error("Error updating payment status:", err);
         setError("Could not update your payment status. Please contact support.");
       } finally {
         setIsUpdating(false);
@@ -108,7 +109,7 @@ function SuccessContent() {
 export default function SuccessPage() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
-            <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div>}>
+            <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div>}>_
                 <SuccessContent />
             </Suspense>
         </div>
