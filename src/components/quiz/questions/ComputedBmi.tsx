@@ -5,7 +5,7 @@ import { Question } from '@/lib/quiz-engine/config';
 import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useEffect, useMemo } from 'react';
 import { getLabel, getDescription } from '@/lib/i18n';
-import { calculateBmi } from '@/lib/unit-conversion';
+import { computeBmi } from '@/lib/unit-conversion';
 
 const ComputedBmi = ({ question }: { question: Question }) => {
   const { state, handleAnswerChange } = useQuizEngine();
@@ -14,7 +14,7 @@ const ComputedBmi = ({ question }: { question: Question }) => {
 
   const bmi = useMemo(() => {
     if (heightCm && weightKg) {
-      return calculateBmi(weightKg, heightCm);
+      return computeBmi(weightKg, heightCm);
     }
     return null;
   }, [heightCm, weightKg]);

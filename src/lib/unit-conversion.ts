@@ -76,13 +76,15 @@ export const normalizeInches = (feet: number, inches: number): { normalizedFeet:
  * Calculates BMI from weight in kg and height in cm.
  * @param weightKg Weight in kilograms.
  * @param heightCm Height in centimeters.
- * @returns The calculated BMI, or null if inputs are invalid.
+ * @returns The calculated BMI, rounded to one decimal place, or undefined if inputs are invalid.
  */
-export const calculateBmi = (weightKg: number, heightCm: number): number | null => {
-    if (!weightKg || !heightCm || heightCm <=0) return null;
+export const computeBmi = (weightKg?: number, heightCm?: number): number | undefined => {
+    if (!weightKg || !heightCm || heightCm <=0) return undefined;
     const heightM = heightCm / 100;
-    return roundToTwo(weightKg / (heightM * heightM));
+    const bmi = weightKg / (heightM * heightM);
+    return +bmi.toFixed(1);
 }
+
 
 /**
  * Calculates a "healthy" weight range based on BMI.
