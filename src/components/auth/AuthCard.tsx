@@ -74,7 +74,7 @@ export function AuthCard({ mode }: AuthCardProps) {
           email: user.email,
           createdAt: serverTimestamp(),
           version: 1,
-        });
+        }, { merge: true });
 
         // 2. Create initial intake document
         const intakeRef = doc(db, `users/${user.uid}/intake/initial`);
