@@ -7,6 +7,7 @@ import { useReducer, useCallback, useMemo, useContext, createContext, ReactNode,
 import { useAnalytics } from './use-analytics';
 import { useDebouncedCallback } from 'use-debounce';
 import { saveIntakeData } from '@/firebase/quiz';
+import { useOnceEvent } from './use-once-event';
 
 type QuizEngineContextType = {
   state: ReturnType<typeof quizReducer>;
@@ -27,47 +28,25 @@ const QuizEngineContext = createContext<QuizEngineContextType | null>(null);
 export const QuizEngineProvider = ({ children, config }: { children: ReactNode, config: QuizConfig }) => {
   const { track } = useAnalytics();
   const [state, dispatch] = useReducer(quizReducer, getInitialState(config));
+  const { trackOnce } = useOnceEvent(state.currentQuestionId || 'init');
 
-  // Track step view
+
+  // Track step view, but only once per step ID.
   useEffect(() => {
     if (state.currentQuestionId) {
-      track('quiz_step_view', { step: state.currentQuestionId });
+      trackOnce('quiz_step_view', { step: state.currentQuestionId });
     }
-  }, [state.currentQuestionId, track]);
+  }, [state.currentQuestionId, trackOnce]);
 
 
   const initializeState = useCallback((initialAnswers: Record<string, any>, currentQuestionId: string | null = null) => {
     dispatch({ type: 'INITIALIZE_STATE', payload: { config, initialAnswers, currentQuestionId } });
   }, [config]);
 
-   const debouncedTrackAnswer = useDebouncedCallback((analyticsKey: string, value: any, answers: Record<string, any>) => {
-    if (analyticsKey) {
-        let payload:any = { analyticsKey, value };
 
-        if (analyticsKey === 'bmi_calc' && answers.body?.heightCm && answers.body?.weightKg) {
-            payload.heightCm = answers.body.heightCm;
-            payload.weightKg = answers.body.weightKg;
-        }
-
-        // Add special payload for goal_weight
-        if (analyticsKey === 'goal_weight_kg' && answers.body?.weightKg > 0 && value > 0) {
-            const delta = value - answers.body.weightKg;
-            const deltaPct = (delta / answers.body.weightKg) * 100;
-            payload.delta = delta;
-            payload.deltaPct = deltaPct;
-        }
-
-        track('quiz_answer', payload);
-    }
-  }, 1000);
-
-  const handleAnswerChange = useCallback((questionId: string, value: any, analyticsKey?: string) => {
+  const handleAnswerChange = useCallback((questionId: string, value: any) => {
     dispatch({ type: 'SET_ANSWER', payload: { questionId, value } });
-    if (analyticsKey) {
-        const updatedAnswers = { ...state.answers, [questionId]: value };
-        debouncedTrackAnswer(analyticsKey, value, updatedAnswers);
-    }
-  }, [debouncedTrackAnswer, state.answers]);
+  }, []);
 
   const completeQuiz = useCallback(() => {
     track('quiz_complete');
@@ -84,6 +63,12 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
         if (!isValid) {
           return { isValid: false, message };
         }
+    }
+
+    // Fire analytics event for the answer on successful validation/progression
+    if (currentQuestion.analytics_key) {
+        let payload: any = { analyticsKey: currentQuestion.analytics_key, value: answers[currentQuestion.id] };
+        track('quiz_answer', payload);
     }
     
     if (isLastQuestion) {
@@ -104,14 +89,13 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     // If no next question is found (we are on the last visible question), complete the quiz
     completeQuiz();
 
-  }, [state, config.questions, completeQuiz]);
+  }, [state, config.questions, completeQuiz, track]);
 
   const prevQuestion = useCallback(() => {
     const { answers } = state;
     if (state.status === 'completed') {
         const lastQuestionIndex = config.questions.map(q => evaluateBranchingLogic(q.branching, answers)).lastIndexOf(true);
         dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: lastQuestionIndex });
-        track('quiz_step_view', { step: config.questions[lastQuestionIndex].id });
         return;
     }
 
@@ -124,7 +108,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
       }
       prevIndex--;
     }
-  }, [state, config.questions, track]);
+  }, [state, config.questions]);
   
   const jumpToQuestion = useCallback((questionId: string) => {
       const questionIndex = config.questions.findIndex(q => q.id === questionId);
@@ -234,3 +218,5 @@ export const QuizProvider = ({ children, config }: { children: ReactNode, config
         {children}
     </QuizEngineProvider>
 );
+
+    
