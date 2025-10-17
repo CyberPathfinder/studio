@@ -14,9 +14,9 @@ const Height = ({ question }: { question: Question }) => {
   
   const { 
     unitHeight = 'metric', 
-    heightCmView = '', 
-    heightFtView = '', 
-    heightInView = '' 
+    heightCmView, 
+    heightFtView, 
+    heightInView 
   } = state.answers.body || {};
 
   const handleUnitChange = (newUnit: 'metric' | 'imperial') => {
@@ -24,32 +24,32 @@ const Height = ({ question }: { question: Question }) => {
   }
 
   const handleViewChange = (field: 'heightCmView' | 'heightFtView' | 'heightInView', value: string) => {
-    dispatch({ type: 'SET_BODY_VIEW_FIELD', payload: { field, value }});
+    dispatch({ type: 'SET_BODY_VIEW_FIELD', payload: { field, value, analyticsKey: question.analytics_key }});
   }
 
   return (
     <div className="w-full">
       <CardHeader className="text-center p-0 mb-8">
-        <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
-        {getDescription(question) && <CardDescription>{getDescription(question)}</CardDescription>}
+        <CardTitle className="font-headline text-3xl">{getLabel(question, 'ru')}</CardTitle>
+        {getDescription(question) && <CardDescription className="mt-2">{getDescription(question)}</CardDescription>}
       </CardHeader>
 
-       <div className='flex justify-center mb-4'>
+       <div className='flex justify-center mb-6'>
             <RadioGroup
               value={unitHeight}
               onValueChange={handleUnitChange}
-              className="flex rounded-md border p-1"
+              className="flex rounded-md border p-1 bg-muted/50"
             >
               <RadioGroupItem value="metric" id="cm" className="sr-only" />
-              <Label htmlFor="cm" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitHeight === 'metric' && "bg-muted font-semibold")}>cm</Label>
+              <Label htmlFor="cm" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitHeight === 'metric' && "bg-background font-semibold shadow-sm")}>Сантиметры (cm)</Label>
               <RadioGroupItem value="imperial" id="ft_in" className="sr-only" />
-              <Label htmlFor="ft_in" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitHeight === 'imperial' && "bg-muted font-semibold")}>ft, in</Label>
+              <Label htmlFor="ft_in" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitHeight === 'imperial' && "bg-background font-semibold shadow-sm")}>Футы/дюймы (ft/in)</Label>
             </RadioGroup>
       </div>
 
       {unitHeight === 'metric' ? (
         <div>
-          <Label htmlFor={`${question.id}-cm`} className="sr-only">Height in cm</Label>
+          <Label htmlFor={`${question.id}-cm`} className="sr-only">Рост (см)</Label>
           <Input
             id={`${question.id}-cm`}
             type="number"
@@ -57,13 +57,13 @@ const Height = ({ question }: { question: Question }) => {
             value={heightCmView}
             onChange={(e) => handleViewChange('heightCmView', e.target.value)}
             placeholder="e.g., 175"
-            className="text-center text-lg h-12 mt-2 max-w-xs mx-auto"
+            className="text-center text-lg h-14 mt-2 max-w-xs mx-auto"
           />
         </div>
       ) : (
         <div className="flex items-center gap-4 justify-center">
           <div>
-            <Label htmlFor={`${question.id}-ft`}>Feet</Label>
+            <Label htmlFor={`${question.id}-ft`}>Футы</Label>
             <Input
               id={`${question.id}-ft`}
               type="number"
@@ -71,11 +71,11 @@ const Height = ({ question }: { question: Question }) => {
               value={heightFtView}
               onChange={(e) => handleViewChange('heightFtView', e.target.value)}
               placeholder="e.g., 5"
-              className="text-center text-lg h-12 mt-2"
+              className="text-center text-lg h-14 mt-2"
             />
           </div>
           <div>
-            <Label htmlFor={`${question.id}-in`}>Inches</Label>
+            <Label htmlFor={`${question.id}-in`}>Дюймы</Label>
             <Input
               id={`${question.id}-in`}
               type="number"
@@ -83,11 +83,12 @@ const Height = ({ question }: { question: Question }) => {
               value={heightInView}
               onChange={(e) => handleViewChange('heightInView', e.target.value)}
               placeholder="e.g., 9"
-              className="text-center text-lg h-12 mt-2"
+              className="text-center text-lg h-14 mt-2"
             />
           </div>
         </div>
       )}
+       <p className="text-center text-sm text-muted-foreground mt-6">Можно переключать единицы — значения конвертируются автоматически.</p>
     </div>
   );
 };

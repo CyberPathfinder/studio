@@ -1,12 +1,11 @@
 
-
 import { QuizConfig, Question, Section } from './config';
 import { evaluateBranchingLogic } from './utils';
 import { convertCmToFtIn, convertFtInToCm, convertWeight, normalizeInches, roundToTwo } from '@/lib/unit-conversion';
 
 type UnitPref = 'metric' | 'imperial';
 
-interface BodyAnswers {
+export interface BodyAnswers {
   unitHeight: UnitPref;
   unitWeight: UnitPref;
 
@@ -30,7 +29,7 @@ interface BodyAnswers {
 export interface QuizState {
   config: QuizConfig;
   answers: {
-    body?: BodyAnswers;
+    body: BodyAnswers;
     [key: string]: any;
   };
   currentQuestionId: string | null;
@@ -90,7 +89,7 @@ type Action =
   | { type: 'SET_BODY_CANONICAL'; payload: { field: 'heightCm' | 'weightKg' | 'goalWeightKg', value: number | null, analyticsKey?: string } };
 
 export const quizReducer = (state: QuizState, action: Action): QuizState => {
-  let newState = { ...state, answers: { ...state.answers, body: { ...state.answers.body! } } };
+  let newState = { ...state, answers: { ...state.answers, body: { ...state.answers.body } as BodyAnswers } };
   
   switch (action.type) {
     case 'INITIALIZE_STATE':
@@ -151,16 +150,21 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
             body.heightCm = parseFloat(value) || undefined;
         } else if (field === 'heightFtView' || field === 'heightInView') {
             const feet = parseFloat(body.heightFtView) || 0;
-            const inches = parseFloat(body.heightInView) || 0;
-            const { normalizedFeet, normalizedInches } = normalizeInches(feet, inches);
-            body.heightFtView = normalizedFeet.toString();
-            body.heightInView = normalizedInches.toString();
-            body.heightCm = convertFtInToCm(normalizedFeet, normalizedInches) || undefined;
+            let inches = parseFloat(body.heightInView) || 0;
+
+            if (field === 'heightInView' && inches >= 12) {
+              const { normalizedFeet, normalizedInches } = normalizeInches(feet, inches);
+              body.heightFtView = normalizedFeet.toString();
+              body.heightInView = normalizedInches.toString();
+              body.heightCm = convertFtInToCm(normalizedFeet, normalizedInches) || undefined;
+            } else {
+              body.heightCm = convertFtInToCm(feet, inches) || undefined;
+            }
         } else if (field === 'weightKgView' || field === 'weightLbView' || field === 'goalWeightKgView' || field === 'goalWeightLbView') {
             const isGoal = field.startsWith('goal');
             const unit = body.unitWeight;
             const canonicalField = isGoal ? 'goalWeightKg' : 'weightKg';
-            const valueKg = (unit === 'metric' && (field === 'weightKgView' || field === 'goalWeightKgView'))
+            const valueKg = (unit === 'metric' && (field.endsWith('KgView')))
               ? parseFloat(value)
               : convertWeight(parseFloat(value), 'lb', 'kg');
 
@@ -180,7 +184,7 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
             const { feet, inches } = convertCmToFtIn(value);
             body.heightCmView = value ? roundToTwo(value).toString() : '';
             body.heightFtView = feet.toString();
-            body.heightInView = inches.toString();
+            body.heightInView = roundToTwo(inches).toString();
         } else if (field === 'weightKg') {
             body.weightKgView = value ? roundToTwo(value).toString() : '';
             body.weightLbView = value ? roundToTwo(convertWeight(value, 'kg', 'lb')).toString() : '';
@@ -197,9 +201,22 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
         const body = newState.answers.body!;
 
         if (unitType === 'height') {
+          if (body.unitHeight === unit) break; // No change
           body.unitHeight = unit;
+          // Re-sync view from canonical
+          const { feet, inches } = convertCmToFtIn(body.heightCm);
+          body.heightCmView = body.heightCm ? roundToTwo(body.heightCm).toString() : '';
+          body.heightFtView = feet.toString();
+          body.heightInView = roundToTwo(inches).toString();
+
         } else if (unitType === 'weight') {
+          if (body.unitWeight === unit) break; // No change
           body.unitWeight = unit;
+          // Re-sync view from canonical
+          body.weightKgView = body.weightKg ? roundToTwo(body.weightKg).toString() : '';
+          body.weightLbView = body.weightKg ? roundToTwo(convertWeight(body.weightKg, 'kg', 'lb')).toString() : '';
+          body.goalWeightKgView = body.goalWeightKg ? roundToTwo(body.goalWeightKg).toString() : '';
+          body.goalWeightLbView = body.goalWeightKg ? roundToTwo(convertWeight(body.goalWeightKg, 'kg', 'lb')).toString() : '';
         }
         break;
     }

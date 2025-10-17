@@ -1,3 +1,4 @@
+
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,17 @@ import { evaluateBranchingLogic } from '@/lib/quiz-engine/utils';
 const QuizControls = () => {
   const { state, nextQuestion, prevQuestion, canSkip } = useQuizEngine();
   const { toast } = useToast();
+
+  const isNextDisabled = useMemo(() => {
+    const q = state.currentQuestion;
+    if (!q) return true;
+    if (q.id === 'height' && (!state.answers.body?.heightCm || state.answers.body.heightCm < 120 || state.answers.body.heightCm > 230)) {
+        return true;
+    }
+    // Add more complex validation logic here if needed
+    return false;
+  }, [state.currentQuestion, state.answers.body]);
+
 
   const handleNext = () => {
     const result = nextQuestion();
@@ -59,12 +71,12 @@ const QuizControls = () => {
             </Button>
         )}
         {state.isLastQuestion ? (
-            <Button onClick={handleNext} aria-label="Finish Quiz (Enter)">
+            <Button onClick={handleNext} aria-label="Finish Quiz (Enter)" disabled={isNextDisabled}>
                 Finish
                 <Check className="ml-2 h-4 w-4" />
             </Button>
         ) : (
-            <Button onClick={handleNext} aria-label="Go to next step (Enter)">
+            <Button onClick={handleNext} aria-label="Go to next step (Enter)" disabled={isNextDisabled}>
                 Next
                 <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

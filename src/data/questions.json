@@ -41,8 +41,11 @@
       "order": 3,
       "type": "height",
       "label": "What is your height?",
-      "ui": { "unit_toggle": ["cm", "ft_in"] },
-      "validation": { "required": true, "min": 100, "max": 250 },
+      "i18n": {
+        "en": { "label": "What is your height?" },
+        "ru": { "label": "Какой у тебя рост?" }
+      },
+      "validation": { "required": true, "min": 120, "max": 230 },
       "analytics_key": "height_cm"
     },
     {
@@ -52,7 +55,6 @@
       "type": "weight",
       "label": "What’s your current weight?",
       "description": "We’ll use this to tailor your plan.",
-      "ui": { "unit_toggle": ["kg", "lb"] },
       "validation": { "required": true, "min": 35, "max": 300 },
       "analytics_key": "weight_kg"
     },
@@ -63,19 +65,18 @@
       "type": "computed_bmi",
       "label": "Your BMI",
       "description": "BMI is an estimate we use to personalize your plan.",
-      "branching": { "show_if": "answers['height'] && answers['weight']" },
+      "branching": { "show_if": "answers.body.heightCm && answers.body.weightKg" },
       "analytics_key": "bmi"
     },
     {
         "id": "goal_weight",
-        "section": "goals",
+        "section": "body",
         "order": 6,
         "type": "weight",
         "label": "What's your goal weight?",
         "description": "Set a goal you're comfortable with. You can always change it later.",
-        "ui": { "unit_toggle": ["kg", "lb"] },
         "validation": { "required": true, "min": 35, "max": 300 },
-        "analytics_key": "goal_weight"
+        "analytics_key": "goal_weight_kg"
     },
     {
         "id": "goal_confirm",
@@ -85,7 +86,7 @@
         "label": "Great!",
         "emoji": "🎉",
         "description": "You've set your first goal. You can change this at any time.",
-        "branching": { "show_if": "answers['goal_weight']" }
+        "branching": { "show_if": "answers.body.goalWeightKg" }
     },
     {
       "id": "sex",
