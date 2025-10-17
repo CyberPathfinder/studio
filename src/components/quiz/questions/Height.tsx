@@ -96,6 +96,7 @@ const Height = ({ question }: { question: Question }) => {
           <Input
             id={`${question.id}-cm`}
             type="number"
+            inputMode='decimal'
             value={cmValue}
             onChange={onCmChange}
             placeholder="e.g., 175"
@@ -109,6 +110,7 @@ const Height = ({ question }: { question: Question }) => {
             <Input
               id={`${question.id}-ft`}
               type="number"
+              inputMode='decimal'
               value={ftValue}
               onChange={(e) => onFtInChange('ft', e.target.value)}
               placeholder="e.g., 5"
@@ -120,6 +122,7 @@ const Height = ({ question }: { question: Question }) => {
             <Input
               id={`${question.id}-in`}
               type="number"
+              inputMode='decimal'
               value={inValue}
               onChange={(e) => onFtInChange('in', e.target.value)}
               placeholder="e.g., 9"

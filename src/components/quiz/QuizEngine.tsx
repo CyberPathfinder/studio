@@ -1,5 +1,3 @@
-
-
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -11,13 +9,15 @@ import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger, SidebarContent,
 import { VivaFormLogo } from '../icons/logo';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
-import { CheckCircle, Circle, Edit, Lock, LogOut } from 'lucide-react';
+import { CheckCircle, Circle, Edit, Lock, LogOut, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
 import QuizSummary from './QuizSummary';
 import { getLabel } from '@/lib/i18n';
 import { evaluateBranchingLogic } from '@/lib/quiz-engine/utils';
+import { Sheet, SheetTrigger, SheetContent as MobileSheetContent } from '../ui/sheet';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 
 const QuizSummarySidebar = () => {
@@ -26,8 +26,7 @@ const QuizSummarySidebar = () => {
 
     const answeredQuestionIds = new Set(Object.keys(answers).filter(k => answers[k] !== null && answers[k] !== undefined && answers[k] !== ''));
 
-    return (
-      <SidebarContent>
+    const content = (
         <ScrollArea className="h-full">
             <SidebarMenu>
                 {config.sections.map((section) => (
@@ -51,7 +50,7 @@ const QuizSummarySidebar = () => {
 
 
                                 return (
-                                    <li key={q.id}>
+                                    <li key={q.id} className="group">
                                         <button 
                                             onClick={() => !isFuture && jumpToQuestion(q.id)}
                                             disabled={isFuture}
@@ -74,15 +73,42 @@ const QuizSummarySidebar = () => {
                 ))}
             </SidebarMenu>
         </ScrollArea>
-      </SidebarContent>
     );
+
+    const isMobile = useIsMobile();
+
+    if (isMobile) {
+        return (
+             <Sheet>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="md:hidden">
+                        <Menu className="h-5 w-5" />
+                        <span className="sr-only">Open Menu</span>
+                    </Button>
+                </SheetTrigger>
+                <MobileSheetContent side="left" className="p-0 w-[300px]">
+                    <SidebarHeader className='p-2'>
+                        <VivaFormLogo />
+                    </SidebarHeader>
+                    {content}
+                </MobileSheetContent>
+            </Sheet>
+        )
+    }
+
+    return (
+        <SidebarContent>
+           {content}
+        </SidebarContent>
+    )
 };
 
 
 const QuizEngine = () => {
-  const { state, nextQuestion, prevQuestion } = useQuizEngine();
+  const { state } = useQuizEngine();
   const { currentQuestion } = state;
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
 
     // Keyboard navigation
@@ -134,7 +160,7 @@ const QuizEngine = () => {
 
   return (
     <SidebarProvider>
-        <Sidebar collapsible="icon" side="right">
+        <Sidebar collapsible="icon" side="right" className="hidden md:block">
              <SidebarHeader>
                 <VivaFormLogo />
             </SidebarHeader>
@@ -151,15 +177,18 @@ const QuizEngine = () => {
             </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-            <div className="relative flex min-h-screen flex-col items-center justify-center bg-muted/40 p-4">
-                <div className="absolute top-4 right-4 z-20">
+            <div className="relative flex min-h-screen flex-col items-center justify-center bg-muted/40 md:p-4">
+                <div className="absolute top-4 right-4 z-20 hidden md:block">
                     <SidebarTrigger />
                 </div>
+                 <div className="absolute top-4 left-4 z-20 md:hidden">
+                    <QuizSummarySidebar />
+                </div>
                 
-                <Card className="w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col">
-                    <div className="p-8 flex-grow">
+                <Card className="w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col h-screen md:h-auto md:max-h-[90vh]">
+                    <div className="p-4 md:p-8 flex-grow overflow-y-auto">
                         <QuizProgress />
-                        <div className="relative mt-8 h-[28rem] flex items-center justify-center">
+                        <div className="relative mt-8 min-h-[28rem] flex items-center justify-center">
                             <AnimatePresence mode="wait">
                             <motion.div
                                 key={state.currentQuestionId}
@@ -167,14 +196,18 @@ const QuizEngine = () => {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -50 }}
                                 transition={{ duration: 0.3 }}
-                                className="absolute w-full"
+                                className="absolute w-full px-4 md:px-0"
                             >
                                 {QuestionComponent ? <QuestionComponent question={currentQuestion} /> : <div>Unknown question type: {currentQuestion.type}</div>}
                             </motion.div>
                             </AnimatePresence>
                         </div>
                     </div>
-                    <div className="bg-muted/60 p-4 border-t">
+                    <div className={cn(
+                        "bg-muted/60 p-4 border-t",
+                        "md:relative",
+                        isMobile && "fixed bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm pb-[calc(1rem+env(safe-area-inset-bottom))]"
+                    )}>
                         <QuizControls />
                     </div>
                 </Card>

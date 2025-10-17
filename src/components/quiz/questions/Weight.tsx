@@ -73,6 +73,7 @@ const Weight = ({ question }: { question: Question }) => {
             <Input
               id={`${question.id}-weight`}
               type="number"
+              inputMode='decimal'
               value={displayWeight}
               onChange={onWeightInputChange}
               placeholder={unit === 'kg' ? 'e.g., 70' : 'e.g., 154'}

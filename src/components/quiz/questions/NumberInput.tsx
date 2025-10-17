@@ -62,7 +62,7 @@ const NumberInput = ({ question }: { question: Question }) => {
             render={({ field }) => (
               <FormItem>
                 <div className="flex items-center justify-center">
-                    <FormLabel htmlFor={question.id} className="text-xl">{getLabel(question)}</FormLabel>
+                    <FormLabel htmlFor={question.id} className="text-xl sr-only">{getLabel(question)}</FormLabel>
                     {description && (
                         <Popover>
                             <PopoverTrigger asChild>
@@ -78,6 +78,7 @@ const NumberInput = ({ question }: { question: Question }) => {
                   <Input
                     id={question.id}
                     type="number"
+                    inputMode='decimal'
                     placeholder={hint || ''}
                     min={question.validation?.min}
                     max={question.validation?.max}
