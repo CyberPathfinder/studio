@@ -31,7 +31,7 @@ const ComputedBmi = ({ question }: { question: Question }) => {
     <div className="w-full max-w-md mx-auto text-center">
       <CardHeader className="text-center p-0 mb-4">
         <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
-        {getDescription(question) && <CardDescription className="mt-2">{getDescription(question)}</CardDescription>}
+        <CardDescription className="mt-2">BMI is an estimate we use to personalize your plan.</CardDescription>
       </CardHeader>
       
       <div className="bg-primary/10 text-primary font-bold text-5xl rounded-lg p-8">

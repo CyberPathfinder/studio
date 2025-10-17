@@ -1,11 +1,7 @@
 
 const KG_TO_LB = 2.20462;
-const IN_TO_CM = 2.54;
-const FT_TO_IN = 12;
-
-
-type WeightUnit = 'kg' | 'lb';
-type HeightUnit = 'cm' | 'ft_in';
+const CM_TO_IN = 0.393701;
+const FT_TO_CM = 30.48;
 
 /**
  * Converts a weight value from a source unit to a target unit.
@@ -14,7 +10,7 @@ type HeightUnit = 'cm' | 'ft_in';
  * @param toUnit The unit to convert to ('kg' or 'lb').
  * @returns The converted weight value.
  */
-export const convertWeight = (value: number, fromUnit: WeightUnit, toUnit: WeightUnit): number => {
+export const convertWeight = (value: number, fromUnit: 'kg' | 'lb', toUnit: 'kg' | 'lb'): number => {
   if (fromUnit === toUnit || !value) {
     return value;
   }
@@ -24,7 +20,6 @@ export const convertWeight = (value: number, fromUnit: WeightUnit, toUnit: Weigh
   if (fromUnit === 'lb' && toUnit === 'kg') {
     return value / KG_TO_LB;
   }
-  // Should not happen with defined types
   return value;
 };
 
@@ -35,9 +30,9 @@ export const convertWeight = (value: number, fromUnit: WeightUnit, toUnit: Weigh
  */
 export const convertCmToFtIn = (cm: number): { feet: number, inches: number } => {
     if (!cm) return { feet: 0, inches: 0 };
-    const totalInches = cm / IN_TO_CM;
-    const feet = Math.floor(totalInches / FT_TO_IN);
-    const inches = Math.round(totalInches % FT_TO_IN);
+    const totalInches = cm * CM_TO_IN;
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
     return { feet, inches };
 };
 
@@ -48,8 +43,8 @@ export const convertCmToFtIn = (cm: number): { feet: number, inches: number } =>
  * @returns The height in centimeters.
  */
 export const convertFtInToCm = (feet: number, inches: number): number => {
-    const totalInches = (feet || 0) * FT_TO_IN + (inches || 0);
-    return totalInches * IN_TO_CM;
+    const totalInches = (feet || 0) * 12 + (inches || 0);
+    return totalInches / CM_TO_IN;
 }
 
 
