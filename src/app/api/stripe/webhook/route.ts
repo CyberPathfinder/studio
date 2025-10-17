@@ -1,7 +1,7 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import Stripe from 'stripe';
-import { doc, getDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { initializeFirebase } from '@/firebase/server';
 import { logger } from '@/lib/logger';
 import { getServerEnv } from '@/config/server-env';
@@ -46,7 +46,8 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.text();
-  const signature = headers().get('Stripe-Signature') as string;
+  const headerList = await headers();
+  const signature = headerList.get('Stripe-Signature') as string;
 
   let event: Stripe.Event;
 
@@ -60,10 +61,10 @@ export async function POST(req: NextRequest) {
   // Idempotency: Check if we've already processed this event.
   // We store events under the user's subcollection to keep data organized.
   // For events without a user context (like general account updates), you might store them in a root collection.
-  const eventRef = doc(firestore, `stripe_events/${event.id}`);
-  const eventDoc = await getDoc(eventRef);
+  const eventRef = firestore.doc(`stripe_events/${event.id}`);
+  const eventDoc = await eventRef.get();
 
-  if (eventDoc.exists()) {
+  if (eventDoc.exists) {
     logger.warn(`Webhook: Received duplicate event: ${event.id}, ignoring.`);
     return NextResponse.json({ ok: true, message: 'Already processed.' });
   }
@@ -108,16 +109,16 @@ const handleCheckoutSessionCompleted = async (session: Stripe.Checkout.Session, 
 
   if (session.payment_status === 'paid') {
     try {
-      const batch = writeBatch(firestore);
+      const batch = firestore.batch();
 
       // 1. Update the payment document
-      const paymentRef = doc(firestore, `users/${uid}/payments/${session.id}`);
+      const paymentRef = firestore.doc(`users/${uid}/payments/${session.id}`);
       batch.set(paymentRef, {
         status: 'success',
         planId: planId,
         amount: session.amount_total,
         currency: session.currency,
-        updatedAt: serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
         stripe: {
           customerId: session.customer,
           paymentIntentId: session.payment_intent,
@@ -125,20 +126,20 @@ const handleCheckoutSessionCompleted = async (session: Stripe.Checkout.Session, 
       }, { merge: true });
 
       // 2. Set the user's membership status
-      const membershipRef = doc(firestore, `users/${uid}/membership`, 'stripe');
+      const membershipRef = firestore.doc(`users/${uid}/membership/stripe`);
       batch.set(membershipRef, {
         tier: 'premium',
         source: 'stripe',
         active: true,
         planId: planId,
         stripeSessionId: session.id, // Store session ID for cross-referencing
-        updatedAt: serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       }, { merge: true });
 
       // 3. Record that this event has been processed for idempotency
-      const eventRef = doc(firestore, `stripe_events/${eventId}`);
-      batch.set(eventRef, {
-        processedAt: serverTimestamp(),
+      const processedEventRef = firestore.doc(`stripe_events/${eventId}`);
+      batch.set(processedEventRef, {
+        processedAt: FieldValue.serverTimestamp(),
         eventType: 'checkout.session.completed',
         uid: uid,
       });

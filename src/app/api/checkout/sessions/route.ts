@@ -1,7 +1,7 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import Stripe from 'stripe';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { initializeFirebase } from '@/firebase/server'; // Assumes server-side initialization
 import { logger } from '@/lib/logger';
 import { getServerEnv } from '@/config/server-env';
@@ -55,12 +55,15 @@ export async function POST(req: NextRequest) {
     // This allows us to have a record of the intent to purchase.
     // We use a temporary ID that we will replace with the session ID later if needed,
     // but for this flow, the session ID is what matters.
-    const tempPaymentRef = doc(firestore, `users/${uid}/payments`, 'pending_checkout');
-    await setDoc(tempPaymentRef, {
+    const tempPaymentRef = firestore.doc(`users/${uid}/payments/pending_checkout`);
+    await tempPaymentRef.set(
+      {
         status: 'pending',
         planId: planId,
-        createdAt: serverTimestamp(),
-    }, { merge: true });
+        createdAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
 
 
     // Create a Stripe Checkout Session
@@ -87,16 +90,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Now, create the specific payment document for this session.
-    const paymentRef = doc(firestore, `users/${uid}/payments/${session.id}`);
-    await setDoc(paymentRef, {
+    const paymentRef = firestore.doc(`users/${uid}/payments/${session.id}`);
+    await paymentRef.set({
       status: 'created',
       planId: planId,
-      createdAt: serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
       stripeSessionId: session.id,
     });
     
     // Optionally delete the temporary document
-    await setDoc(tempPaymentRef, { status: 'migrated' }, { merge: true });
+    await tempPaymentRef.set({ status: 'migrated' }, { merge: true });
 
 
     return NextResponse.json({ sessionId: session.id });

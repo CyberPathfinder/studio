@@ -1,7 +1,7 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import Stripe from 'stripe';
-import { doc, getDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { initializeFirebase } from '@/firebase/server';
 import { logger } from '@/lib/logger';
 import { getServerEnv } from '@/config/server-env';
@@ -57,9 +57,9 @@ export async function POST(req: NextRequest) {
     }
     
     // Check if we have already processed this payment
-    const membershipRef = doc(firestore, `users/${uid}/membership`, 'stripe');
-    const existingMembership = await getDoc(membershipRef);
-    if (existingMembership.exists() && existingMembership.data()?.stripeSessionId === sessionId) {
+    const membershipRef = firestore.doc(`users/${uid}/membership/stripe`);
+    const existingMembership = await membershipRef.get();
+    if (existingMembership.exists && existingMembership.data()?.stripeSessionId === sessionId) {
         logger.warn(`Webhook: Attempted to process already processed session: ${sessionId}`);
         return NextResponse.json({ ok: true, message: 'Already processed.' });
     }
@@ -67,16 +67,16 @@ export async function POST(req: NextRequest) {
     if (session.payment_status === 'paid') {
       const planId = session.metadata?.planId || 'unknown_plan';
 
-      const batch = writeBatch(firestore);
+      const batch = firestore.batch();
 
       // 1. Update the payment document
-      const paymentRef = doc(firestore, `users/${uid}/payments/${sessionId}`);
+      const paymentRef = firestore.doc(`users/${uid}/payments/${sessionId}`);
       batch.set(paymentRef, {
         status: 'success',
         planId: planId,
         amount: session.amount_total,
         currency: session.currency,
-        updatedAt: serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
         stripe: {
             customerId: session.customer,
             paymentIntentId: session.payment_intent,
@@ -90,8 +90,8 @@ export async function POST(req: NextRequest) {
         source: 'stripe',
         active: true,
         planId: planId,
-        stripeSessionId: sessionId, 
-        updatedAt: serverTimestamp(),
+        stripeSessionId: sessionId,
+        updatedAt: FieldValue.serverTimestamp(),
       }, { merge: true });
 
       await batch.commit();

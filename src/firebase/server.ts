@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import type { ServiceAccount } from 'firebase-admin';
 import { credential } from 'firebase-admin';
-import { getApp, getApps, initializeApp, type FirebaseOptions } from 'firebase-admin/app';
+import { getApp, getApps, initializeApp, type AppOptions } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 function loadServiceAccount(): ServiceAccount {
@@ -33,7 +33,7 @@ function loadServiceAccount(): ServiceAccount {
   );
 }
 
-const firebaseConfig: FirebaseOptions = {
+const firebaseConfig: AppOptions = {
   credential: credential.cert(loadServiceAccount()),
 };
 
