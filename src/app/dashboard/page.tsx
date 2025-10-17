@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -27,7 +28,7 @@ export default function DashboardPage() {
 
   const { data: intakeData, isLoading: isIntakeLoading, error: intakeError } = useDoc(intakeRef);
 
-  if (isUserLoading || (isIntakeLoading && !intakeError)) {
+  if (isUserLoading || (isIntakeLoading && !intakeData && !intakeError)) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
