@@ -127,7 +127,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
   };
 
 
-  const isInitialized = useMemo(() => state.status !== 'loading', [state.status]);
+  const isInitialized = useMemo(() => state.status === 'in-progress' || state.status === 'completed', [state.status]);
 
   const canSkip = useMemo(() => {
     if (!state.currentQuestion || !state.currentQuestion.validation) {

@@ -23,9 +23,17 @@ const QuizClientInternal = () => {
   } = useQuizEngine();
   const { track } = useAnalytics();
 
-  // 1. Check for drafts on load
+  // 1. Initialize the quiz engine immediately on mount.
   useEffect(() => {
-    if (isInitialized || isUserLoading) return;
+    if (!isInitialized) {
+        initializeState({}, null);
+    }
+  }, [isInitialized, initializeState]);
+
+  // 2. Check for drafts on load (after initial render)
+  useEffect(() => {
+    // Only check for drafts once, and don't run while checking auth state.
+    if (isUserLoading) return;
 
     let draftPromise: Promise<any | null>;
 
@@ -41,15 +49,17 @@ const QuizClientInternal = () => {
         setDraftToResume(draft);
         setShowResumePrompt(true);
       } else {
-        // No draft, initialize fresh
-        initializeState({});
+        // No draft, so we can track the start event.
+        // If there was a draft, this is handled in `handleResume`.
         track('quiz_start');
       }
     });
-  }, [user, isUserLoading, isInitialized, initializeState, track]);
+    // This effect should only run once when the user's auth state is resolved.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isUserLoading, quizConfig.quizId]);
 
 
-  // 2. Autosave logic (debounced in hook)
+  // 3. Autosave logic (debounced in hook)
   useEffect(() => {
     if (!state.isDirty || isUserLoading || !isInitialized) return;
 
@@ -75,7 +85,7 @@ const QuizClientInternal = () => {
       initializeState(draftToResume.answers, draftToResume.currentQuestionId);
       track('quiz_resume');
     } else {
-      initializeState({});
+      initializeState({}, null);
       if (user) {
         // If they chose not to resume, clear the server draft
         saveQuizDraft(user.uid, quizConfig.quizId, { answers: {}, currentQuestionId: null });
@@ -106,10 +116,15 @@ const QuizClientInternal = () => {
   );
 };
 
-const QuizClient = () => (
-    <QuizProvider config={quizConfig as any}>
-        <QuizClientInternal />
-    </QuizProvider>
-)
+const QuizClient = () => {
+    if (!quizConfig) {
+        return <div>Loading...</div>
+    }
+    return (
+        <QuizProvider config={quizConfig as any}>
+            <QuizClientInternal />
+        </QuizProvider>
+    )
+}
 
 export default QuizClient;
