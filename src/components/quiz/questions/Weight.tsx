@@ -62,16 +62,6 @@ const Weight = ({ question }: { question: Question }) => {
             });
         }
         
-        // Soft validation for ambitious goal weight
-        if (question.id === 'goal_weight') {
-            const currentWeight = state.answers['weight'];
-            if (currentWeight > newWeightInKg) { // It's a weight loss goal
-                const percentageLoss = ((currentWeight - newWeightInKg) / currentWeight) * 100;
-                if (percentageLoss > 25) {
-                    showAmbitiousGoalToast();
-                }
-            }
-        }
     }
     
     handleAnswerChange(question.id, isNaN(numericValue) ? null : newWeightInKg, question.analytics_key);

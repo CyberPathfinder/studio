@@ -56,44 +56,14 @@
       "analytics_key": "weight_kg"
     },
     {
-      "id": "goal_weight",
-      "section": "body",
-      "order": 5,
-      "type": "weight",
-      "label": "What’s your goal weight?",
-      "ui": { "unit_toggle": ["kg", "lb"] },
-      "validation": { "required": true, "min": 35, "max": 300 },
-      "analytics_key": "goal_weight"
-    },
-    {
-      "id": "goal_confirm",
-      "section": "body",
-      "order": 6,
-      "type": "message",
-      "label": "Great!",
-      "description": "You’ve set your first goal. You can change it later.",
-      "emoji": "🎉"
-    },
-    {
       "id": "bmi_calc",
       "section": "body",
-      "order": 7,
+      "order": 5,
       "type": "computed_bmi",
       "label": "Your BMI",
       "description": "BMI is an estimate we use to personalize your plan.",
       "branching": { "show_if": "answers['height'] && answers['weight']" },
       "analytics_key": "bmi"
-    },
-    {
-      "id": "bmi_education",
-      "section": "body",
-      "order": 8,
-      "type": "chart_bmi",
-      "label": "Risks of unhealthy BMI",
-      "ui": { "range": [16, 40], "healthy_zone": [18.5, 24.9] },
-      "description": "Reaching and maintaining a healthy BMI (18.5–24.9) can reduce the risk of several chronic conditions.",
-      "source": "National Institutes of Health",
-      "branching": { "show_if": "answers['bmi_calc']" }
     },
     {
       "id": "sex",
@@ -123,7 +93,7 @@
       "order": 11,
       "type": "profile_card",
       "label": "Your personal profile",
-      "branching": { "show_if": "answers['bmi_calc'] && answers['goal_weight'] && answers['name']" },
+      "branching": { "show_if": "answers['bmi_calc'] && answers['name']" },
       "ui": { "show_bmi_badge": true }
     },
     {
@@ -197,16 +167,6 @@
       "label": "Calculating your personal plan",
       "description": "Analyzing your profile…",
       "ui": { "progress": 18, "community_counter": { "men_30s": 147165, "weight_lost_tons": 396 } }
-    },
-    {
-      "id": "prediction",
-      "section": "summary",
-      "order": 19,
-      "type": "prediction",
-      "label": "Your predicted progress",
-      "description": "Based on your answers, we estimate your trajectory.",
-      "disclaimer": "This is an estimate based on similar members and not a guarantee.",
-      "branching": { "show_if": "answers['goal_weight'] && answers['weight'] && answers['name']" }
     },
     {
       "id": "halfway_msg",
