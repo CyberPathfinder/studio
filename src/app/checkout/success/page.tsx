@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { useFirebase } from '@/firebase';
 import { doc, getFirestore, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useAnalytics } from '@/hooks/use-analytics';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -16,6 +17,7 @@ function SuccessContent() {
   const { user } = useFirebase();
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(true);
+  const { track } = useAnalytics();
 
   useEffect(() => {
     if (sessionId && user) {
@@ -23,6 +25,12 @@ function SuccessContent() {
         try {
           const paymentRef = doc(getFirestore(), `users/${user.uid}/payments/${sessionId}`);
           await setDoc(paymentRef, { status: 'success', updatedAt: serverTimestamp() }, { merge: true });
+          track('checkout_success', {
+            transaction_id: sessionId,
+            value: 10, // Assuming a fixed value for now
+            currency: 'USD',
+            planId: 'premium_monthly',
+          });
         } catch (err) {
           console.error("Error updating payment status:", err);
           setError("Could not update your payment status. Please contact support.");
@@ -36,6 +44,7 @@ function SuccessContent() {
         if (!sessionId) setError("No session ID found.");
         if (!user) setError("You must be logged in to confirm a payment.");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId, user]);
 
   return (

@@ -91,5 +91,3 @@ This table shows which questions are conditional and what triggers their visibil
 | `workout_type`         | `workout_frequency`  | `answers['workout_frequency'] !== '0'`                                   |
 
 All questions have been validated and are correctly wired into the quiz engine.
-
-    

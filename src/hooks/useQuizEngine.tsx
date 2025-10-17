@@ -44,6 +44,11 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     if (analyticsKey) {
         let payload:any = { analyticsKey, value };
 
+        if (analyticsKey === 'bmi_calc' && answers.body?.heightCm && answers.body?.weightKg) {
+            payload.heightCm = answers.body.heightCm;
+            payload.weightKg = answers.body.weightKg;
+        }
+
         // Add special payload for goal_weight
         if (analyticsKey === 'goal_weight_kg' && answers.body?.weightKg > 0 && value > 0) {
             const delta = value - answers.body.weightKg;
@@ -150,7 +155,9 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
         preferences: {
             diet_style: answers.diet_style,
             food_prefs: answers.food_prefs,
-            meat_prefs: answers.meat_prefs
+            meat_prefs: answers.meat_prefs,
+            unitHeight: answers.body?.unitHeight,
+            unitWeight: answers.body?.unitWeight
         },
         habits: {
             activity_level: answers.activity,
@@ -177,7 +184,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     };
 
     await saveIntakeData(uid, 'initial', intakeData);
-    track('intake_saved');
+    track('intake_saved', { docPath: `users/${uid}/intake/initial` });
     // Also clear local draft if it exists
     localStorage.removeItem('vf_quiz_draft');
   };

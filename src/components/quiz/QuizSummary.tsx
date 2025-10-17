@@ -56,7 +56,7 @@ const QuizSummary = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const newUser = userCredential.user;
       
-      track('sign_up_success', { uid: newUser.uid });
+      track('sign_up_success', { uid: newUser.uid, method: 'password' });
       toast({
         title: 'Аккаунт создан!',
         description: 'Ваш аккаунт был успешно создан.',
@@ -91,6 +91,7 @@ const QuizSummary = () => {
       return;
     }
     setIsLoading(true);
+    track('checkout_start', { planId: 'premium_monthly' });
     try {
       const res = await fetch('/api/checkout/sessions', {
         method: 'POST',
