@@ -2,7 +2,6 @@
 import { QuizConfig, Question, Section } from './config';
 import { evaluateBranchingLogic } from './utils';
 import { convertCmToFtIn, convertFtInToCm, convertWeight, normalizeInches, roundToTwo } from '@/lib/unit-conversion';
-import type { Translations } from '@/i18n';
 
 type UnitPref = 'metric' | 'imperial';
 
@@ -38,8 +37,6 @@ export interface QuizState {
   status: 'loading' | 'in-progress' | 'completed';
   isDirty: boolean; // Has been modified since last save
   lastSaved: Date | null;
-  locale: 'en' | 'ru';
-  translations: Translations;
   // Computed properties
   currentQuestion: Question | null;
   currentSection: Section | null;
@@ -60,7 +57,7 @@ const initialBodyState: BodyAnswers = {
     goalWeightLbView: '',
 };
 
-export const getInitialState = (config: QuizConfig, locale: 'en' | 'ru', translations: Translations): QuizState => {
+export const getInitialState = (config: QuizConfig): QuizState => {
     return {
         config,
         answers: {
@@ -71,8 +68,6 @@ export const getInitialState = (config: QuizConfig, locale: 'en' | 'ru', transla
         status: 'loading',
         isDirty: false,
         lastSaved: null,
-        locale,
-        translations,
         // Computed
         currentQuestion: null,
         currentSection: null,
@@ -83,7 +78,7 @@ export const getInitialState = (config: QuizConfig, locale: 'en' | 'ru', transla
 };
 
 type Action =
-  | { type: 'INITIALIZE_STATE'; payload: { config: QuizConfig, initialAnswers: Record<string, any>, currentQuestionId?: string | null, locale: 'en' | 'ru', translations: Translations } }
+  | { type: 'INITIALIZE_STATE'; payload: { config: QuizConfig, initialAnswers: Record<string, any>, currentQuestionId?: string | null } }
   | { type: 'SET_ANSWER'; payload: { questionId: string; value: any, analyticsKey?: string } }
   | { type: 'SET_QUESTION_BY_INDEX'; payload: number }
   | { type: 'SET_STATUS'; payload: 'loading' | 'in-progress' | 'completed' }
@@ -99,7 +94,7 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
   
   switch (action.type) {
     case 'INITIALIZE_STATE':
-        const { config, initialAnswers, currentQuestionId, locale, translations } = action.payload;
+        const { config, initialAnswers, currentQuestionId } = action.payload;
         newState.config.questions.sort((a,b) => a.order - b.order);
         newState.config.sections.sort((a,b) => (a.order || 0) - (b.order || 0));
 
@@ -115,7 +110,7 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
         }
         
         newState = {
-            ...getInitialState(config, locale, translations),
+            ...getInitialState(config),
             answers: { ...initialAnswers, body: { ...initialBodyState, ...(initialAnswers.body || {}) } },
             status: 'in-progress',
             currentQuestionIndex: startIndex,

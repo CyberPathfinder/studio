@@ -43,7 +43,7 @@ const Height = ({ question }: { question: Question }) => {
   return (
     <div className="w-full max-w-lg mx-auto">
       <CardHeader className="text-center p-0 mb-8">
-        <CardTitle className="font-headline text-3xl">{getLabel(question, state.locale)}</CardTitle>
+        <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
         {getDescription(question) && <CardDescription className="mt-2">{getDescription(question)}</CardDescription>}
       </CardHeader>
 
@@ -54,23 +54,23 @@ const Height = ({ question }: { question: Question }) => {
               className="flex rounded-md border p-1 bg-muted/50"
             >
               <RadioGroupItem value="metric" id="cm" className="sr-only" />
-              <Label htmlFor="cm" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitHeight === 'metric' && "bg-background font-semibold shadow-sm")}>{state.translations.units.cm}</Label>
+              <Label htmlFor="cm" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitHeight === 'metric' && "bg-background font-semibold shadow-sm")}>cm</Label>
               <RadioGroupItem value="imperial" id="ft_in" className="sr-only" />
-              <Label htmlFor="ft_in" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitHeight === 'imperial' && "bg-background font-semibold shadow-sm")}>{state.translations.units.ft_in}</Label>
+              <Label htmlFor="ft_in" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitHeight === 'imperial' && "bg-background font-semibold shadow-sm")}>ft, in</Label>
             </RadioGroup>
       </div>
 
       <div className="space-y-4">
         {unitHeight === 'metric' ? (
           <div className="max-w-xs mx-auto">
-            <Label htmlFor={`${question.id}-cm`} className="sr-only">{state.translations.units.height_cm}</Label>
+            <Label htmlFor={`${question.id}-cm`} className="sr-only">Height in cm</Label>
             <Input
               id={`${question.id}-cm`}
               type="number"
               inputMode='decimal'
               value={heightCmView}
               onChange={(e) => handleViewChange('heightCmView', e.target.value)}
-              placeholder={state.translations.placeholders.height_cm}
+              placeholder={"175"}
               className="text-center text-xl h-16 rounded-lg shadow-inner"
               autoFocus
             />
@@ -78,7 +78,7 @@ const Height = ({ question }: { question: Question }) => {
         ) : (
           <div className="flex items-start gap-4 justify-center">
             <div className="w-1/2 max-w-xs">
-              <Label htmlFor={`${question.id}-ft`} className="ml-2">{state.translations.units.feet}</Label>
+              <Label htmlFor={`${question.id}-ft`} className="ml-2">feet</Label>
               <Input
                 id={`${question.id}-ft`}
                 type="number"
@@ -91,7 +91,7 @@ const Height = ({ question }: { question: Question }) => {
               />
             </div>
             <div className="w-1/2 max-w-xs">
-              <Label htmlFor={`${question.id}-in`} className="ml-2">{state.translations.units.inches}</Label>
+              <Label htmlFor={`${question.id}-in`} className="ml-2">inches</Label>
               <Input
                 id={`${question.id}-in`}
                 type="number"
@@ -106,7 +106,7 @@ const Height = ({ question }: { question: Question }) => {
         )}
       </div>
       
-       <p className="text-center text-sm text-muted-foreground mt-8">{state.translations.hints.unit_conversion}</p>
+       <p className="text-center text-sm text-muted-foreground mt-8">We convert units automatically.</p>
     </div>
   );
 };

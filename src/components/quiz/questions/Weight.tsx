@@ -52,8 +52,8 @@ const Weight = ({ question }: { question: Question }) => {
 
   const showAmbitiousGoalToast = useDebouncedCallback(() => {
     toast({
-        title: state.translations.toasts.ambitious_goal.title,
-        description: state.translations.toasts.ambitious_goal.description,
+        title: "Ambitious Goal!",
+        description: "That's a bold target! We recommend aiming for a gradual, sustainable change.",
     });
   }, 1000);
 
@@ -96,7 +96,7 @@ const Weight = ({ question }: { question: Question }) => {
   return (
     <div className="w-full max-w-lg mx-auto">
       <CardHeader className="text-center p-0 mb-8">
-        <CardTitle className="font-headline text-3xl">{getLabel(question, state.locale)}</CardTitle>
+        <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
       </CardHeader>
 
       <div className='flex justify-center mb-8'>
@@ -106,27 +106,27 @@ const Weight = ({ question }: { question: Question }) => {
               className="flex rounded-md border p-1 bg-muted/50"
             >
               <RadioGroupItem value="metric" id="kg" className="sr-only" />
-              <Label htmlFor="kg" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'metric' && "bg-background font-semibold shadow-sm")}>{state.translations.units.kg}</Label>
+              <Label htmlFor="kg" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'metric' && "bg-background font-semibold shadow-sm")}>kg</Label>
               <RadioGroupItem value="imperial" id="lb" className="sr-only" />
-              <Label htmlFor="lb" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'imperial' && "bg-background font-semibold shadow-sm")}>{state.translations.units.lb}</Label>
+              <Label htmlFor="lb" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'imperial' && "bg-background font-semibold shadow-sm")}>lb</Label>
             </RadioGroup>
       </div>
 
        <div className="max-w-xs mx-auto">
-            <Label htmlFor={`${question.id}-weight`} className="sr-only">{state.translations.labels.weight}</Label>
+            <Label htmlFor={`${question.id}-weight`} className="sr-only">Weight</Label>
             <Input
                 id={`${question.id}-weight`}
                 type="number"
                 inputMode='decimal'
                 value={displayValue}
                 onChange={(e) => handleViewChange(e.target.value)}
-                placeholder={unitWeight === 'metric' ? state.translations.placeholders.weight_kg : state.translations.placeholders.weight_lb}
+                placeholder={unitWeight === 'metric' ? "70" : "154"}
                 className="text-center text-xl h-16 rounded-lg shadow-inner"
                 autoFocus
             />
       </div>
       
-      {getDescription(question) && <p className="text-center text-sm text-muted-foreground mt-8">{getDescription(question, state.locale)}</p>}
+      {getDescription(question) && <p className="text-center text-sm text-muted-foreground mt-8">{getDescription(question)}</p>}
     </div>
   );
 };
