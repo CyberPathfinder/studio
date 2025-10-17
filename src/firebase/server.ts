@@ -1,13 +1,40 @@
+import { readFileSync } from 'node:fs';
 
-import { initializeApp, getApp, getApps, type FirebaseOptions } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import type { ServiceAccount } from 'firebase-admin';
 import { credential } from 'firebase-admin';
+import { getApp, getApps, initializeApp, type FirebaseOptions } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 
-// IMPORTANT: Path to your service account key file
-const serviceAccount = require('../../service-account.json');
+function loadServiceAccount(): ServiceAccount {
+  const serviceAccountFromEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
+
+  if (serviceAccountFromEnv) {
+    try {
+      return JSON.parse(serviceAccountFromEnv) as ServiceAccount;
+    } catch (error) {
+      throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable contains invalid JSON.');
+    }
+  }
+
+  const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+
+  if (credentialsPath) {
+    try {
+      const fileContents = readFileSync(credentialsPath, 'utf-8');
+      return JSON.parse(fileContents) as ServiceAccount;
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to read Firebase service account file at ${credentialsPath}: ${reason}`);
+    }
+  }
+
+  throw new Error(
+    'Firebase service account credentials are not configured. Set FIREBASE_SERVICE_ACCOUNT or GOOGLE_APPLICATION_CREDENTIALS.'
+  );
+}
 
 const firebaseConfig: FirebaseOptions = {
-    credential: credential.cert(serviceAccount),
+  credential: credential.cert(loadServiceAccount()),
 };
 
 export function initializeFirebase() {
