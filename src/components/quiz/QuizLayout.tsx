@@ -1,3 +1,4 @@
+
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
@@ -40,6 +41,8 @@ const QuizSummarySidebar = () => {
 
     const handleSaveAndExit = () => {
         toast({ title: "Progress Saved", description: "Your progress has been saved. You can continue later."});
+        // In a real app, you might want to redirect the user here.
+        // For now, we'll just show a toast.
     }
 
     const content = (
@@ -56,15 +59,18 @@ const QuizSummarySidebar = () => {
                         const sectionQuestions = config.questions.filter((q) => evaluateBranchingLogic(q.branching, answers) && q.section === section.id);
                         if (sectionQuestions.length === 0) return null;
 
+                        const answeredInSection = sectionQuestions.filter(q => answeredQuestionIds.has(q.id)).length;
+                        const totalInSection = sectionQuestions.length;
+
                         return (
                         <AccordionItem value={section.id} key={section.id} className="border-none">
                             <AccordionTrigger className="px-2 py-2 text-sm font-semibold hover:no-underline hover:bg-muted/50 rounded-md">
                                <div className="flex-1 text-left">{section.i18n?.en.title || section.title}</div>
                                <div className="flex items-center gap-1.5 ml-2">
-                                    {sectionQuestions.map(q => (
-                                        <div key={q.id} className={cn(
+                                    {Array.from({ length: totalInSection }).map((_, i) => (
+                                        <div key={i} className={cn(
                                             "w-2 h-2 rounded-full",
-                                            answeredQuestionIds.has(q.id) ? "bg-primary/80" : "bg-muted-foreground/30"
+                                            i < answeredInSection ? "bg-primary/80" : "bg-muted-foreground/30"
                                         )}></div>
                                     ))}
                                </div>
@@ -110,7 +116,7 @@ const QuizSummarySidebar = () => {
                     )})}
                 </Accordion>
             </ScrollArea>
-             <div className="p-2 border-t">
+             <div className="p-2 border-t mt-auto">
                 <Button onClick={handleSaveAndExit} variant="ghost" className="w-full justify-start">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Save & Exit</span>
@@ -128,16 +134,24 @@ export const QuizLayout = ({ children }: { children: React.ReactNode }) => {
     const isMobile = useIsMobile(1280);
 
     useEffect(() => {
-        const savedState = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (savedState) {
-            setIsSidebarOpen(JSON.parse(savedState));
+        try {
+            const savedState = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedState) {
+                setIsSidebarOpen(JSON.parse(savedState));
+            }
+        } catch (error) {
+            console.error("Could not parse sidebar state from localStorage", error);
         }
     }, []);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(prev => {
             const newState = !prev;
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newState));
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newState));
+            } catch (error) {
+                console.error("Could not save sidebar state to localStorage", error);
+            }
             return newState;
         });
     };
@@ -168,7 +182,9 @@ export const QuizLayout = ({ children }: { children: React.ReactNode }) => {
                         </SheetContent>
                     </Sheet>
                 </div>
-                {children}
+                <div className="p-4 md:p-6 lg:p-8 flex justify-center">
+                    {children}
+                </div>
             </QuizLayoutContext.Provider>
         )
     }
@@ -179,9 +195,11 @@ export const QuizLayout = ({ children }: { children: React.ReactNode }) => {
           "grid items-start transition-[grid-template-columns] duration-300",
           isSidebarOpen ? "grid-cols-[1fr_320px]" : "grid-cols-[1fr_56px]"
       )}>
-        <main>{children}</main>
+        <main className="p-4 md:p-6 lg:p-8 flex justify-center">
+            {children}
+        </main>
         
-        <aside className="sticky top-0 h-screen flex flex-col border-l bg-card">
+        <aside className="sticky top-[72px] h-[calc(100vh-96px)] flex flex-col border-l bg-card shadow-md rounded-tl-2xl">
             <div className="p-2 border-b">
                  <Button 
                     variant="ghost" 
