@@ -21,7 +21,11 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form'
 import { loadStripe } from '@stripe/stripe-js';
 import SmartFeedbackCard from '../dashboard/SmartFeedbackCard';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
+const stripePublicKey = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
+const stripePromise = stripePublicKey
+  ? loadStripe(stripePublicKey)
+  : Promise.resolve(null);
+const isStripeConfigured = Boolean(stripePublicKey);
 
 const signUpSchema = z.object({
   email: z.string().email({ message: 'Пожалуйста, введите корректный email.' }),
@@ -87,6 +91,15 @@ const QuizSummary = () => {
         variant: "destructive",
         title: "Not Logged In",
         description: "You must be logged in to purchase a plan.",
+      });
+      return;
+    }
+    if (!isStripeConfigured) {
+      track('checkout_unavailable', { reason: 'missing_stripe_key' });
+      toast({
+        variant: "destructive",
+        title: "Оплата недоступна",
+        description: "Платежная система временно недоступна. Пожалуйста, попробуйте позже.",
       });
       return;
     }
@@ -289,10 +302,15 @@ const QuizSummary = () => {
                 ) : (
                     <>
                       <SmartFeedbackCard bmi={bmi} intakeData={intakeData} />
-                      <Button onClick={handleGoPremium} className="w-full" disabled={isLoading}>
+                      <Button onClick={handleGoPremium} className="w-full" disabled={isLoading || !isStripeConfigured}>
                           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                           Оформить Premium
                       </Button>
+                      {!isStripeConfigured && (
+                        <p className="text-xs text-muted-foreground text-center">
+                          Платежная система пока не настроена.
+                        </p>
+                      )}
                     </>
                 )}
             </div>
