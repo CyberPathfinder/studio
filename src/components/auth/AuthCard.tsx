@@ -1,9 +1,11 @@
+
 'use client';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getFirestore, doc, setDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -60,6 +62,30 @@ export function AuthCard({ mode }: AuthCardProps) {
       const auth = getAuth();
       if (mode === 'signup') {
         const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+        const user = userCredential.user;
+        
+        // After creating the user, create their documents in Firestore
+        const db = getFirestore();
+        const batch = writeBatch(db);
+
+        // 1. Create user document
+        const userRef = doc(db, 'users', user.uid);
+        batch.set(userRef, {
+          email: user.email,
+          createdAt: serverTimestamp(),
+          version: 1,
+        });
+
+        // 2. Create initial intake document
+        const intakeRef = doc(db, `users/${user.uid}/intake/initial`);
+        batch.set(intakeRef, { 
+          createdAt: serverTimestamp(),
+          // Add any other default fields for a new intake doc here
+        }, { merge: true });
+
+        // Commit both writes at once
+        await batch.commit();
+        
         await updateProfile(userCredential.user, { displayName: data.email.split('@')[0] });
         toast({ title: 'Успешно!', description: 'Ваш аккаунт создан.' });
       } else {
