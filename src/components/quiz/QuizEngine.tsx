@@ -1,7 +1,8 @@
 
+
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import QuizProgress from './QuizProgress';
 import QuizControls from './QuizControls';
@@ -17,6 +18,7 @@ const QuizEngine = () => {
   const { currentQuestion } = state;
   const isMobile = useIsMobile(1280);
   const quizCardRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   // Keyboard navigation
   useEffect(() => {
@@ -47,6 +49,11 @@ const QuizEngine = () => {
     }
   }, [state.currentQuestionId]);
 
+  const variants = {
+    initial: { opacity: 0.92, y: 12 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, x: -50 },
+  };
 
   if (state.status === 'completed') {
     return (
@@ -74,9 +81,10 @@ const QuizEngine = () => {
         <MotionCard
           key={state.currentQuestionId}
           ref={quizCardRef}
-          initial={{ opacity: 0.92, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, x: -50 }}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          variants={shouldReduceMotion ? {} : variants}
           transition={{ duration: 0.22, ease: "easeOut" }}
           className="w-full max-w-3xl overflow-hidden shadow-md rounded-2xl flex flex-col"
         >

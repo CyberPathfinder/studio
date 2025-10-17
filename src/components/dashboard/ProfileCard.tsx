@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -5,18 +6,25 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/firebase';
 import { User } from 'firebase/auth';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 const ProfileCard = ({ user }: { user: User }) => {
   const auth = useAuth();
+  const shouldReduceMotion = useReducedMotion();
   const handleSignOut = () => {
     auth.signOut();
   };
 
+  const variants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial="initial"
+      animate="animate"
+      variants={shouldReduceMotion ? {} : variants}
       transition={{ duration: 0.5 }}
     >
       <Card>

@@ -1,17 +1,25 @@
+
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 
 const AccessStatusCard = () => {
     // In a real app, you would fetch payment status here
     const hasPremium = true;
+    const shouldReduceMotion = useReducedMotion();
+
+    const variants = {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+    };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial="initial"
+      animate="animate"
+      variants={shouldReduceMotion ? {} : variants}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
       <Card>

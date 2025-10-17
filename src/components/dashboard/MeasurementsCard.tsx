@@ -1,14 +1,16 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 
 const MeasurementsCard = ({ intakeData }: { intakeData: any }) => {
   const { measures, preferences } = intakeData;
   const unitWeight = preferences?.unitWeight || 'metric';
   const unitHeight = preferences?.unitHeight || 'metric';
+  const shouldReduceMotion = useReducedMotion();
 
   const displayHeight = unitHeight === 'imperial'
     ? `${Math.floor(measures.height_cm / 2.54 / 12)}'${Math.round((measures.height_cm / 2.54) % 12)}"`
@@ -22,10 +24,16 @@ const MeasurementsCard = ({ intakeData }: { intakeData: any }) => {
     ? `${Math.round(measures.goal_weight_kg * 2.20462)} lbs`
     : `${Math.round(measures.goal_weight_kg)} kg`;
 
+  const variants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial="initial"
+      animate="animate"
+      variants={shouldReduceMotion ? {} : variants}
       transition={{ duration: 0.5, delay: 0.1 }}
     >
       <Card className="lg:col-span-2">

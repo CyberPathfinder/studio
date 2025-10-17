@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useEffect } from 'react';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
@@ -84,8 +85,10 @@ const TextInput = ({ question }: { question: Question }) => {
                         value={field.value ?? ''}
                     />
                 </FormControl>
-                 <FormMessage className={cn(hint && "hidden")}/>
-                {hint && <p className={cn("text-sm text-muted-foreground text-center", errors.value && "text-destructive")}>{hint}</p>}
+                <div className="h-5">
+                    <FormMessage className={cn(hint && "hidden")}/>
+                    {hint && <p className={cn("text-sm text-muted-foreground text-center", errors.value && "text-destructive")}>{errors.value ? errors.value.message : hint}</p>}
+                </div>
               </FormItem>
             )}
           />

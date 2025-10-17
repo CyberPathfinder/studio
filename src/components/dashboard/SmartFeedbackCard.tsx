@@ -1,8 +1,9 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Lightbulb, Zap, Apple, Scale, BrainCircuit } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useEffect, useMemo } from 'react';
 
@@ -39,6 +40,7 @@ const getBmiBand = (bmi: number): keyof typeof TIPS => {
 
 const SmartFeedbackCard = ({ bmi, intakeData }: { bmi: number, intakeData: any }) => {
     const { track } = useAnalytics();
+    const shouldReduceMotion = useReducedMotion();
     
     const bmiBand = useMemo(() => getBmiBand(bmi), [bmi]);
     const tips = useMemo(() => TIPS[bmiBand], [bmiBand]);
@@ -50,6 +52,10 @@ const SmartFeedbackCard = ({ bmi, intakeData }: { bmi: number, intakeData: any }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [bmiBand]);
 
+  const variants = {
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+  };
 
   if (!bmi || !intakeData) {
     return null;
@@ -57,8 +63,9 @@ const SmartFeedbackCard = ({ bmi, intakeData }: { bmi: number, intakeData: any }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial="initial"
+      animate="animate"
+      variants={shouldReduceMotion ? {} : variants}
       transition={{ duration: 0.5, delay: 0.3 }}
     >
       <Card>
