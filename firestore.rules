@@ -2,66 +2,86 @@
  * @fileoverview Firestore Security Rules for the quiz application.
  *
  * Core Philosophy:
- * This ruleset enforces a strict user-ownership model for user-generated content (quiz responses and intake drafts) and allows public read access to quiz definitions.
+ * This ruleset enforces a strict user-ownership model for all data stored under the /users/{userId}/** path.
+ * Only the authenticated user matching the {userId} can read or write data in their respective tree.
+ * Public read access is granted to the /quizzes collection, but write access is restricted.
  *
  * Data Structure:
- * - /quizzes/{quizId}: Stores publicly readable quiz definitions.
- * - /users/{userId}/quiz_responses/{quizResponseId}: Stores a user's quiz responses.
- * - /users/{userId}/intake_drafts/{quizId}: Stores a user's draft quiz responses (for resuming flows).
+ * - /quizzes/{quizId}: Publicly readable quiz definitions. Write access is limited to authenticated users.
+ * - /users/{userId}/quiz_responses/{quizResponseId}: User-specific quiz responses.
+ * - /users/{userId}/quiz_responses/{quizResponseId}/question_responses/{questionResponseId}: User-specific question responses for a given quiz response.
+ * - /users/{userId}/intake_drafts/{quizId}: User-specific quiz drafts.
  *
  * Key Security Decisions:
- * - User data is segregated under /users/{userId} to enforce ownership.
- * - Listing of user-specific collections (quiz_responses, intake_drafts) is allowed only for the owner.
- * - Quiz definitions are publicly readable to support QAPs.
- *
- * Denormalization for Authorization:
- * - User-specific data is nested under /users/{userId} to enable path-based authorization, avoiding the need for `get()` calls to verify ownership.
- * - The application enforces a homogeneous security posture using dedicated collections.
+ * - User listing is implicitly disallowed because there's no rule allowing it on the root `/users` collection.
+ * - Path-based ownership is enforced for all user-specific data, eliminating the need for `get()` calls.
+ * - Write access to `/quizzes` requires authentication, but lacks explicit ownership checks. This should be addressed in future iterations.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows anyone to read quiz definitions; only allows create, update, and delete for existing owners.
+     * @description Checks if the request is authenticated and the user ID matches the provided userId.
+     * @param {string} userId - The user ID to compare against the authenticated user's ID.
+     * @return {bool} True if the user is signed in and the UID matches, false otherwise.
+     */
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the request is authenticated.
+     * @return {bool} True if the user is signed in, false otherwise.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the user is the owner of the existing document.
+     * @param {string} userId - The user ID to compare against the resource data's userId.
+     * @return {bool} True if the user is the owner of the document and the document exists.
+     */
+    function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Rules for the /quizzes collection.
      * @path /quizzes/{quizId}
-     * @allow (get, list): if true
-     * @allow (create): if request.auth.uid != null
-     * @allow (update, delete): if false
-     * @deny (create): if request.auth.uid == null
-     * @principle Public read access with owner-only writes.
+     * @allow (get, list): Any user can read quizzes.
+     * @allow (create): Authenticated user can create quizzes.
+     * @deny (update, delete): Only the owner can update or delete quizzes (requires ownerId field).
+     * @principle Allows public read access to quizzes, but restricts write access to authenticated users.
      */
     match /quizzes/{quizId} {
       allow get, list: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if false;
+      allow create: if isSignedIn();
+      allow update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
     }
 
     /**
-     * @description Allows anyone to read questions; only allows create, update, and delete for existing owners.
+     * @description Rules for the /quizzes/{quizId}/questions collection.
      * @path /quizzes/{quizId}/questions/{questionId}
-     * @allow (get, list): if true
-     * @allow (create): if request.auth.uid != null
-     * @allow (update, delete): if false
-     * @deny (create): if request.auth.uid == null
-     * @principle Public read access with owner-only writes.
+     * @allow (get, list): Any user can read questions.
+     * @allow (create): Authenticated user can create questions.
+     * @deny (update, delete): Only the owner can update or delete questions (requires ownerId field).
+     * @principle Allows public read access to questions, but restricts write access to authenticated users.
      */
     match /quizzes/{quizId}/questions/{questionId} {
       allow get, list: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if false;
+      allow create: if isSignedIn();
+      allow update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
     }
 
     /**
-     * @description Manages user's quiz responses.  Allows only the owner to read, create, update, and delete their responses.
+     * @description Rules for the /users/{userId}/quiz_responses collection.
      * @path /users/{userId}/quiz_responses/{quizResponseId}
-     * @allow (get, list): if isOwner(userId)
-     * @allow (create): if isOwner(userId)
-     * @allow (update, delete): if isExistingOwner(userId)
-     * @deny (get, list, create, update, delete): if !isSignedIn()
-     * @deny (create): if !isOwner(userId)
-     * @deny (update, delete): if !isExistingOwner(userId)
-     * @principle Enforces document ownership for all operations.
+     * @allow (read, write): Only the owner can read and write quiz responses.
+     * @deny (create): If the userId in the path does not match the authenticated user's ID.
+     * @allow (update, delete): Only the owner can update or delete a quiz response, and the document must exist.
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /users/{userId}/quiz_responses/{quizResponseId} {
       allow get, list: if isOwner(userId);
@@ -71,15 +91,12 @@ service cloud.firestore {
     }
 
     /**
-     * @description Manages question responses within a quiz response. Allows only the owner to read, create, update, and delete.
+     * @description Rules for the /users/{userId}/quiz_responses/{quizResponseId}/question_responses collection.
      * @path /users/{userId}/quiz_responses/{quizResponseId}/question_responses/{questionResponseId}
-     * @allow (get, list): if isOwner(userId)
-     * @allow (create): if isOwner(userId)
-     * @allow (update, delete): if isExistingOwner(userId)
-     * @deny (get, list, create, update, delete): if !isSignedIn()
-     * @deny (create): if !isOwner(userId)
-     * @deny (update, delete): if !isExistingOwner(userId)
-     * @principle Enforces document ownership for all operations.
+     * @allow (read, write): Only the owner can read and write question responses.
+     * @deny (create): If the userId in the path does not match the authenticated user's ID.
+     * @allow (update, delete): Only the owner can update or delete a question response, and the document must exist.
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /users/{userId}/quiz_responses/{quizResponseId}/question_responses/{questionResponseId} {
       allow get, list: if isOwner(userId);
@@ -89,15 +106,12 @@ service cloud.firestore {
     }
 
     /**
-     * @description Manages user's intake drafts, allowing resuming flows. Allows only the owner to read, create, update and delete.
+     * @description Rules for the /users/{userId}/intake_drafts collection.
      * @path /users/{userId}/intake_drafts/{quizId}
-     * @allow (get, list): if isOwner(userId)
-     * @allow (create): if isOwner(userId)
-     * @allow (update, delete): if isExistingOwner(userId)
-     * @deny (get, list, create, update, delete): if !isSignedIn()
-     * @deny (create): if !isOwner(userId)
-     * @deny (update, delete): if !isExistingOwner(userId)
-     * @principle Enforces document ownership for all operations.
+     * @allow (read, write): Only the owner can read and write intake drafts.
+     * @deny (create): If the userId in the path does not match the authenticated user's ID.
+     * @allow (update, delete): Only the owner can update or delete an intake draft, and the document must exist.
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
      */
     match /users/{userId}/intake_drafts/{quizId} {
       allow get, list: if isOwner(userId);
@@ -105,18 +119,5 @@ service cloud.firestore {
       allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
     }
-  }
-
-  // Helper Functions
-  function isSignedIn() {
-    return request.auth != null;
-  }
-
-  function isOwner(userId) {
-    return isSignedIn() && request.auth.uid == userId;
-  }
-
-  function isExistingOwner(userId) {
-    return isOwner(userId) && resource != null;
   }
 }
