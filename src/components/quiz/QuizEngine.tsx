@@ -11,18 +11,21 @@ import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger, SidebarContent,
 import { VivaFormLogo } from '../icons/logo';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
-import { CheckCircle, Circle, Edit, LogOut } from 'lucide-react';
+import { CheckCircle, Circle, Edit, Lock, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
 import QuizSummary from './QuizSummary';
 import { getLabel } from '@/lib/i18n';
+import { evaluateBranchingLogic } from '@/lib/quiz-engine/utils';
 
 
 const QuizSummarySidebar = () => {
     const { state, jumpToQuestion } = useQuizEngine();
     const { answers, config } = state;
-  
+
+    const answeredQuestionIds = new Set(Object.keys(answers).filter(k => answers[k] !== null && answers[k] !== undefined && answers[k] !== ''));
+
     return (
       <SidebarContent>
         <ScrollArea className="h-full">
@@ -32,21 +35,36 @@ const QuizSummarySidebar = () => {
                         <h4 className="font-semibold text-sm mb-2 px-2">{section.i18n?.en.title || section.title}</h4>
                         <ul className="flex flex-col gap-1">
                             {config.questions
-                                .filter((q) => q.section === section.id)
+                                .filter((q) => evaluateBranchingLogic(q.branching, answers) && q.section === section.id)
                                 .map((q) => {
-                                const hasAnswer = answers[q.id] !== undefined && answers[q.id] !== null && answers[q.id] !== '';
+                                const isAnswered = answeredQuestionIds.has(q.id);
+                                const isCurrent = q.id === state.currentQuestionId;
+                                const isFuture = !isAnswered && !isCurrent;
+
+                                let Icon = Circle;
+                                if (isAnswered) Icon = CheckCircle;
+                                if (isFuture) Icon = Lock;
+
+                                let iconColor = "text-muted-foreground";
+                                if (isAnswered) iconColor = "text-primary";
+                                if (isCurrent) iconColor = "text-primary";
+
+
                                 return (
                                     <li key={q.id}>
                                         <button 
-                                            onClick={() => jumpToQuestion(q.id)}
+                                            onClick={() => !isFuture && jumpToQuestion(q.id)}
+                                            disabled={isFuture}
                                             className={cn(
-                                                "w-full text-left text-xs p-2 rounded-md flex items-center gap-2 hover:bg-sidebar-accent",
-                                                q.id === state.currentQuestionId && "bg-sidebar-accent"
+                                                "w-full text-left text-sm p-2 rounded-md flex items-start gap-2",
+                                                !isFuture && "hover:bg-sidebar-accent",
+                                                isCurrent && "bg-sidebar-accent font-semibold",
+                                                isFuture && "cursor-not-allowed opacity-60"
                                             )}
                                         >
-                                            {hasAnswer ? <CheckCircle className="h-3 w-3 text-primary" /> : <Circle className="h-3 w-3 text-muted-foreground" />}
-                                            <span className="flex-1 truncate">{getLabel(q)}</span>
-                                            <Edit className="h-3 w-3 invisible group-hover:visible" />
+                                            <Icon className={cn("h-4 w-4 mt-0.5 flex-shrink-0", iconColor)} />
+                                            <span className="flex-1">{getLabel(q)}</span>
+                                            {!isFuture && <Edit className="h-4 w-4 invisible group-hover:visible flex-shrink-0" />}
                                         </button>
                                     </li>
                                 );
