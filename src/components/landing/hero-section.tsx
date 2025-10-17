@@ -4,9 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Apple, Activity, Soup } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { useState, useEffect } from "react";
 import { Progress } from "../ui/progress";
-import { cn } from "@/lib/utils";
 
 const PhoneScreenHome = () => (
   <div className="p-4 space-y-4 bg-background">
@@ -60,97 +58,7 @@ const PhoneScreenHome = () => (
   </div>
 );
 
-const PhoneScreenFoodLog = () => (
-  <div className="p-4 space-y-4 bg-background">
-    <h2 className="font-headline text-xl font-bold">Breakfast</h2>
-    <Card>
-      <CardContent className="p-3 flex items-center justify-between">
-        <div>
-          <p className="font-semibold">Oatmeal with Berries</p>
-          <p className="text-sm text-muted-foreground">1 bowl</p>
-        </div>
-        <p className="font-medium">350 kcal</p>
-      </CardContent>
-    </Card>
-    <h2 className="font-headline text-xl font-bold mt-4">Lunch</h2>
-    <Card>
-      <CardContent className="p-3 flex items-center justify-between">
-        <div>
-          <p className="font-semibold">Grilled Chicken Salad</p>
-          <p className="text-sm text-muted-foreground">1 serving</p>
-        </div>
-        <p className="font-medium">450 kcal</p>
-      </CardContent>
-    </Card>
-     <Card>
-      <CardContent className="p-4 flex items-center justify-between">
-        <div className="text-center">
-          <Activity className="h-6 w-6 mx-auto text-muted-foreground" />
-          <p className="text-xs mt-1">Home</p>
-        </div>
-        <div className="text-center">
-          <Apple className="h-6 w-6 mx-auto text-primary" />
-          <p className="text-xs mt-1">Log</p>
-        </div>
-        <div className="text-center">
-          <Soup className="h-6 w-6 mx-auto text-muted-foreground" />
-          <p className="text-xs mt-1">Recipes</p>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
-
-const PhoneScreenRecipe = () => (
-  <div className="bg-background">
-    <div className="h-32 bg-primary/20"></div>
-    <div className="p-4 -mt-16">
-      <Card>
-        <CardHeader>
-          <CardTitle>Quinoa Salad</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-2">A refreshing and protein-packed salad perfect for any meal.</p>
-          <div className="flex justify-around text-sm text-center mt-4">
-            <div><p className="font-bold">15</p><p>min</p></div>
-            <div><p className="font-bold">4</p><p>servings</p></div>
-            <div><p className="font-bold">380</p><p>kcal</p></div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-     <Card className="m-4">
-      <CardContent className="p-4 flex items-center justify-between">
-        <div className="text-center">
-          <Activity className="h-6 w-6 mx-auto text-muted-foreground" />
-          <p className="text-xs mt-1">Home</p>
-        </div>
-        <div className="text-center">
-          <Apple className="h-6 w-6 mx-auto text-muted-foreground" />
-          <p className="text-xs mt-1">Log</p>
-        </div>
-        <div className="text-center">
-          <Soup className="h-6 w-6 mx-auto text-primary" />
-          <p className="text-xs mt-1">Recipes</p>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
-
-
 const HeroSection = () => {
-  const [currentScreen, setCurrentScreen] = useState(0);
-  const screens = [<PhoneScreenHome key="home" />, <PhoneScreenFoodLog key="log"/>, <PhoneScreenRecipe key="recipe"/>];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentScreen((prevScreen) => (prevScreen + 1) % screens.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, [screens.length]);
-
-
   return (
     <section className="relative w-full overflow-hidden pt-20 md:pt-28 lg:pt-32">
       <div className="absolute inset-0 bg-gradient-to-br from-[#E8FBF4] via-[#F9FCFB] to-[#F3FAFA] -z-10"></div>
@@ -182,17 +90,7 @@ const HeroSection = () => {
                 <div className="h-[40px] w-[3px] bg-gray-200 dark:bg-gray-800 absolute -left-[11px] top-[150px] rounded-l-lg"></div>
                 <div className="h-[55px] w-[3px] bg-gray-200 dark:bg-gray-800 absolute -right-[11px] top-[120px] rounded-r-lg"></div>
                 <div className="rounded-[2rem] overflow-hidden w-full h-full bg-white dark:bg-gray-800 relative">
-                  {screens.map((screen, index) => (
-                    <div
-                      key={index}
-                      className={cn(
-                        "absolute inset-0 transition-opacity duration-500 ease-in-out",
-                        index === currentScreen ? "opacity-100" : "opacity-0"
-                      )}
-                    >
-                      {screen}
-                    </div>
-                  ))}
+                  <PhoneScreenHome />
                 </div>
             </div>
           </div>
