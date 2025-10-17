@@ -3,14 +3,14 @@
 import { QuizConfig } from '@/lib/quiz-engine/config';
 import { quizReducer, getInitialState } from '@/lib/quiz-engine/state';
 import { evaluateBranchingLogic, validateAnswer } from '@/lib/quiz-engine/utils';
-import { useReducer, useCallback, useMemo, useContext, createContext, ReactNode } from 'react';
+import { useReducer, useCallback, useMemo, useContext, createContext, ReactNode, Dispatch } from 'react';
 import { useAnalytics } from './use-analytics';
 import { useDebouncedCallback } from 'use-debounce';
 import { deleteQuizDraft, saveIntakeData } from '@/firebase/quiz';
 
 type QuizEngineContextType = {
   state: ReturnType<typeof quizReducer>;
-  dispatch: React.Dispatch<any>;
+  dispatch: Dispatch<any>;
   isInitialized: boolean;
   initializeState: (initialAnswers: Record<string, any>, currentQuestionId?: string | null) => void;
   handleAnswerChange: (questionId: string, value: any, analyticsKey?: string) => void;
@@ -32,15 +32,19 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     dispatch({ type: 'INITIALIZE_STATE', payload: { config, initialAnswers, currentQuestionId } });
   }, [config]);
 
-  const handleAnswerChange = useDebouncedCallback((questionId: string, value: any, analyticsKey?: string) => {
+  const debouncedAnswerChange = useDebouncedCallback((questionId: string, value: any, analyticsKey?: string) => {
     if (analyticsKey) {
-        track('quiz_step' as any, { analyticsKey, value });
+        track('quiz_answer', { analyticsKey, value });
     }
     dispatch({ type: 'SET_ANSWER', payload: { questionId, value } });
-  }, 800);
+  }, 300);
+
+  const handleAnswerChange = (questionId: string, value: any, analyticsKey?: string) => {
+      debouncedAnswerChange(questionId, value, analyticsKey);
+  }
 
   const completeQuiz = useCallback(() => {
-    track('intake_saved');
+    track('quiz_complete');
     dispatch({ type: 'COMPLETE_QUIZ' });
   },[track]);
 
@@ -57,7 +61,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
 
     if (state.isLastQuestion) {
         completeQuiz();
-        return;
+        return { isValid: true };
     }
 
     let nextIndex = state.currentQuestionIndex + 1;
@@ -73,6 +77,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     
     // If no next question is found, complete the quiz
     completeQuiz();
+    return { isValid: true };
 
   }, [state, config.questions, track, completeQuiz]);
 
@@ -81,6 +86,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     if (state.status === 'completed') {
         const lastQuestionIndex = config.questions.map(q => evaluateBranchingLogic(q.branching, answers)).lastIndexOf(true);
         dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: lastQuestionIndex });
+        track('quiz_step', { stepId: config.questions[lastQuestionIndex].id, direction: 'jump' });
         return;
     }
 
@@ -108,11 +114,11 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
   }, [config.questions, track, state.status]);
 
   const submitQuiz = async (uid: string) => {
-    track('intake_saved');
     const quizId = config.quizId;
     await saveIntakeData(uid, quizId, state.answers);
-    await deleteQuizDraft(uid, quizId);
-    localStorage.removeItem('vf_quiz_draft'); // Also clear local draft
+    track('intake_saved');
+    // Also clear local draft if it exists
+    localStorage.removeItem('vf_quiz_draft'); 
   };
 
 

@@ -5,11 +5,15 @@ import { event as gtagEvent } from '@/lib/gtag';
 import { event as metaEvent } from '@/lib/meta';
 
 // Define your custom event types here for strong typing
-type EventName =
+export type EventName =
   | 'quiz_start'
+  | 'quiz_resume'
   | 'quiz_step'
+  | 'quiz_answer'
+  | 'quiz_complete'
   | 'sign_up_attempt'
   | 'sign_up_success'
+  | 'sign_up_failure'
   | 'intake_saved';
 
 // Defines the structure for analytics mapping for each service
@@ -22,16 +26,30 @@ type AnalyticsMapping = {
 // Map your custom events to analytics-specific formats
 const eventMap: Record<EventName, AnalyticsMapping> = {
   quiz_start: {
-    gtag: () => ({ action: 'quiz_start', category: 'engagement', label: 'User started the onboarding quiz' }),
+    gtag: () => ({ action: 'quiz_start', category: 'engagement', label: 'User started a new quiz' }),
     meta: () => ({ eventName: 'Lead' }),
-    gads: () => ({ conversionLabel: 'AW-CONVERSION-LABEL-LEAD' }), // Placeholder for Google Ads
+  },
+  quiz_resume: {
+    gtag: () => ({ action: 'quiz_resume', category: 'engagement', label: 'User resumed a quiz' }),
   },
   quiz_step: {
-    gtag: (payload: { step: number; direction: 'next' | 'previous' | 'jump' }) => ({
-      action: `quiz_step_${payload.step}`,
+    gtag: (payload: { stepId: string; direction: 'next' | 'previous' | 'jump' }) => ({
+      action: `quiz_step_view`,
       category: 'engagement',
-      label: `User went to step ${payload.step} (${payload.direction})`,
+      label: `User navigated to step: ${payload.stepId} (${payload.direction})`,
+      value: payload.stepId,
     }),
+  },
+  quiz_answer: {
+     gtag: (payload: { analyticsKey: string, value: any }) => ({
+      action: 'quiz_answer',
+      category: 'engagement',
+      label: `Question: ${payload.analyticsKey}`,
+      value: typeof payload.value === 'object' ? JSON.stringify(payload.value) : payload.value,
+    }),
+  },
+  quiz_complete: {
+     gtag: () => ({ action: 'quiz_complete', category: 'conversion', label: 'User reached the summary screen' }),
   },
   sign_up_attempt: {
     gtag: () => ({ action: 'sign_up_attempt', category: 'engagement', label: 'User attempted to sign up' }),
@@ -40,6 +58,9 @@ const eventMap: Record<EventName, AnalyticsMapping> = {
     gtag: (payload: { uid: string }) => ({ action: 'sign_up_success', category: 'conversion', label: 'User created an account', user_id: payload.uid }),
     meta: () => ({ eventName: 'CompleteRegistration' }),
     gads: () => ({ conversionLabel: 'AW-CONVERSION-LABEL-SIGNUP' }), // Placeholder for Google Ads
+  },
+   sign_up_failure: {
+    gtag: (payload: { error: string }) => ({ action: 'sign_up_failure', category: 'error', label: payload.error }),
   },
   intake_saved: {
     gtag: () => ({ action: 'intake_saved', category: 'conversion', label: 'User intake data was saved' }),
