@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect } from 'react';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { doc } from 'firebase/firestore';
@@ -20,6 +21,13 @@ export default function DashboardPage() {
   const firestore = useFirestore();
   const router = useRouter();
 
+  // Redirect to login if auth is done and there's no user.
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/login');
+    }
+  }, [isUserLoading, user, router]);
+
   // The useMemoFirebase hook correctly waits for `user` and `firestore` to be available.
   // If they are not, it returns `null`, and `useDoc` will wait.
   const intakeRef = useMemoFirebase(() => {
@@ -30,18 +38,12 @@ export default function DashboardPage() {
   const { data: intakeData, isLoading: isIntakeLoading, error: intakeError } = useDoc(intakeRef);
 
   // Show a loader while authentication is in progress or the initial fetch is happening.
-  if (isUserLoading || (isIntakeLoading && !intakeData && !intakeError)) {
+  if (isUserLoading || !user) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
-  }
-
-  // If loading is finished and there's no user, redirect to login.
-  if (!user) {
-    router.push('/login');
-    return null;
   }
 
   // Handle permission errors gracefully.
@@ -61,7 +63,15 @@ export default function DashboardPage() {
 
   // Handle the case where the intake document doesn't exist (not-found).
   // This is a normal state for a new user.
-  if (!isIntakeLoading && !intakeData) {
+  if (isIntakeLoading && !intakeData) {
+      return (
+        <div className="flex min-h-[60vh] items-center justify-center">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        </div>
+    );
+  }
+  
+  if (!intakeData) {
     return (
       <div className="container mx-auto max-w-5xl py-12 px-4 text-center">
         <Card className="shadow-lg">
