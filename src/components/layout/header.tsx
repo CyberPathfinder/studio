@@ -4,6 +4,7 @@ import { VivaFormLogo } from "@/components/icons/logo";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
 import { ThemeToggle } from "./theme-toggle";
+import { useUser } from "@/firebase/auth";
 
 const navLinks = [
   { href: "#features", label: "Features" },
@@ -13,6 +14,12 @@ const navLinks = [
 ];
 
 export function Header() {
+  // We can't use useUser() here directly because Header is a Server Component.
+  // We'll handle showing user-specific buttons on the client.
+  // This is a placeholder for a real implementation that would likely involve
+  // a client component that wraps the buttons.
+  const showDashboard = false;
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
@@ -25,6 +32,11 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+          {showDashboard && (
+             <Link href="/dashboard" className="text-foreground/60 transition-colors hover:text-foreground/80">
+                Dashboard
+             </Link>
+          )}
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-2">
           <nav className="hidden items-center space-x-2 md:flex">
@@ -54,6 +66,11 @@ export function Header() {
                       {link.label}
                     </Link>
                   ))}
+                   {showDashboard && (
+                     <Link href="/dashboard" className="text-lg font-medium text-foreground/80 transition-colors hover:text-foreground">
+                        Dashboard
+                     </Link>
+                  )}
                   <div className="mt-4 flex flex-col gap-4">
                     <Button variant="outline" asChild>
                       <Link href="/login" aria-label="Log In">Log In</Link>
