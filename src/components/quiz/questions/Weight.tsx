@@ -12,10 +12,6 @@ import { getHealthyWeightRange } from '@/lib/unit-conversion';
 import { getLabel, getDescription } from '@/lib/i18n';
 import { useDebouncedCallback } from 'use-debounce';
 import { useEffect, useMemo } from 'react';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useAnalytics } from '@/hooks/use-analytics';
 
 
@@ -29,11 +25,11 @@ const Weight = ({ question }: { question: Question }) => {
   const { 
     unitWeight = 'metric', 
     weightKg,
-    weightKgView = '', 
-    weightLbView = '',
+    weightKgView, 
+    weightLbView,
     goalWeightKg,
-    goalWeightKgView = '',
-    goalWeightLbView = '',
+    goalWeightKgView,
+    goalWeightLbView,
     heightCm
   } = state.answers.body || {};
   
@@ -41,24 +37,6 @@ const Weight = ({ question }: { question: Question }) => {
     ? (unitWeight === 'metric' ? goalWeightKgView : goalWeightLbView)
     : (unitWeight === 'metric' ? weightKgView : weightLbView);
   
-  const canonicalValue = isGoalWeightQuestion ? goalWeightKg : weightKg;
-
-  // Use Zod for validation
-  const formSchema = z.object({
-    weightKg: z.number().min(35, "Вес должен быть не менее 35 кг").max(300, "Вес должен быть не более 300 кг"),
-  });
-
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    values: { weightKg: canonicalValue ?? 0 },
-  });
-  
-  // Re-validate when canonical value changes
-  useEffect(() => {
-    form.setValue('weightKg', canonicalValue ?? 0, { shouldValidate: true });
-  }, [canonicalValue, form]);
-
-
   const suggestedGoalKg = useMemo(() => {
     if (isGoalWeightQuestion && weightKg && !goalWeightKg) {
       return parseFloat((weightKg * 0.95).toFixed(1));
@@ -128,32 +106,19 @@ const Weight = ({ question }: { question: Question }) => {
             </RadioGroup>
       </div>
 
-       <Form {...form}>
-        <form className="space-y-4">
-            <FormField
-                control={form.control}
-                name="weightKg"
-                render={() => (
-                    <FormItem className="max-w-xs mx-auto">
-                        <Label htmlFor={`${question.id}-weight`} className="sr-only">Вес</Label>
-                        <FormControl>
-                            <Input
-                                id={`${question.id}-weight`}
-                                type="number"
-                                inputMode='decimal'
-                                value={displayValue}
-                                onChange={(e) => handleViewChange(e.target.value)}
-                                placeholder={unitWeight === 'metric' ? 'Например, 70' : 'Например, 154'}
-                                className="text-center text-xl h-16 rounded-lg shadow-inner"
-                                autoFocus
-                            />
-                        </FormControl>
-                        <FormMessage className="text-center" />
-                    </FormItem>
-                )}
+       <div className="max-w-xs mx-auto">
+            <Label htmlFor={`${question.id}-weight`} className="sr-only">Вес</Label>
+            <Input
+                id={`${question.id}-weight`}
+                type="number"
+                inputMode='decimal'
+                value={displayValue}
+                onChange={(e) => handleViewChange(e.target.value)}
+                placeholder={unitWeight === 'metric' ? 'Например, 70' : 'Например, 154'}
+                className="text-center text-xl h-16 rounded-lg shadow-inner"
+                autoFocus
             />
-        </form>
-      </Form>
+      </div>
       
       {getDescription(question) && <p className="text-center text-sm text-muted-foreground mt-8">{getDescription(question)}</p>}
     </div>

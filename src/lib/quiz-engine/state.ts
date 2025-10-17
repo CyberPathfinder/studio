@@ -143,34 +143,56 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
     case 'SET_BODY_VIEW_FIELD': {
         const { field, value } = action.payload;
         const body = newState.answers.body!;
-        (body[field] as any) = value;
+        
+        // 1. Update the string-based view field that the user is editing.
+        (body[field] as any) = value.replace(/[^0-9.]/g, '');
 
-        // Sync from view to canonical
-        if (field === 'heightCmView') {
-            body.heightCm = parseFloat(value) || undefined;
-        } else if (field === 'heightFtView' || field === 'heightInView') {
+
+        // 2. Derive the canonical (SI unit) value from the view fields.
+        let newCanonicalValue: number | undefined;
+
+        if (field.startsWith('height')) {
             const feet = parseFloat(body.heightFtView) || 0;
-            let inches = parseFloat(body.heightInView) || 0;
-
-            if (field === 'heightInView' && inches >= 12) {
-              const { normalizedFeet, normalizedInches } = normalizeInches(feet, inches);
-              body.heightFtView = normalizedFeet.toString();
-              body.heightInView = normalizedInches.toString();
-              body.heightCm = convertFtInToCm(normalizedFeet, normalizedInches) || undefined;
-            } else {
-              body.heightCm = convertFtInToCm(feet, inches) || undefined;
-            }
-        } else if (field === 'weightKgView' || field === 'weightLbView' || field === 'goalWeightKgView' || field === 'goalWeightLbView') {
-            const isGoal = field.startsWith('goal');
-            const unit = body.unitWeight;
-            const canonicalField = isGoal ? 'goalWeightKg' : 'weightKg';
-            const valueKg = (unit === 'metric' && (field.endsWith('KgView')))
-              ? parseFloat(value)
-              : convertWeight(parseFloat(value), 'lb', 'kg');
-
-            body[canonicalField] = valueKg || undefined;
+            const inches = parseFloat(body.heightInView) || 0;
+            const cm = parseFloat(body.heightCmView) || 0;
+            newCanonicalValue = body.unitHeight === 'metric' ? cm : convertFtInToCm(feet, inches);
+            body.heightCm = newCanonicalValue > 0 ? newCanonicalValue : undefined;
+        
+        } else if (field.startsWith('weight')) {
+            const kg = parseFloat(body.weightKgView) || 0;
+            const lb = parseFloat(body.weightLbView) || 0;
+            newCanonicalValue = body.unitWeight === 'metric' ? kg : convertWeight(lb, 'lb', 'kg');
+            body.weightKg = newCanonicalValue > 0 ? newCanonicalValue : undefined;
+        
+        } else if (field.startsWith('goalWeight')) {
+            const kg = parseFloat(body.goalWeightKgView) || 0;
+            const lb = parseFloat(body.goalWeightLbView) || 0;
+            newCanonicalValue = body.unitWeight === 'metric' ? kg : convertWeight(lb, 'lb', 'kg');
+            body.goalWeightKg = newCanonicalValue > 0 ? newCanonicalValue : undefined;
         }
 
+        // 3. Sync all view fields from the new canonical value to ensure consistency.
+        if (body.heightCm) {
+            const { feet, inches } = convertCmToFtIn(body.heightCm);
+            body.heightFtView = feet > 0 ? feet.toString() : '';
+            body.heightInView = inches > 0 ? roundToTwo(inches).toString() : '';
+            if (body.unitHeight === 'metric') {
+              body.heightCmView = body.heightCm > 0 ? roundToTwo(body.heightCm).toString() : '';
+            }
+        }
+        if (body.weightKg) {
+            body.weightLbView = body.weightKg > 0 ? roundToTwo(convertWeight(body.weightKg, 'kg', 'lb')).toString() : '';
+             if (body.unitWeight === 'metric') {
+              body.weightKgView = body.weightKg > 0 ? roundToTwo(body.weightKg).toString() : '';
+            }
+        }
+        if (body.goalWeightKg) {
+            body.goalWeightLbView = body.goalWeightKg > 0 ? roundToTwo(convertWeight(body.goalWeightKg, 'kg', 'lb')).toString() : '';
+            if (body.unitWeight === 'metric') {
+              body.goalWeightKgView = body.goalWeightKg > 0 ? roundToTwo(body.goalWeightKg).toString() : '';
+            }
+        }
+        
         newState.isDirty = true;
         break;
     }
@@ -203,20 +225,9 @@ export const quizReducer = (state: QuizState, action: Action): QuizState => {
         if (unitType === 'height') {
           if (body.unitHeight === unit) break; // No change
           body.unitHeight = unit;
-          // Re-sync view from canonical
-          const { feet, inches } = convertCmToFtIn(body.heightCm);
-          body.heightCmView = body.heightCm ? roundToTwo(body.heightCm).toString() : '';
-          body.heightFtView = feet.toString();
-          body.heightInView = roundToTwo(inches).toString();
-
         } else if (unitType === 'weight') {
           if (body.unitWeight === unit) break; // No change
           body.unitWeight = unit;
-          // Re-sync view from canonical
-          body.weightKgView = body.weightKg ? roundToTwo(body.weightKg).toString() : '';
-          body.weightLbView = body.weightKg ? roundToTwo(convertWeight(body.weightKg, 'kg', 'lb')).toString() : '';
-          body.goalWeightKgView = body.goalWeightKg ? roundToTwo(body.goalWeightKg).toString() : '';
-          body.goalWeightLbView = body.goalWeightKg ? roundToTwo(convertWeight(body.goalWeightKg, 'kg', 'lb')).toString() : '';
         }
         break;
     }
