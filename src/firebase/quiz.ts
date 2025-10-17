@@ -31,7 +31,7 @@ export const saveQuizDraft = (
       requestResourceData: draftData,
     });
     errorEmitter.emit('permission-error', contextualError);
-    console.error("Error saving quiz draft:", error);
+    // console.error("Error saving quiz draft:", error);
   });
 };
 
@@ -91,7 +91,7 @@ export const saveIntakeData = async (
             requestResourceData: intakeData,
         });
         errorEmitter.emit('permission-error', contextualError);
-        console.error("Error committing intake data batch:", error);
+        // console.error("Error committing intake data batch:", error);
         // Re-throw to be caught by the calling function
         throw error;
     });
@@ -112,6 +112,6 @@ export const deleteQuizDraft = async (userId: string, quizId: string) => {
       operation: 'delete',
     });
     errorEmitter.emit('permission-error', contextualError);
-    console.error("Error deleting quiz draft:", error);
+    // console.error("Error deleting quiz draft:", error);
   });
 };
