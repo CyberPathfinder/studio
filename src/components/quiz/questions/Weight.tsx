@@ -1,4 +1,3 @@
-
 'use client';
 import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import { Question } from '@/lib/quiz-engine/config';
@@ -7,9 +6,9 @@ import { Label } from '@/components/ui/label';
 import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { convertWeight, roundToTwo } from '@/lib/unit-conversion';
+import { convertWeight, roundToTwo, getHealthyWeightRange } from '@/lib/unit-conversion';
 import { getLabel, getDescription } from '@/lib/i18n';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -17,10 +16,27 @@ const Weight = ({ question }: { question: Question }) => {
   const { state, handleAnswerChange } = useQuizEngine();
   const { toast } = useToast();
   
-  // This component will manage its own unit state but save the canonical value (kg) to the engine
+  const isGoalWeightQuestion = question.id === 'goal_weight';
   const weightInKg = state.answers[question.id];
+  const currentWeightKg = state.answers['weight'];
+
   const [unit, setUnit] = useState<'kg' | 'lb'>('kg');
   const [displayWeight, setDisplayWeight] = useState<string>('');
+  
+  // Suggest a 5% weight loss goal if it's the goal question and no goal is set
+  const suggestedGoalKg = useMemo(() => {
+    if (isGoalWeightQuestion && currentWeightKg > 0 && !weightInKg) {
+      return roundToTwo(currentWeightKg * 0.95);
+    }
+    return null;
+  }, [isGoalWeightQuestion, currentWeightKg, weightInKg]);
+
+  // Effect to pre-fill the goal weight suggestion
+  useEffect(() => {
+    if (suggestedGoalKg !== null) {
+      handleAnswerChange(question.id, suggestedGoalKg, question.analytics_key);
+    }
+  }, [suggestedGoalKg, handleAnswerChange, question.id, question.analytics_key]);
   
   useEffect(() => {
     const numericValue = parseFloat(weightInKg);
@@ -48,23 +64,33 @@ const Weight = ({ question }: { question: Question }) => {
     setDisplayWeight(displayValue);
     
     const numericValue = parseFloat(displayValue);
-    let newWeightInKg = 0;
-    if (!isNaN(numericValue)) {
+    let newWeightInKg: number | null = null;
+
+    if (!isNaN(numericValue) && numericValue > 0) {
         newWeightInKg = unit === 'lb' ? convertWeight(numericValue, 'lb', 'kg') : numericValue;
         
         // Soft validation for weight range
         const min = question.validation?.min || 35;
         const max = question.validation?.max || 300;
-        if (newWeightInKg > 0 && (newWeightInKg < min || newWeightInKg > max)) {
+        if (newWeightInKg < min || newWeightInKg > max) {
             toast({
                 title: 'Unusual Weight',
                 description: `The weight seems unusual. Please double-check if it's correct.`
             });
         }
         
+        // Soft validation for ambitious goal
+        if (isGoalWeightQuestion && currentWeightKg && newWeightInKg) {
+            const lossPercentage = ((currentWeightKg - newWeightInKg) / currentWeightKg) * 100;
+            const [minHealthy] = getHealthyWeightRange(state.answers['height']);
+
+            if (lossPercentage > 25 || newWeightInKg < minHealthy) {
+                showAmbitiousGoalToast();
+            }
+        }
     }
     
-    handleAnswerChange(question.id, isNaN(numericValue) ? null : newWeightInKg, question.analytics_key);
+    handleAnswerChange(question.id, newWeightInKg, question.analytics_key);
   };
 
   const onUnitChange = (newUnit: 'kg' | 'lb') => {

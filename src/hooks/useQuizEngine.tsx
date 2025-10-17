@@ -37,7 +37,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
         let payload:any = { analyticsKey, value };
 
         // Add special payload for goal_weight
-        if (analyticsKey === 'goal_weight' && answers.weight > 0) {
+        if (analyticsKey === 'goal_weight' && answers.weight > 0 && value > 0) {
             const delta = value - answers.weight;
             const deltaPct = (delta / answers.weight) * 100;
             payload.delta = delta;

@@ -47,6 +47,31 @@ export const convertFtInToCm = (feet: number, inches: number): number => {
     return totalInches / CM_TO_IN;
 }
 
+/**
+ * Calculates BMI from weight in kg and height in cm.
+ * @param weightKg Weight in kilograms.
+ * @param heightCm Height in centimeters.
+ * @returns The calculated BMI, or null if inputs are invalid.
+ */
+export const calculateBmi = (weightKg: number, heightCm: number): number | null => {
+    if (!weightKg || !heightCm || heightCm <=0) return null;
+    const heightM = heightCm / 100;
+    return roundToTwo(weightKg / (heightM * heightM));
+}
+
+/**
+ * Calculates a "healthy" weight range based on BMI.
+ * @param heightCm Height in centimeters.
+ * @param healthyBmiRange The BMI range considered healthy.
+ * @returns A tuple [minWeight, maxWeight] in kg.
+ */
+export const getHealthyWeightRange = (heightCm: number, healthyBmiRange: [number, number] = [18.5, 25]): [number, number] => {
+    if (!heightCm || heightCm <= 0) return [0, 0];
+    const heightM = heightCm / 100;
+    const minWeight = healthyBmiRange[0] * (heightM * heightM);
+    const maxWeight = healthyBmiRange[1] * (heightM * heightM);
+    return [roundToTwo(minWeight), roundToTwo(maxWeight)];
+}
 
 /**
  * Rounds a number to a specified number of decimal places.

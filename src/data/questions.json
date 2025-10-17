@@ -4,10 +4,11 @@
   "sections": [
     { "id": "profile", "title": "Profile", "order": 1 },
     { "id": "body", "title": "Body", "order": 2 },
-    { "id": "diet", "title": "Diet Style", "order": 3 },
-    { "id": "habits", "title": "Habits & Lifestyle", "order": 4 },
-    { "id": "health", "title": "Health", "order": 5 },
-    { "id": "summary", "title": "Summary", "order": 6 }
+    { "id": "goals", "title": "Goals", "order": 3 },
+    { "id": "diet", "title": "Diet Style", "order": 4 },
+    { "id": "habits", "title": "Habits & Lifestyle", "order": 5 },
+    { "id": "health", "title": "Health", "order": 6 },
+    { "id": "summary", "title": "Summary", "order": 7 }
   ],
   "questions": [
     {
@@ -64,6 +65,27 @@
       "description": "BMI is an estimate we use to personalize your plan.",
       "branching": { "show_if": "answers['height'] && answers['weight']" },
       "analytics_key": "bmi"
+    },
+    {
+        "id": "goal_weight",
+        "section": "goals",
+        "order": 6,
+        "type": "weight",
+        "label": "What's your goal weight?",
+        "description": "Set a goal you're comfortable with. You can always change it later.",
+        "ui": { "unit_toggle": ["kg", "lb"] },
+        "validation": { "required": true, "min": 35, "max": 300 },
+        "analytics_key": "goal_weight"
+    },
+    {
+        "id": "goal_confirm",
+        "section": "goals",
+        "order": 7,
+        "type": "message",
+        "label": "Great!",
+        "emoji": "🎉",
+        "description": "You've set your first goal. You can change this at any time.",
+        "branching": { "show_if": "answers['goal_weight']" }
     },
     {
       "id": "sex",
