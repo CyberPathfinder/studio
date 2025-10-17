@@ -5,13 +5,15 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { doc } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import ProfileCard from '@/components/dashboard/ProfileCard';
 import MeasurementsCard from '@/components/dashboard/MeasurementsCard';
 import AccessStatusCard from '@/components/dashboard/AccessStatusCard';
 import SmartFeedbackCard from '@/components/dashboard/SmartFeedbackCard';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Terminal } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -23,9 +25,9 @@ export default function DashboardPage() {
     return doc(firestore, `users/${user.uid}/intake/initial`);
   }, [user, firestore]);
 
-  const { data: intakeData, isLoading: isIntakeLoading } = useDoc(intakeRef);
+  const { data: intakeData, isLoading: isIntakeLoading, error: intakeError } = useDoc(intakeRef);
 
-  if (isUserLoading || isIntakeLoading) {
+  if (isUserLoading || (isIntakeLoading && !intakeError)) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -38,19 +40,39 @@ export default function DashboardPage() {
     return null;
   }
 
-  if (!intakeData) {
+  // Handle permission errors gracefully
+  if (intakeError) {
+     return (
+        <div className="container mx-auto max-w-5xl py-12 px-4 text-center">
+            <Alert variant="destructive">
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>Access Denied</AlertTitle>
+              <AlertDescription>
+                We couldn't load your dashboard data due to a permission issue. Please try signing out and back in. If the problem persists, contact support.
+              </AlertDescription>
+            </Alert>
+        </div>
+    );
+  }
+
+
+  // Handle case where intake document doesn't exist
+  if (!isIntakeLoading && !intakeData) {
     return (
       <div className="container mx-auto max-w-5xl py-12 px-4 text-center">
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Welcome to your Dashboard!</CardTitle>
+            <CardTitle className="font-headline text-3xl">Welcome to your Dashboard!</CardTitle>
+            <CardDescription className="text-lg text-muted-foreground pt-2">
+              Let's get started on your wellness journey.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              You haven't completed your intake quiz yet. Complete the quiz to get your personalized plan.
+            <p className="mb-6">
+              You haven't completed your intake quiz yet. Complete the quiz to unlock your personalized plan and dashboard.
             </p>
-            <Button asChild>
-              <Link href="/quiz">Start My Quiz</Link>
+            <Button size="lg" asChild variant="gradient">
+              <Link href="/quiz">Start My Free Quiz</Link>
             </Button>
           </CardContent>
         </Card>
