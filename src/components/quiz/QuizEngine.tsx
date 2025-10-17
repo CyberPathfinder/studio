@@ -16,7 +16,7 @@ import { useEffect } from 'react';
 import QuizSummary from './QuizSummary';
 import { getLabel } from '@/lib/i18n';
 import { evaluateBranchingLogic } from '@/lib/quiz-engine/utils';
-import { Sheet, SheetTrigger, SheetContent as MobileSheetContent } from '../ui/sheet';
+import { Sheet, SheetTrigger, SheetContent as MobileSheetContent, SheetTitle, SheetHeader, SheetDescription } from '../ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 
@@ -81,15 +81,18 @@ const QuizSummarySidebar = () => {
         return (
              <Sheet>
                 <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="md:hidden">
+                    <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open quiz sections menu">
                         <Menu className="h-5 w-5" />
                         <span className="sr-only">Open Menu</span>
                     </Button>
                 </SheetTrigger>
                 <MobileSheetContent side="left" className="p-0 w-[300px]">
-                    <SidebarHeader className='p-2'>
-                        <VivaFormLogo />
-                    </SidebarHeader>
+                   <SheetHeader className="p-4 border-b">
+                     <SheetTitle>Quiz Sections</SheetTitle>
+                     <SheetDescription>
+                       Review your answers or jump to a specific section.
+                     </SheetDescription>
+                   </SheetHeader>
                     {content}
                 </MobileSheetContent>
             </Sheet>

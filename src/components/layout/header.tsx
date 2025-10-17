@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { VivaFormLogo } from "@/components/icons/logo";
 import { Menu } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
 import { ThemeToggle } from "./theme-toggle";
 
 const navLinks = [
@@ -44,6 +44,10 @@ export function Header() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right">
+                <SheetHeader className="mb-6 text-left">
+                  <SheetTitle>Menu</SheetTitle>
+                  <SheetDescription>Navigate to different sections of the website.</SheetDescription>
+                </SheetHeader>
                 <div className="flex flex-col gap-6 pt-6">
                   {navLinks.map((link) => (
                     <Link key={link.href} href={link.href} className="text-lg font-medium text-foreground/80 transition-colors hover:text-foreground">
