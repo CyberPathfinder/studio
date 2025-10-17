@@ -27,23 +27,45 @@ const clientSchema = z.object({
     .min(1, { message: 'NEXT_PUBLIC_STRIPE_PUBLIC_KEY is not set in environment variables.' }),
 });
 
-const parsedServerEnv = serverSchema.safeParse(process.env);
-const parsedClientEnv = clientSchema.safeParse(readClientEnv());
+type ServerEnvResult = z.SafeParseReturnType<NodeJS.ProcessEnv, z.infer<typeof serverSchema>>;
+type ClientEnvResult = z.SafeParseReturnType<ReturnType<typeof readClientEnv>, z.infer<typeof clientSchema>>;
 
-if (process.env.NODE_ENV !== 'test') {
-  // Don't log during tests
-  if (!parsedServerEnv.success) {
-    logger.error('Invalid server environment variables:', parsedServerEnv.error.flatten().fieldErrors);
+let cachedServerEnv: ServerEnvResult | null = null;
+let cachedClientEnv: ClientEnvResult | null = null;
+
+function logInvalidEnv<TInput, TOutput>(
+  result: z.SafeParseReturnType<TInput, TOutput>,
+  scope: 'server' | 'client'
+) {
+  if (process.env.NODE_ENV === 'test' || result.success) {
+    return;
   }
-  if (!parsedClientEnv.success) {
-    logger.error('Invalid client environment variables:', parsedClientEnv.error.flatten().fieldErrors);
+
+  logger.error(`Invalid ${scope} environment variables:`, result.error.flatten().fieldErrors);
+}
+
+function validateServerEnv() {
+  if (!cachedServerEnv) {
+    cachedServerEnv = serverSchema.safeParse(process.env);
+    logInvalidEnv(cachedServerEnv, 'server');
   }
+
+  return cachedServerEnv;
+}
+
+function validateClientEnv() {
+  if (!cachedClientEnv) {
+    cachedClientEnv = clientSchema.safeParse(readClientEnv());
+    logInvalidEnv(cachedClientEnv, 'client');
+  }
+
+  return cachedClientEnv;
 }
 
 export async function getServerEnv() {
-  return parsedServerEnv;
+  return validateServerEnv();
 }
 
 export async function getClientEnv() {
-  return parsedClientEnv;
+  return validateClientEnv();
 }
