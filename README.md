@@ -17,6 +17,23 @@ NEXT_PUBLIC_META_PIXEL_ID=0000000000000
 
 Replace the placeholder values with your actual tracking IDs. The application will automatically detect these variables and enable the respective analytics scripts. Events are logged to the browser console in development mode for easy debugging.
 
+## Stripe Setup
+
+Add the following keys to your `.env.local` file to enable Stripe Checkout:
+
+```bash
+# .env.local
+STRIPE_SECRET_KEY=sk_live_or_test_key
+STRIPE_PRICE_ID=price_1234567890abcdef
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_live_or_test_key
+```
+
+* `STRIPE_SECRET_KEY` — секретный ключ Stripe, используемый только на сервере.
+* `STRIPE_PRICE_ID` — идентификатор цены (Price ID) для выбранного плана подписки.
+* `NEXT_PUBLIC_STRIPE_PUBLIC_KEY` — публичный ключ Stripe, используемый на клиенте.
+
+Убедитесь, что вы используете тестовые ключи в процессе разработки и не коммитите файл `.env.local` в репозиторий.
+
 ## Quiz Engine: Managing Questions
 
 The quiz is powered by a JSON configuration file located at `src/data/questions.json`. This allows for easy updates to questions, sections, and logic without changing the application code.
