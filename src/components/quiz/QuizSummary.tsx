@@ -99,9 +99,14 @@ const QuizSummary = () => {
         body: JSON.stringify({ uid: user.uid, planId: 'premium_monthly', intakeVersion: 'v1' }),
       });
 
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to create checkout session.');
+      }
+
       const { sessionId } = await res.json();
       if (!sessionId) {
-        throw new Error('Failed to create checkout session.');
+        throw new Error('Failed to retrieve checkout session ID.');
       }
       
       const stripe = await stripePromise;
@@ -109,7 +114,11 @@ const QuizSummary = () => {
         throw new Error('Stripe.js has not loaded yet.');
       }
 
-      await stripe.redirectToCheckout({ sessionId });
+      const { error } = await stripe.redirectToCheckout({ sessionId });
+
+      if (error) {
+        throw new Error(error.message);
+      }
 
     } catch (error: any) {
        toast({
