@@ -95,7 +95,7 @@ const QuizSummary = () => {
   }
 
   return (
-    <Card className="w-full max-w-4xl shadow-2xl">
+    <Card className="w-full max-w-4xl shadow-md rounded-2xl">
       <CardHeader>
         <CardTitle className="font-headline text-3xl">Confirm Your Plan</CardTitle>
         <CardDescription>Review your answers below. You can edit them before saving your plan.</CardDescription>

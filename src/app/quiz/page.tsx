@@ -8,7 +8,7 @@ function QuizLoadingSkeleton() {
     return (
         <div className="relative flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
             <div className="absolute top-4 left-4 text-primary font-bold text-lg">VivaForm</div>
-            <Card className="w-full max-w-xl overflow-hidden shadow-2xl p-8 space-y-8">
+            <Card className="w-full max-w-2xl overflow-hidden shadow-md rounded-2xl p-8 space-y-8">
                 <Skeleton className="h-8 w-1/2 mx-auto" />
                 <div className="space-y-4">
                     <Skeleton className="h-10 w-full" />

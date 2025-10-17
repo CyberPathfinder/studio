@@ -185,8 +185,8 @@ const QuizEngine = () => {
                     <QuizSummarySidebar />
                 </div>
                 
-                <Card className="w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col h-screen md:h-auto md:max-h-[90vh]">
-                    <div className="p-4 md:p-8 flex-grow overflow-y-auto">
+                <Card className="w-full max-w-2xl overflow-hidden shadow-md rounded-2xl flex flex-col h-screen md:h-auto md:max-h-[90vh]">
+                    <div className="p-6 md:p-8 flex-grow overflow-y-auto">
                         <QuizProgress />
                         <div className="relative mt-8 min-h-[28rem] flex items-center justify-center">
                             <AnimatePresence mode="wait">
@@ -204,7 +204,7 @@ const QuizEngine = () => {
                         </div>
                     </div>
                     <div className={cn(
-                        "bg-muted/60 p-4 border-t",
+                        "bg-muted/60 p-6 border-t",
                         "md:relative",
                         isMobile && "fixed bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm pb-[calc(1rem+env(safe-area-inset-bottom))]"
                     )}>
