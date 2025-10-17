@@ -73,12 +73,30 @@
       "analytics_key": "bmi"
     },
     {
+        "id": "bmi_chart",
+        "section": "body",
+        "order": 5,
+        "type": "chart_bmi",
+        "label": "Твой индекс массы тела (BMI)",
+        "description": "BMI — ориентировочный показатель и не учитывает состав тела. Для персональных рекомендаций смотри следующий шаг.",
+        "branching": { "show_if": "answers['bmi_calc']" },
+        "ui": {
+            "range": [16, 40],
+            "healthy_zone": [18.5, 24.9]
+        },
+        "source": "WHO"
+    },
+    {
         "id": "goal_weight",
         "section": "body",
         "order": 6,
         "type": "weight",
         "label": "What's your goal weight?",
         "description": "Set a goal you're comfortable with. You can always change it later.",
+        "i18n": {
+            "en": { "label": "What's your goal weight?" },
+            "ru": { "label": "Какой у вас целевой вес?" }
+        },
         "validation": { "required": true, "min": 35, "max": 300 },
         "analytics_key": "goal_weight_kg"
     },

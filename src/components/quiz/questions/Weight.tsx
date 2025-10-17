@@ -155,7 +155,7 @@ const Weight = ({ question }: { question: Question }) => {
         </form>
       </Form>
       
-      <p className="text-center text-sm text-muted-foreground mt-8">{getDescription(question)}</p>
+      {getDescription(question) && <p className="text-center text-sm text-muted-foreground mt-8">{getDescription(question)}</p>}
     </div>
   );
 };

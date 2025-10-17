@@ -12,22 +12,22 @@ const BmiCategoryIndicator = ({ bmi, healthyMin, healthyMax } : { bmi: number, h
   let color = 'bg-gray-400';
 
   if (bmi < 18.5) {
-      category = 'Underweight';
+      category = 'Недовес';
       color = 'bg-blue-400';
   } else if (bmi >= 18.5 && bmi < 25) {
-      category = 'Healthy';
+      category = 'Норма';
       color = 'bg-green-500';
   } else if (bmi >= 25 && bmi < 30) {
-      category = 'Overweight';
+      category = 'Избыточный вес';
       color = 'bg-yellow-400';
   } else if (bmi >= 30 && bmi < 35) {
-      category = 'Obese I';
+      category = 'Ожирение I';
       color = 'bg-orange-500';
   } else if (bmi >= 35 && bmi < 40) {
-      category = 'Obese II';
+      category = 'Ожирение II';
       color = 'bg-red-500';
   } else {
-      category = 'Obese III';
+      category = 'Ожирение III';
       color = 'bg-red-700';
   }
   
@@ -75,7 +75,7 @@ const ChartBmi = ({ question }: { question: Question }) => {
             <span>{healthyZone[1]}</span>
             <span>{range[1]}</span>
        </div>
-       <p className="text-xs text-muted-foreground mt-4">Source: {question.source}</p>
+       <p className="text-xs text-muted-foreground mt-4">Источник: {question.source}</p>
     </div>
   );
 };
