@@ -4,15 +4,25 @@ import Stripe from 'stripe';
 import { doc, getDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase/server';
 import { logger } from '@/lib/logger';
-import { stripeSecretKey } from '@/config/stripe-server';
+import { env } from '@/config/env';
 
-const stripe = new Stripe(stripeSecretKey, {
+// Validate server environment variables
+if (!env.server.success) {
+    logger.error('Stripe server environment variables are not set.', env.server.error.flatten());
+}
+
+const stripe = env.server.success ? new Stripe(env.server.data.STRIPE_SECRET_KEY, {
   apiVersion: '2024-06-20',
-});
+}) : null;
+
 
 const { firestore } = initializeFirebase();
 
 export async function POST(req: NextRequest) {
+  if (!stripe || !env.server.success) {
+    return NextResponse.json({ error: 'Stripe is not configured. Missing API keys.' }, { status: 500 });
+  }
+  
   try {
     const { sessionId } = await req.json();
 

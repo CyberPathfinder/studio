@@ -19,11 +19,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { loadStripe } from '@stripe/stripe-js';
-import { stripePublicKey } from '@/config/stripe-client';
+import { stripePublicKey, hasStripeKey } from '@/config/stripe-client';
 import SmartFeedbackCard from '../dashboard/SmartFeedbackCard';
 import { useRouter } from 'next/navigation';
 
-const stripePromise = loadStripe(stripePublicKey);
+const stripePromise = hasStripeKey() ? loadStripe(stripePublicKey) : Promise.resolve(null);
 
 const signUpSchema = z.object({
   email: z.string().email({ message: 'Пожалуйста, введите корректный email.' }),
@@ -118,6 +118,14 @@ const QuizSummary = () => {
         variant: "destructive",
         title: "Not Logged In",
         description: "You must be logged in to purchase a plan.",
+      });
+      return;
+    }
+     if (!hasStripeKey()) {
+      toast({
+        variant: "destructive",
+        title: "Stripe Not Configured",
+        description: "The application is not configured for payments.",
       });
       return;
     }
@@ -295,6 +303,25 @@ const QuizSummary = () => {
                 </Button>
               </form>
             </Form>
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-muted/50 px-2 text-muted-foreground">
+                  ИЛИ
+                </span>
+              </div>
+            </div>
+             <Button
+                variant="secondary"
+                onClick={handleGuestContinue}
+                className="w-full"
+                disabled={isLoading}
+            >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Продолжить без аккаунта
+            </Button>
           </div>
         )}
         {/* CTA for authenticated users */}
@@ -318,7 +345,7 @@ const QuizSummary = () => {
                 ) : (
                     <>
                       <SmartFeedbackCard bmi={bmi} intakeData={intakeData} />
-                      <Button onClick={handleGoPremium} className="w-full" disabled={isLoading}>
+                      <Button onClick={handleGoPremium} className="w-full" disabled={isLoading || !hasStripeKey()}>
                           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                           Оформить Premium
                       </Button>

@@ -4,16 +4,25 @@ import Stripe from 'stripe';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase/server'; // Assumes server-side initialization
 import { logger } from '@/lib/logger';
-import { stripePriceId, stripeSecretKey } from '@/config/stripe-server';
+import { env } from '@/config/env';
 
-const stripe = new Stripe(stripeSecretKey, {
+// Validate server environment variables
+if (!env.server.success) {
+    logger.error('Stripe server environment variables are not set.', env.server.error.flatten());
+}
+
+const stripe = env.server.success ? new Stripe(env.server.data.STRIPE_SECRET_KEY, {
   apiVersion: '2024-06-20',
-});
+}) : null;
 
 // Initialize Firebase Admin for server-side operations
 const { firestore } = initializeFirebase();
 
 export async function POST(req: NextRequest) {
+  if (!stripe || !env.server.success) {
+    return NextResponse.json({ error: 'Stripe is not configured. Missing API keys.' }, { status: 500 });
+  }
+
   try {
     const { uid, planId, intakeVersion } = await req.json();
 
@@ -40,7 +49,7 @@ export async function POST(req: NextRequest) {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: stripePriceId,
+          price: env.server.data.STRIPE_PRICE_ID,
           quantity: 1,
         },
       ],
