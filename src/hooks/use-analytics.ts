@@ -13,6 +13,7 @@ export type EventName =
   | 'quiz_unit_change'
   | 'quiz_answer'
   | 'quiz_complete'
+  | 'guest_continue'
   | 'sign_up_attempt'
   | 'sign_up_success'
   | 'sign_up_failure'
@@ -65,11 +66,15 @@ const eventMap: Record<EventName, AnalyticsMapping> = {
   quiz_complete: {
      gtag: () => ({ action: 'quiz_complete', category: 'conversion', label: 'User reached the summary screen' }),
   },
+  guest_continue: {
+      gtag: () => ({ action: 'guest_continue', category: 'conversion', label: 'User continued as guest' }),
+      meta: () => ({ eventName: 'SubmitApplication' }), // Using this as a proxy for a soft conversion
+  },
   sign_up_attempt: {
     gtag: () => ({ action: 'sign_up_attempt', category: 'engagement', label: 'User attempted to sign up' }),
   },
   sign_up_success: {
-    gtag: (payload: { uid: string, method: string }) => ({ action: 'sign_up_success', category: 'conversion', label: 'User created an account', user_id: payload.uid, method: payload.method }),
+    gtag: (payload: { uid: string, method: string }) => ({ action: 'sign_up', category: 'conversion', label: 'User created an account', user_id: payload.uid, method: payload.method }),
     meta: () => ({ eventName: 'CompleteRegistration' }),
     gads: () => ({ conversionLabel: 'AW-CONVERSION-LABEL-SIGNUP' }), // Placeholder
   },
@@ -137,3 +142,5 @@ export const useAnalytics = () => {
 
   return { track };
 };
+
+    

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, linkWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { getFirestore, doc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { useQuizEngine } from '@/hooks/useQuizEngine';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Пожалуйста, введите корректный email.' }),
@@ -31,6 +32,8 @@ const mapFirebaseError = (errorCode: string): string => {
   switch (errorCode) {
     case 'auth/email-already-in-use':
       return 'Этот адрес электронной почты уже используется. Попробуйте войти.';
+    case 'auth/credential-already-in-use':
+        return 'Этот аккаунт уже существует. Попробуйте войти.';
     case 'auth/invalid-email':
       return 'Некорректный формат адреса электронной почты.';
     case 'auth/wrong-password':
@@ -48,6 +51,7 @@ export function AuthCard({ mode }: AuthCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const { submitQuiz } = useQuizEngine();
 
   const form = useForm<AuthFormValues>({
     resolver: zodResolver(formSchema),
@@ -57,43 +61,47 @@ export function AuthCard({ mode }: AuthCardProps) {
   const onSubmit = async (data: AuthFormValues) => {
     setIsLoading(true);
     form.clearErrors();
+    const auth = getAuth();
 
     try {
-      const auth = getAuth();
       if (mode === 'signup') {
-        const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-        const user = userCredential.user;
+        const currentUser = auth.currentUser;
         
-        // After creating the user, create their documents in Firestore
-        const db = getFirestore();
-        const batch = writeBatch(db);
+        if (currentUser && currentUser.isAnonymous) {
+          // Upgrade anonymous user
+          const credential = EmailAuthProvider.credential(data.email, data.password);
+          await linkWithCredential(currentUser, credential);
+          await updateProfile(currentUser, { displayName: data.email.split('@')[0] });
+          toast({ title: 'Успешно!', description: 'Ваш аккаунт был обновлен.' });
 
-        // 1. Create user document
-        const userRef = doc(db, 'users', user.uid);
-        batch.set(userRef, {
-          email: user.email,
-          createdAt: serverTimestamp(),
-          version: 1,
-        }, { merge: true });
+        } else {
+          // Regular new user sign up
+          const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+          const user = userCredential.user;
+          
+          // Create user documents in Firestore
+          const db = getFirestore();
+          const batch = writeBatch(db);
 
-        // 2. Create initial intake document
-        const intakeRef = doc(db, `users/${user.uid}/intake/initial`);
-        batch.set(intakeRef, { 
-          createdAt: serverTimestamp(),
-          // Add any other default fields for a new intake doc here
-        }, { merge: true });
+          const userRef = doc(db, 'users', user.uid);
+          batch.set(userRef, { email: user.email, createdAt: serverTimestamp(), version: 1 }, { merge: true });
 
-        // Commit both writes at once
-        await batch.commit();
-        
-        await updateProfile(userCredential.user, { displayName: data.email.split('@')[0] });
-        toast({ title: 'Успешно!', description: 'Ваш аккаунт создан.' });
+          const intakeRef = doc(db, `users/${user.uid}/intake/initial`);
+          batch.set(intakeRef, { createdAt: serverTimestamp() }, { merge: true });
+
+          await batch.commit();
+          
+          await updateProfile(user, { displayName: data.email.split('@')[0] });
+          toast({ title: 'Успешно!', description: 'Ваш аккаунт создан.' });
+        }
+
       } else {
         await signInWithEmailAndPassword(auth, data.email, data.password);
         toast({ title: 'Добро пожаловать!', description: 'Вы успешно вошли в систему.' });
       }
+
       router.push('/dashboard');
-      router.refresh(); // Forces a refresh to update server components with new user state
+      router.refresh();
     } catch (error: any) {
       const friendlyMessage = mapFirebaseError(error.code);
       form.setError('root', { message: friendlyMessage });
@@ -163,3 +171,5 @@ export function AuthCard({ mode }: AuthCardProps) {
     </Card>
   );
 }
+
+    

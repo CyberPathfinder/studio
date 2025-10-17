@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { doc } from 'firebase/firestore';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -15,6 +15,19 @@ import AccessStatusCard from '@/components/dashboard/AccessStatusCard';
 import SmartFeedbackCard from '@/components/dashboard/SmartFeedbackCard';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
+
+const GuestUserBanner = () => (
+    <Alert className="mb-8 bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-200">
+        <Info className="h-4 w-4 !text-blue-600 dark:!text-blue-300" />
+        <AlertTitle>You are viewing as a guest.</AlertTitle>
+        <AlertDescription>
+            Your progress is saved on this device, but to access it anywhere and unlock all features, please create a free account.
+            <Button asChild variant="link" className="p-0 h-auto ml-1 text-blue-700 dark:text-blue-300">
+                <Link href="/signup">Create an account</Link>
+            </Button>
+        </AlertDescription>
+    </Alert>
+)
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -88,6 +101,7 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:px-8">
+        {user?.isAnonymous && <GuestUserBanner />}
       <div className="mb-8">
         <h1 className="text-3xl font-bold font-headline">Your Dashboard</h1>
         <p className="text-muted-foreground">Here's an overview of your wellness journey.</p>
@@ -105,3 +119,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

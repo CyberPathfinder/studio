@@ -11,7 +11,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Edit, Loader2 } from 'lucide-react';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, linkWithCredential, EmailAuthProvider, signInAnonymously } from 'firebase/auth';
 import { getLabel } from '@/lib/i18n';
 import { convertCmToFtIn, convertWeight, roundToTwo } from '@/lib/unit-conversion';
 import { useForm } from 'react-hook-form';
@@ -21,6 +21,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form'
 import { loadStripe } from '@stripe/stripe-js';
 import { stripePublicKey } from '@/config/stripe-client';
 import SmartFeedbackCard from '../dashboard/SmartFeedbackCard';
+import { useRouter } from 'next/navigation';
 
 const stripePromise = loadStripe(stripePublicKey);
 
@@ -35,6 +36,7 @@ const QuizSummary = () => {
   const { user, isUserLoading } = useFirebase();
   const { track } = useAnalytics();
   const { toast } = useToast();
+  const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isPlanSaved, setIsPlanSaved] = useState(false);
@@ -54,33 +56,61 @@ const QuizSummary = () => {
 
     try {
       const auth = getAuth();
-      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-      const newUser = userCredential.user;
+      const currentUser = auth.currentUser;
+
+      if (currentUser && currentUser.isAnonymous) {
+        // Link anonymous account to a permanent one
+        const credential = EmailAuthProvider.credential(values.email, values.password);
+        await linkWithCredential(currentUser, credential);
+        track('sign_up_success', { uid: currentUser.uid, method: 'anonymous_upgrade' });
+      } else {
+        // Regular sign up
+        const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+        const newUser = userCredential.user;
+        track('sign_up_success', { uid: newUser.uid, method: 'password' });
+        await submitQuiz(newUser.uid);
+      }
       
-      track('sign_up_success', { uid: newUser.uid, method: 'password' });
       toast({
         title: 'Аккаунт создан!',
         description: 'Ваш аккаунт был успешно создан.',
       });
 
-      await submitQuiz(newUser.uid);
       setIsPlanSaved(true);
-      toast({
-        title: 'Успешно!',
-        description: 'Ваш персональный план сохранен.',
-      });
       
     } catch (error: any) {
       track('sign_up_failure', { error: error.message });
       if (error.code === 'auth/email-already-in-use') {
         form.setError('email', { type: 'manual', message: 'Этот адрес электронной почты уже используется.'});
-      } else {
+      } else if (error.code === 'auth/credential-already-in-use') {
+        form.setError('email', { type: 'manual', message: 'Этот аккаунт уже существует. Попробуйте войти.' });
+      }
+      else {
         form.setError('root', { type: 'manual', message: 'Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.' });
       }
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleGuestContinue = async () => {
+    setIsLoading(true);
+    track('guest_continue');
+    try {
+      const auth = getAuth();
+      const userCredential = await signInAnonymously(auth);
+      await submitQuiz(userCredential.user.uid);
+      router.push('/dashboard');
+    } catch (error: any) {
+       toast({
+        variant: "destructive",
+        title: "Could not continue as guest",
+        description: error.message || 'An unexpected error occurred.',
+      });
+    } finally {
+        setIsLoading(false);
+    }
+  }
 
   const handleGoPremium = async () => {
     if (!user) {
@@ -264,9 +294,20 @@ const QuizSummary = () => {
                 </Button>
               </form>
             </Form>
-            <p className="text-xs text-muted-foreground mt-4 text-center">
-              Создайте аккаунт, чтобы сохранить ваш прогресс.
-            </p>
+            <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-muted/50 px-2 text-muted-foreground">
+                        ИЛИ
+                    </span>
+                </div>
+            </div>
+            <Button variant="secondary" className="w-full" onClick={handleGuestContinue} disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Продолжить без аккаунта
+            </Button>
           </div>
         )}
         {/* CTA for authenticated users */}
@@ -305,3 +346,5 @@ const QuizSummary = () => {
 };
 
 export default QuizSummary;
+
+    
