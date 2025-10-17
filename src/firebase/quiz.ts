@@ -65,21 +65,23 @@ export const getQuizDraft = async (
 /**
  * Saves the final intake data and deletes the draft.
  * @param userId The user's unique ID.
- * @param quizId The ID of the quiz.
+ * @param intakeDocId The document ID for the intake data (e.g., 'initial').
  * @param intakeData The final answers to save.
  */
 export const saveIntakeData = async (
     userId: string,
-    quizId: string,
+    intakeDocId: string,
     intakeData: any
 ) => {
     if (!userId) return;
     const db = getFirestore();
-    const intakeRef = doc(db, `users/${userId}/intake/${quizId}`);
+    // The original quizId is used to find the draft to delete
+    const quizId = 'vivaform_intake_v1';
+    const intakeRef = doc(db, `users/${userId}/intake/${intakeDocId}`);
     const draftRef = doc(db, `users/${userId}/intake_drafts/${quizId}`);
 
     const batch = writeBatch(db);
-    batch.set(intakeRef, { ...intakeData, completedAt: new Date().toISOString() });
+    batch.set(intakeRef, intakeData);
     batch.delete(draftRef);
 
     await batch.commit().catch(error => {

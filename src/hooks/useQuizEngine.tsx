@@ -126,15 +126,54 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
   }, [config.questions, track, state.status]);
 
   const submitQuiz = async (uid: string) => {
-    const quizId = config.quizId;
-    if (!quizId) {
-        console.error("Quiz ID is not defined in the config.");
-        return;
-    }
-    await saveIntakeData(uid, quizId, state.answers);
+    const { answers } = state;
+    const intakeData = {
+        createdAt: new Date().toISOString(),
+        version: "v1",
+        profile: {
+            name: answers.name,
+            age: answers.age,
+            sex: answers.sex
+        },
+        measures: {
+            height_cm: answers.height,
+            weight_kg: answers.weight,
+            bmi: answers.bmi_calc,
+            goal_weight_kg: answers.goal_weight,
+        },
+        preferences: {
+            diet_style: answers.diet_style,
+            food_prefs: answers.food_prefs,
+            meat_prefs: answers.meat_prefs
+        },
+        habits: {
+            activity_level: answers.activity,
+            lost_before: answers.lost_before,
+            ideal_weight_time: answers.ideal_when,
+            eating_habits: answers.eating_habits,
+            cooking_skill: answers.cooking_skill,
+            water_intake: answers.water_intake,
+            work_schedule: answers.work_schedule,
+            support_system: answers.start_with_support,
+        },
+        health: {
+            sleep_quality: answers.sleep_quality,
+            health_risks: answers.health_risks,
+            energy_levels: answers.energy_levels,
+            mobility_limitations: answers.mobility_limited,
+            activity_assistance: answers.need_help_activities,
+            missed_activities: answers.miss_activities,
+            self_esteem_impact: answers.self_esteem,
+            family_concern: answers.family_concerned,
+            medications: answers.medications,
+            allergies: answers.allergies,
+        }
+    };
+
+    await saveIntakeData(uid, 'initial', intakeData);
     track('intake_saved');
     // Also clear local draft if it exists
-    localStorage.removeItem('vf_quiz_draft'); 
+    localStorage.removeItem('vf_quiz_draft');
   };
 
 
