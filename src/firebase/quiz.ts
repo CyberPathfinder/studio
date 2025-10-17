@@ -1,3 +1,4 @@
+
 'use client';
 import { doc, getDoc, setDoc, deleteDoc, writeBatch, Firestore } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
