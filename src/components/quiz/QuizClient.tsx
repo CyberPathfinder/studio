@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useFirebase } from '@/firebase';
 import { getQuizDraft, saveQuizDraft } from '@/firebase/quiz';
-import { useQuizEngine, QuizProvider } from '@/hooks/useQuizEngine.tsx';
+import { useQuizEngine, QuizProvider } from '@/hooks/useQuizEngine';
 import quizConfig from '@/data/questions.json';
 import ResumePrompt from './ResumePrompt';
 import QuizEngine from './QuizEngine';
@@ -30,7 +30,7 @@ const QuizClientInternal = () => {
     let draftPromise: Promise<any | null>;
 
     if (user) {
-      draftPromise = getQuizDraft(user.uid, quizConfig.id);
+      draftPromise = getQuizDraft(user.uid, quizConfig.quizId);
     } else {
       const localDraft = localStorage.getItem(LOCAL_STORAGE_KEY);
       draftPromise = Promise.resolve(localDraft ? JSON.parse(localDraft) : null);
@@ -59,7 +59,7 @@ const QuizClientInternal = () => {
             currentQuestionId: state.currentQuestionId,
         };
       if (user) {
-        await saveQuizDraft(user.uid, quizConfig.id, draftData);
+        await saveQuizDraft(user.uid, quizConfig.quizId, draftData);
       } else {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(draftData));
       }
@@ -67,7 +67,7 @@ const QuizClientInternal = () => {
     };
 
     saveData();
-  }, [state.answers, user, isUserLoading, state.isDirty, quizConfig.id, state.currentQuestionId, dispatch, isInitialized]);
+  }, [state.answers, user, isUserLoading, state.isDirty, quizConfig.quizId, state.currentQuestionId, dispatch, isInitialized]);
 
 
   const handleResume = (resume: boolean) => {
@@ -78,7 +78,7 @@ const QuizClientInternal = () => {
       initializeState({});
       if (user) {
         // If they chose not to resume, clear the server draft
-        saveQuizDraft(user.uid, quizConfig.id, { answers: {}, currentQuestionId: null });
+        saveQuizDraft(user.uid, quizConfig.quizId, { answers: {}, currentQuestionId: null });
       } else {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
       }

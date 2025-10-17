@@ -7,7 +7,6 @@ import { useReducer, useCallback, useMemo, useContext, createContext, ReactNode 
 import { useAnalytics } from './use-analytics';
 import { useDebouncedCallback } from 'use-debounce';
 import { deleteQuizDraft, saveIntakeData } from '@/firebase/quiz';
-import { getLabel } from '@/lib/i18n';
 
 type QuizEngineContextType = {
   state: ReturnType<typeof quizReducer>;
@@ -38,7 +37,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
         track('quiz_step' as any, { analyticsKey, value });
     }
     dispatch({ type: 'SET_ANSWER', payload: { questionId, value } });
-  }, 300);
+  }, 800);
 
   const completeQuiz = useCallback(() => {
     track('intake_saved');
@@ -110,7 +109,7 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
 
   const submitQuiz = async (uid: string) => {
     track('intake_saved');
-    const quizId = config.quizId || config.id;
+    const quizId = config.quizId;
     await saveIntakeData(uid, quizId, state.answers);
     await deleteQuizDraft(uid, quizId);
     localStorage.removeItem('vf_quiz_draft'); // Also clear local draft
