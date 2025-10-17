@@ -1,7 +1,7 @@
 'use client';
 
 import quizConfig from '@/data/questions.json';
-import { QuizProvider } from '@/hooks/useQuizEngine.tsx';
+import { QuizProvider } from '@/hooks/useQuizEngine';
 
 export default function QuizLayout({
     children,

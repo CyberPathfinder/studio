@@ -2,7 +2,7 @@
 
 'use client';
 import { useEffect } from 'react';
-import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
+import { useQuizEngine } from '@/hooks/useQuizEngine';
 import { Question } from '@/lib/quiz-engine/config';
 import { Input } from '@/components/ui/input';
 import { CardHeader, CardTitle } from '@/components/ui/card';

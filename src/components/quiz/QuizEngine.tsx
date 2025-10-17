@@ -1,7 +1,7 @@
 
 
 'use client';
-import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
+import { useQuizEngine } from '@/hooks/useQuizEngine';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import QuizProgress from './QuizProgress';

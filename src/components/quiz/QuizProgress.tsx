@@ -1,6 +1,6 @@
 
 'use client';
-import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
+import { useQuizEngine } from '@/hooks/useQuizEngine';
 import { Progress } from '@/components/ui/progress';
 import { useMemo, useState, useEffect } from 'react';
 import { evaluateBranchingLogic } from '@/lib/quiz-engine/utils';
