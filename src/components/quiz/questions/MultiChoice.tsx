@@ -21,21 +21,20 @@ const MultiChoice = ({ question }: { question: Question }) => {
 
   return (
     <div className="w-full">
-      <CardHeader className="text-center p-0 mb-8">
+      <CardHeader className="text-center p-0 mb-8" id={`${question.id}-label`}>
         <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
         {getDescription(question) && <CardDescription>{getDescription(question)}</CardDescription>}
       </CardHeader>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div role="group" aria-labelledby={`${question.id}-label`} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {options?.map((option) => (
           <div key={option.value} className="flex items-center space-x-3 rounded-md border p-4">
             <Checkbox
               id={`${question.id}-${option.value}`}
               checked={currentAnswers.includes(option.value)}
               onCheckedChange={() => onSelect(option.value)}
-              aria-labelledby={`${question.id}-${option.value}-label`}
             />
-            <Label id={`${question.id}-${option.value}-label`} htmlFor={`${question.id}-${option.value}`} className="font-normal w-full cursor-pointer">
+            <Label htmlFor={`${question.id}-${option.value}`} className="font-normal w-full cursor-pointer">
               {option.label}
             </Label>
           </div>

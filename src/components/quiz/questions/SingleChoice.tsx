@@ -15,7 +15,7 @@ const SingleChoice = ({ question }: { question: Question }) => {
 
   return (
     <div className="w-full">
-      <CardHeader className="text-center p-0 mb-8">
+      <CardHeader className="text-center p-0 mb-8" id={`${question.id}-label`}>
         <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
         {getDescription(question) && <CardDescription>{getDescription(question)}</CardDescription>}
       </CardHeader>
@@ -24,7 +24,7 @@ const SingleChoice = ({ question }: { question: Question }) => {
         onValueChange={(value) => handleAnswerChange(question.id, value, question.analytics_key)}
         value={answer}
         className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-        aria-label={getLabel(question)}
+        aria-labelledby={`${question.id}-label`}
       >
         {options?.map((option) => (
           <div key={option.value}>

@@ -15,7 +15,6 @@ const QuizControls = () => {
     const q = state.currentQuestion;
     if (!q) return true;
 
-    // Use a simple check for existence, as detailed validation is now in the component
     if (q.id === 'height') {
         const heightCm = state.answers.body?.heightCm;
         return !heightCm || heightCm < 120 || heightCm > 230;
@@ -66,14 +65,14 @@ const QuizControls = () => {
         variant="ghost"
         onClick={prevQuestion}
         disabled={state.isFirstQuestion}
-        aria-label="Go to previous step (Shift + Enter)"
+        aria-label="Go to previous step"
         className={state.isFirstQuestion ? 'invisible' : 'visible'}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back
       </Button>
 
-      <div className="text-sm font-medium text-muted-foreground">
+      <div className="text-sm font-medium text-muted-foreground" aria-live="polite">
         Step {currentVisibleIndex + 1} of {visibleQuestions.length}
       </div>
 
@@ -84,12 +83,12 @@ const QuizControls = () => {
             </Button>
         )}
         {state.isLastQuestion ? (
-            <Button onClick={handleNext} aria-label="Finish Quiz (Enter)" disabled={isNextDisabled}>
+            <Button onClick={handleNext} aria-label="Finish Quiz" disabled={isNextDisabled}>
                 Finish
                 <Check className="ml-2 h-4 w-4" />
             </Button>
         ) : (
-            <Button onClick={handleNext} aria-label="Go to next step (Enter)" disabled={isNextDisabled}>
+            <Button onClick={handleNext} aria-label="Go to next step" disabled={isNextDisabled}>
                 Next
                 <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
