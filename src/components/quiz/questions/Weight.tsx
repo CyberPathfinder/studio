@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { convertWeight, roundToTwo } from '@/lib/unit-conversion';
 import { getLabel, getDescription } from '@/lib/i18n';
+import { useDebouncedCallback } from 'use-debounce';
 
 const Weight = ({ question }: { question: Question }) => {
   const { state, handleAnswerChange } = useQuizEngine();
@@ -34,6 +35,14 @@ const Weight = ({ question }: { question: Question }) => {
     }
   }, [weightInKg, unit]);
 
+  const showAmbitiousGoalToast = useDebouncedCallback(() => {
+    toast({
+        title: 'Ambitious Goal',
+        description: `This is an ambitious goal, but we'll help you pace it safely.`,
+    });
+  }, 1000);
+
+
   const onWeightInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const displayValue = e.target.value;
     setDisplayWeight(displayValue);
@@ -43,7 +52,7 @@ const Weight = ({ question }: { question: Question }) => {
     if (!isNaN(numericValue)) {
         newWeightInKg = unit === 'lb' ? convertWeight(numericValue, 'lb', 'kg') : numericValue;
         
-        // Soft validation
+        // Soft validation for weight range
         const min = question.validation?.min || 35;
         const max = question.validation?.max || 300;
         if (newWeightInKg > 0 && (newWeightInKg < min || newWeightInKg > max)) {
@@ -51,6 +60,17 @@ const Weight = ({ question }: { question: Question }) => {
                 title: 'Unusual Weight',
                 description: `The weight seems unusual. Please double-check if it's correct.`
             });
+        }
+        
+        // Soft validation for ambitious goal weight
+        if (question.id === 'goal_weight') {
+            const currentWeight = state.answers['weight'];
+            if (currentWeight > newWeightInKg) { // It's a weight loss goal
+                const percentageLoss = ((currentWeight - newWeightInKg) / currentWeight) * 100;
+                if (percentageLoss > 25) {
+                    showAmbitiousGoalToast();
+                }
+            }
         }
     }
     

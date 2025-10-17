@@ -32,18 +32,29 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     dispatch({ type: 'INITIALIZE_STATE', payload: { config, initialAnswers, currentQuestionId } });
   }, [config]);
 
-   const debouncedTrackAnswer = useDebouncedCallback((analyticsKey: string, value: any) => {
+   const debouncedTrackAnswer = useDebouncedCallback((analyticsKey: string, value: any, answers: Record<string, any>) => {
     if (analyticsKey) {
-        track('quiz_answer', { analyticsKey, value });
+        let payload:any = { analyticsKey, value };
+
+        // Add special payload for goal_weight
+        if (analyticsKey === 'goal_weight' && answers.weight > 0) {
+            const delta = value - answers.weight;
+            const deltaPct = (delta / answers.weight) * 100;
+            payload.delta = delta;
+            payload.deltaPct = deltaPct;
+        }
+
+        track('quiz_answer', payload);
     }
   }, 1000);
 
   const handleAnswerChange = useCallback((questionId: string, value: any, analyticsKey?: string) => {
     dispatch({ type: 'SET_ANSWER', payload: { questionId, value } });
     if (analyticsKey) {
-        debouncedTrackAnswer(analyticsKey, value);
+        const updatedAnswers = { ...state.answers, [questionId]: value };
+        debouncedTrackAnswer(analyticsKey, value, updatedAnswers);
     }
-  }, [debouncedTrackAnswer]);
+  }, [debouncedTrackAnswer, state.answers]);
 
   const completeQuiz = useCallback(() => {
     track('quiz_complete');

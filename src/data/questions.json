@@ -56,30 +56,9 @@
       "analytics_key": "weight_kg"
     },
     {
-      "id": "bmi_calc",
-      "section": "body",
-      "order": 5,
-      "type": "computed_bmi",
-      "label": "Your BMI",
-      "description": "BMI is an estimate we use to personalize your plan.",
-      "branching": { "show_if": "answers['height'] && answers['weight']" },
-      "analytics_key": "bmi"
-    },
-    {
-      "id": "bmi_education",
-      "section": "body",
-      "order": 6,
-      "type": "chart_bmi",
-      "label": "Risks of unhealthy BMI",
-      "ui": { "range": [16, 40], "healthy_zone": [18.5, 24.9] },
-      "description": "Reaching and maintaining a healthy BMI (18.5–24.9) can reduce the risk of several chronic conditions.",
-      "source": "National Institutes of Health",
-      "branching": { "show_if": "answers['bmi_calc']" }
-    },
-    {
       "id": "goal_weight",
       "section": "body",
-      "order": 7,
+      "order": 5,
       "type": "weight",
       "label": "What’s your goal weight?",
       "ui": { "unit_toggle": ["kg", "lb"] },
@@ -89,11 +68,32 @@
     {
       "id": "goal_confirm",
       "section": "body",
-      "order": 8,
+      "order": 6,
       "type": "message",
       "label": "Great!",
       "description": "You’ve set your first goal. You can change it later.",
       "emoji": "🎉"
+    },
+    {
+      "id": "bmi_calc",
+      "section": "body",
+      "order": 7,
+      "type": "computed_bmi",
+      "label": "Your BMI",
+      "description": "BMI is an estimate we use to personalize your plan.",
+      "branching": { "show_if": "answers['height'] && answers['weight']" },
+      "analytics_key": "bmi"
+    },
+    {
+      "id": "bmi_education",
+      "section": "body",
+      "order": 8,
+      "type": "chart_bmi",
+      "label": "Risks of unhealthy BMI",
+      "ui": { "range": [16, 40], "healthy_zone": [18.5, 24.9] },
+      "description": "Reaching and maintaining a healthy BMI (18.5–24.9) can reduce the risk of several chronic conditions.",
+      "source": "National Institutes of Health",
+      "branching": { "show_if": "answers['bmi_calc']" }
     },
     {
       "id": "sex",
