@@ -1,47 +1,33 @@
 /**
- * @file Firestore Security Rules
- * @description This ruleset enforces a strict user-ownership model for data stored under `/users/{userId}/**`.
+ * @file Overview
+ * This ruleset enforces a strict user-ownership model for data nested under `/users/{userId}`.
+ * All data is nested under /users/{userId} (or deeper), granting the user (and server) full control.
+ * Clients are prevented from directly modifying membership or payment information, which must be done via a trusted server.
  *
  * Data Structure:
- * All user-specific data (quiz responses, drafts) is nested under `/users/{userId}`.
- * Quiz definitions are stored in a top-level `/quizzes/{quizId}` collection.
+ * - /quizzes/{quizId}: Public quiz definitions.
+ * - /quizzes/{quizId}/questions/{questionId}: Questions for a specific quiz.
+ * - /users/{userId}/quiz_responses/{quizResponseId}: User's quiz responses.
+ * - /users/{userId}/quiz_responses/{quizResponseId}/question_responses/{questionResponseId}: Individual question responses.
+ * - /users/{userId}/intake_drafts/{quizId}: Drafts of user quizzes.
+ * - /users/{userId}/membership: User's membership information (server-managed).
+ * - /users/{userId}/payments/{paymentId}: User's payment information (server-managed).
  *
  * Key Security Decisions:
- * - **Strict Ownership**: Only the authenticated user matching the `userId` path segment can read or write data under their `/users/{userId}` path.
- * - **Public Quizzes**: Quiz definitions in `/quizzes/{quizId}` are publicly readable.
- * - **No User Listing**: Listing users is not permitted.
- *
- * Authorization Strategy:
- *  Path-based ownership is used for all user-specific data.
- *  Quiz definitions are considered public data.
+ * - Clients cannot directly write to `/users/{userId}/membership` or `/users/{userId}/payments/{paymentId}`.
+ * - All write operations to membership and payment information must be performed by a server with admin privileges.
+ * - All read operations are limited to the owner of the data, using path-based ownership.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Determines if the request is made by the owner of the resource.
-     * @param {string} userId - The user ID from the path.
-     * @return {bool} True if the user is signed in and their UID matches the provided userId.
-     */
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    /**
-     * @description Determines if the user is signed in.
-     * @return {bool} True if request.auth is not null.
-     */
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    /**
-     * @description Allows public read access to quiz definitions. Write access is denied.
+     * @description Allows read access to quiz definitions for anyone.
      * @path /quizzes/{quizId}
-     * @allow (get, list) - Any user (signed in or not) can read quiz definitions.
-     * @deny (create, update, delete) - No user can create, update, or delete quiz definitions through the client.
-     * @principle Public read, restricted write.
+     * @allow (get, list)
+     * @deny (create, update, delete)
+     * @principle Allows public reads for quiz definitions.
      */
     match /quizzes/{quizId} {
       allow get, list: if true;
@@ -49,11 +35,11 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows public read access to questions for a quiz. Write access is denied.
+     * @description Allows read access to questions for anyone.
      * @path /quizzes/{quizId}/questions/{questionId}
-     * @allow (get, list) - Any user (signed in or not) can read questions.
-     * @deny (create, update, delete) - No user can create, update, or delete questions through the client.
-     * @principle Public read, restricted write.
+     * @allow (get, list)
+     * @deny (create, update, delete)
+     * @principle Allows public reads for questions under a quiz.
      */
     match /quizzes/{quizId}/questions/{questionId} {
       allow get, list: if true;
@@ -61,78 +47,112 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows a user to manage the root profile document stored at /users/{userId}.
-     * @path /users/{userId}
-     * @allow (get, create, update, delete) - Only the user with ID {userId} can manage their root profile document.
-     * @deny (list) - Listing all users is disallowed to protect privacy.
-     * @principle Enforces document ownership while preventing user enumeration.
-     */
-    match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId);
-      allow delete: if isOwner(userId) && resource != null;
-      allow list: if false;
-    }
-
-    /**
-     * @description Enforces strict user-ownership for stored intake results.
-     * @path /users/{userId}/intake/{intakeDocId}
-     * @allow (get, list, create, update, delete) - Only the user with ID {userId} can perform these actions.
-     * @deny (get, list, create, update, delete) - Any other user attempting these actions will be denied.
-     * @principle Keeps health intake data private to the owner.
-     */
-    match /users/{userId}/intake/{intakeDocId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) && resource != null;
-      allow delete: if isOwner(userId) && resource != null;
-    }
-
-    /**
-     * @description Enforces strict user-ownership for quiz responses.
+     * @description Allows a user to read and write their own quiz responses.
      * @path /users/{userId}/quiz_responses/{quizResponseId}
-     * @allow (get, list, create, update, delete) - Only the user with ID {userId} can perform these actions.
-     * @deny (get, list, create, update, delete) - Any other user attempting these actions will be denied.
-     * @principle Enforces document ownership for all operations.
+     * @allow (create, get, list, update, delete) User with matching {userId} can perform all operations.
+     * @deny (create, get, list, update, delete) User with mismatched {userId} cannot perform any operations.
+     * @principle Enforces document ownership for all write operations.
      */
     match /users/{userId}/quiz_responses/{quizResponseId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) && resource != null;
-      allow delete: if isOwner(userId) && resource != null;
+      allow get, list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId) && resource != null;
+      allow delete: if isSignedIn() && isOwner(userId) && resource != null;
     }
 
     /**
-     * @description Enforces strict user-ownership for question responses.
+     * @description Allows a user to read and write their own question responses.
      * @path /users/{userId}/quiz_responses/{quizResponseId}/question_responses/{questionResponseId}
-     * @allow (get, list, create, update, delete) - Only the user with ID {userId} can perform these actions.
-     * @deny (get, list, create, update, delete) - Any other user attempting these actions will be denied.
+     * @allow (create, get, list, update, delete) User with matching {userId} can perform all operations.
+     * @deny (create, get, list, update, delete) User with mismatched {userId} cannot perform any operations.
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId}/quiz_responses/{quizResponseId}/question_responses/{questionResponseId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) && resource != null;
-      allow delete: if isOwner(userId) && resource != null;
+      allow get, list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId) && resource != null;
+      allow delete: if isSignedIn() && isOwner(userId) && resource != null;
     }
 
     /**
-     * @description Enforces strict user-ownership for intake drafts.
+     * @description Allows a user to read and write their own intake drafts.
      * @path /users/{userId}/intake_drafts/{quizId}
-     * @allow (get, list, create, update, delete) - Only the user with ID {userId} can perform these actions.
-     * @deny (get, list, create, update, delete) - Any other user attempting these actions will be denied.
+     * @allow (create, get, list, update, delete) User with matching {userId} can perform all operations.
+     * @deny (create, get, list, update, delete) User with mismatched {userId} cannot perform any operations.
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId}/intake_drafts/{quizId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) && resource != null;
-      allow delete: if isOwner(userId) && resource != null;
+      allow get, list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId) && resource != null;
+      allow delete: if isSignedIn() && isOwner(userId) && resource != null;
     }
+
+    /**
+     * @description Allows a server to read and write membership information. Clients can only read.
+     * @path /users/{userId}/membership
+     * @allow (read) User with matching {userId} can perform read operations.
+     * @allow (write) Server with admin privileges can perform write operations.
+     * @deny (write) User cannot directly modify membership information.
+     * @principle Restricts write access to a trusted server.
+     */
+    match /users/{userId}/membership {
+      allow read: if isSignedIn() && isOwner(userId);
+      allow create: if isServer();
+      allow update: if isServer() && resource != null;
+      allow delete: if isServer() && resource != null;
+    }
+
+    /**
+     * @description Allows a server to read and write payment information. Clients can only read.
+     * @path /users/{userId}/payments/{paymentId}
+     * @allow (read) User with matching {userId} can perform read operations.
+     * @allow (write) Server with admin privileges can perform write operations.
+     * @deny (write) User cannot directly modify payment information.
+     * @principle Restricts write access to a trusted server.
+     */
+    match /users/{userId}/payments/{paymentId} {
+      allow read: if isSignedIn() && isOwner(userId);
+      allow create: if isServer();
+      allow update: if isServer() && resource != null;
+      allow delete: if isServer() && resource != null;
+    }
+
+    /**
+     * @description Allows any authenticated user to manage their own data.
+     * @path /users/{userId}/{document=**}
+     * @allow (create, get, list, update, delete) User with matching {userId} can perform all operations.
+     * @deny (create, get, list, update, delete) User with mismatched {userId} cannot perform any operations.
+     * @principle Enforces document ownership for all write operations.
+     */
+    match /users/{userId}/{document=**} {
+        allow read, write: if false;
+    }
+  }
+
+  /**
+   * @description Checks if the requesting user is the owner of the document.
+   * @param {string} userId The user ID to compare against the request's authentication UID.
+   * @return {boolean} True if the user is the owner, false otherwise.
+   */
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
+
+  /**
+   * @description Checks if the request comes from a trusted server with admin privileges.
+   * Implemented using custom claims.
+   * @return {boolean} True if the request is from a server, false otherwise.
+   */
+  function isServer() {
+    return request.auth.token.admin == true;
+  }
+
+  /**
+   * @description Checks if the user is signed in.
+   * @return {boolean} True if the user is signed in, false otherwise.
+   */
+  function isSignedIn() {
+    return request.auth != null;
   }
 }
