@@ -10,13 +10,13 @@ import { Loader2 } from 'lucide-react';
 import { Badge } from '../ui/badge';
 
 const AccessStatusCard = () => {
-    const { user, isUserLoading } = useFirebase();
+    const { user, isUserLoading, firestore } = useFirebase();
     const shouldReduceMotion = useReducedMotion();
 
     const membershipRef = useMemoFirebase(() => {
         if (!user) return null;
-        return doc(user.firestore, `users/${user.uid}/membership`, 'stripe');
-    }, [user]);
+        return doc(firestore, `users/${user.uid}/membership`, 'stripe');
+    }, [firestore, user]);
 
     const { data: membershipData, isLoading: isMembershipLoading } = useDoc(membershipRef);
     
