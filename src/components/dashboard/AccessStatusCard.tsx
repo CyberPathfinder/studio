@@ -4,16 +4,48 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
+import { Badge } from '../ui/badge';
 
 const AccessStatusCard = () => {
-    // In a real app, you would fetch payment status here
-    const hasPremium = true;
+    const { user, isUserLoading } = useFirebase();
     const shouldReduceMotion = useReducedMotion();
+
+    const membershipRef = useMemoFirebase(() => {
+        if (!user) return null;
+        return doc(user.firestore, `users/${user.uid}/membership/stripe`);
+    }, [user]);
+
+    const { data: membershipData, isLoading: isMembershipLoading } = useDoc(membershipRef);
+    
+    const hasPremium = membershipData?.tier === 'premium' && membershipData?.active === true;
 
     const variants = {
         initial: { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 },
     };
+
+    const renderContent = () => {
+        if (isUserLoading || isMembershipLoading) {
+            return (
+                <div className="flex items-center justify-center h-10">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+            );
+        }
+
+        if (hasPremium) {
+            return (
+                <div className="flex items-center gap-2">
+                    <Badge variant="gradient" className="text-sm">Premium Access</Badge>
+                </div>
+            )
+        }
+        
+        return <p className="text-muted-foreground">You are on the free plan.</p>;
+    }
 
   return (
     <motion.div
@@ -27,19 +59,15 @@ const AccessStatusCard = () => {
           <CardTitle>Access Status</CardTitle>
         </CardHeader>
         <CardContent>
-            {hasPremium ? (
-                <p className="text-lg font-semibold text-primary">Premium Access</p>
-            ) : (
-                <p className="text-muted-foreground">You are on the free plan.</p>
-            )}
+            {renderContent()}
         </CardContent>
-        <CardFooter>
-            {!hasPremium && (
-                 <Button asChild className="w-full">
-                    <Link href="/pricing">Upgrade to Premium</Link>
+        {!hasPremium && !isUserLoading && !isMembershipLoading && (
+             <CardFooter>
+                 <Button asChild className="w-full" variant="gradient">
+                    <Link href="/quiz">Upgrade to Premium</Link>
                 </Button>
-            )}
-        </CardFooter>
+            </CardFooter>
+        )}
       </Card>
     </motion.div>
   );
