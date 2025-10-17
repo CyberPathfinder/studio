@@ -14,7 +14,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { useEffect, useMemo } from 'react';
 
 const Weight = ({ question }: { question: Question }) => {
-  const { state, dispatch, handleAnswerChange } = useQuizEngine();
+  const { state, dispatch } = useQuizEngine();
   const { toast } = useToast();
   
   const isGoalWeightQuestion = question.id === 'goal_weight';
@@ -27,15 +27,12 @@ const Weight = ({ question }: { question: Question }) => {
     goalWeightKg,
     goalWeightKgView = '',
     goalWeightLbView = '',
+    heightCm
   } = state.answers.body || {};
   
-  const { heightCm } = state.answers.body || {};
-
   const displayValue = isGoalWeightQuestion
     ? (unitWeight === 'metric' ? goalWeightKgView : goalWeightLbView)
     : (unitWeight === 'metric' ? weightKgView : weightLbView);
-  
-  const canonicalValue = isGoalWeightQuestion ? goalWeightKg : weightKg;
 
   const suggestedGoalKg = useMemo(() => {
     if (isGoalWeightQuestion && weightKg && !goalWeightKg) {
@@ -90,7 +87,7 @@ const Weight = ({ question }: { question: Question }) => {
     }
   };
 
-  const handleUnitChange = (newUnit: 'metric' | 'lb') => {
+  const handleUnitChange = (newUnit: 'metric' | 'imperial') => {
     dispatch({ type: 'SET_BODY_UNIT', payload: { unitType: 'weight', unit: newUnit } });
   };
 
@@ -98,31 +95,35 @@ const Weight = ({ question }: { question: Question }) => {
   return (
     <div className="w-full">
       <CardHeader className="text-center p-0 mb-8">
-        <CardTitle className="font-headline text-3xl">{getLabel(question)}</CardTitle>
-        {getDescription(question) && <CardDescription>{getDescription(question)}</CardDescription>}
+        <CardTitle className="font-headline text-3xl">{getLabel(question, 'ru')}</CardTitle>
+        {getDescription(question) && <CardDescription className="mt-2">{getDescription(question)}</CardDescription>}
       </CardHeader>
 
-        <div className="flex items-center gap-2 mt-2 max-w-xs mx-auto">
-            <Input
-              id={`${question.id}-weight`}
-              type="number"
-              inputMode='decimal'
-              value={displayValue}
-              onChange={(e) => handleViewChange(e.target.value)}
-              placeholder={unitWeight === 'metric' ? 'e.g., 70' : 'e.g., 154'}
-              className="text-center text-lg h-12"
-            />
+        <div className="flex items-center gap-2 mt-2 max-w-sm mx-auto">
+            <div className="flex-1">
+                <Label htmlFor={`${question.id}-weight`} className="sr-only">Weight</Label>
+                <Input
+                id={`${question.id}-weight`}
+                type="number"
+                inputMode='decimal'
+                value={displayValue}
+                onChange={(e) => handleViewChange(e.target.value)}
+                placeholder={unitWeight === 'metric' ? 'e.g., 70' : 'e.g., 154'}
+                className="text-center text-lg h-14"
+                />
+            </div>
             <RadioGroup
               value={unitWeight}
               onValueChange={handleUnitChange}
-              className="flex rounded-md border p-1"
+              className="flex rounded-md border p-1 bg-muted/50"
             >
               <RadioGroupItem value="metric" id="kg" className="sr-only" />
-              <Label htmlFor="kg" className={cn("px-3 py-1.5 rounded-md text-sm cursor-pointer", unitWeight === 'metric' && "bg-muted font-semibold")}>kg</Label>
+              <Label htmlFor="kg" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'metric' && "bg-background font-semibold shadow-sm")}>кг</Label>
               <RadioGroupItem value="imperial" id="lb" className="sr-only" />
-              <Label htmlFor="lb" className={cn("px-3 py-1.5 rounded-md text-sm cursor-pointer", unitWeight === 'imperial' && "bg-muted font-semibold")}>lb</Label>
+              <Label htmlFor="lb" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'imperial' && "bg-background font-semibold shadow-sm")}>lb</Label>
             </RadioGroup>
         </div>
+        <p className="text-center text-sm text-muted-foreground mt-6">{getDescription(question)}</p>
     </div>
   );
 };

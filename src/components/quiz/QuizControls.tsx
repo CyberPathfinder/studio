@@ -14,9 +14,17 @@ const QuizControls = () => {
   const isNextDisabled = useMemo(() => {
     const q = state.currentQuestion;
     if (!q) return true;
-    if (q.id === 'height' && (!state.answers.body?.heightCm || state.answers.body.heightCm < 120 || state.answers.body.heightCm > 230)) {
-        return true;
+
+    if (q.id === 'height') {
+        const heightCm = state.answers.body?.heightCm;
+        return !heightCm || heightCm < 120 || heightCm > 230;
     }
+
+    if (q.id === 'weight' || q.id === 'goal_weight') {
+        const weightKg = q.id === 'weight' ? state.answers.body?.weightKg : state.answers.body?.goalWeightKg;
+        return !weightKg || weightKg < 35 || weightKg > 300;
+    }
+    
     // Add more complex validation logic here if needed
     return false;
   }, [state.currentQuestion, state.answers.body]);

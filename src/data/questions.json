@@ -43,7 +43,7 @@
       "label": "What is your height?",
       "i18n": {
         "en": { "label": "What is your height?" },
-        "ru": { "label": "Какой у тебя рост?" }
+        "ru": { "label": "Какой у вас рост?" }
       },
       "validation": { "required": true, "min": 120, "max": 230 },
       "analytics_key": "height_cm"
@@ -55,6 +55,10 @@
       "type": "weight",
       "label": "What’s your current weight?",
       "description": "We’ll use this to tailor your plan.",
+      "i18n": {
+        "en": { "label": "What’s your current weight?" },
+        "ru": { "label": "Какой у вас текущий вес?" }
+      },
       "validation": { "required": true, "min": 35, "max": 300 },
       "analytics_key": "weight_kg"
     },
