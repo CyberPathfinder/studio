@@ -12,6 +12,11 @@ import { getHealthyWeightRange } from '@/lib/unit-conversion';
 import { getLabel, getDescription } from '@/lib/i18n';
 import { useDebouncedCallback } from 'use-debounce';
 import { useEffect, useMemo } from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+
 
 const Weight = ({ question }: { question: Question }) => {
   const { state, dispatch } = useQuizEngine();
@@ -33,6 +38,24 @@ const Weight = ({ question }: { question: Question }) => {
   const displayValue = isGoalWeightQuestion
     ? (unitWeight === 'metric' ? goalWeightKgView : goalWeightLbView)
     : (unitWeight === 'metric' ? weightKgView : weightLbView);
+  
+  const canonicalValue = isGoalWeightQuestion ? goalWeightKg : weightKg;
+
+  // Use Zod for validation
+  const formSchema = z.object({
+    weightKg: z.number().min(35, "Вес должен быть не менее 35 кг").max(300, "Вес должен быть не более 300 кг"),
+  });
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    values: { weightKg: canonicalValue ?? 0 },
+  });
+  
+  // Re-validate when canonical value changes
+  useEffect(() => {
+    form.setValue('weightKg', canonicalValue ?? 0, { shouldValidate: true });
+  }, [canonicalValue, form]);
+
 
   const suggestedGoalKg = useMemo(() => {
     if (isGoalWeightQuestion && weightKg && !goalWeightKg) {
@@ -49,8 +72,8 @@ const Weight = ({ question }: { question: Question }) => {
 
   const showAmbitiousGoalToast = useDebouncedCallback(() => {
     toast({
-        title: 'Ambitious Goal',
-        description: `This is an ambitious goal, but we'll help you pace it safely.`,
+        title: 'Амбициозная цель',
+        description: `Это амбициозная цель, но мы поможем вам достичь ее безопасно.`,
     });
   }, 1000);
 
@@ -66,15 +89,6 @@ const Weight = ({ question }: { question: Question }) => {
     const numericValue = parseFloat(value);
     if (!isNaN(numericValue) && numericValue > 0) {
       const valueInKg = unitWeight === 'lb' ? numericValue / 2.20462 : numericValue;
-
-      const min = question.validation?.min || 35;
-      const max = question.validation?.max || 300;
-      if (valueInKg < min || valueInKg > max) {
-        toast({
-            title: 'Unusual Weight',
-            description: `The weight seems unusual. Please double-check if it's correct.`
-        });
-      }
 
       if (isGoalWeightQuestion && weightKg && valueInKg) {
         const lossPercentage = ((weightKg - valueInKg) / weightKg) * 100;
@@ -93,37 +107,52 @@ const Weight = ({ question }: { question: Question }) => {
 
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-lg mx-auto">
       <CardHeader className="text-center p-0 mb-8">
         <CardTitle className="font-headline text-3xl">{getLabel(question, 'ru')}</CardTitle>
-        {getDescription(question) && <CardDescription className="mt-2">{getDescription(question)}</CardDescription>}
       </CardHeader>
 
-        <div className="flex items-center gap-2 mt-2 max-w-sm mx-auto">
-            <div className="flex-1">
-                <Label htmlFor={`${question.id}-weight`} className="sr-only">Weight</Label>
-                <Input
-                id={`${question.id}-weight`}
-                type="number"
-                inputMode='decimal'
-                value={displayValue}
-                onChange={(e) => handleViewChange(e.target.value)}
-                placeholder={unitWeight === 'metric' ? 'e.g., 70' : 'e.g., 154'}
-                className="text-center text-lg h-14"
-                />
-            </div>
+      <div className='flex justify-center mb-8'>
             <RadioGroup
               value={unitWeight}
               onValueChange={handleUnitChange}
               className="flex rounded-md border p-1 bg-muted/50"
             >
               <RadioGroupItem value="metric" id="kg" className="sr-only" />
-              <Label htmlFor="kg" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'metric' && "bg-background font-semibold shadow-sm")}>кг</Label>
+              <Label htmlFor="kg" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'metric' && "bg-background font-semibold shadow-sm")}>Килограммы</Label>
               <RadioGroupItem value="imperial" id="lb" className="sr-only" />
-              <Label htmlFor="lb" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'imperial' && "bg-background font-semibold shadow-sm")}>lb</Label>
+              <Label htmlFor="lb" className={cn("px-4 py-2 rounded-md text-base cursor-pointer", unitWeight === 'imperial' && "bg-background font-semibold shadow-sm")}>Фунты</Label>
             </RadioGroup>
-        </div>
-        <p className="text-center text-sm text-muted-foreground mt-6">{getDescription(question)}</p>
+      </div>
+
+       <Form {...form}>
+        <form className="space-y-4">
+            <FormField
+                control={form.control}
+                name="weightKg"
+                render={() => (
+                    <FormItem className="max-w-xs mx-auto">
+                        <Label htmlFor={`${question.id}-weight`} className="sr-only">Вес</Label>
+                        <FormControl>
+                            <Input
+                                id={`${question.id}-weight`}
+                                type="number"
+                                inputMode='decimal'
+                                value={displayValue}
+                                onChange={(e) => handleViewChange(e.target.value)}
+                                placeholder={unitWeight === 'metric' ? 'Например, 70' : 'Например, 154'}
+                                className="text-center text-xl h-16 rounded-lg shadow-inner"
+                                autoFocus
+                            />
+                        </FormControl>
+                        <FormMessage className="text-center" />
+                    </FormItem>
+                )}
+            />
+        </form>
+      </Form>
+      
+      <p className="text-center text-sm text-muted-foreground mt-8">{getDescription(question)}</p>
     </div>
   );
 };

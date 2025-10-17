@@ -15,17 +15,22 @@ const QuizControls = () => {
     const q = state.currentQuestion;
     if (!q) return true;
 
+    // Use a simple check for existence, as detailed validation is now in the component
     if (q.id === 'height') {
         const heightCm = state.answers.body?.heightCm;
         return !heightCm || heightCm < 120 || heightCm > 230;
     }
 
-    if (q.id === 'weight' || q.id === 'goal_weight') {
-        const weightKg = q.id === 'weight' ? state.answers.body?.weightKg : state.answers.body?.goalWeightKg;
+    if (q.id === 'weight') {
+        const weightKg = state.answers.body?.weightKg;
         return !weightKg || weightKg < 35 || weightKg > 300;
     }
     
-    // Add more complex validation logic here if needed
+    if (q.id === 'goal_weight') {
+        const goalWeightKg = state.answers.body?.goalWeightKg;
+        return !goalWeightKg || goalWeightKg < 35 || goalWeightKg > 300;
+    }
+    
     return false;
   }, [state.currentQuestion, state.answers.body]);
 
