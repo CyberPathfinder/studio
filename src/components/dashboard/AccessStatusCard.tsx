@@ -15,7 +15,7 @@ const AccessStatusCard = () => {
 
     const membershipRef = useMemoFirebase(() => {
         if (!user) return null;
-        return doc(user.firestore, `users/${user.uid}/membership/stripe`);
+        return doc(user.firestore, `users/${user.uid}/membership`, 'stripe');
     }, [user]);
 
     const { data: membershipData, isLoading: isMembershipLoading } = useDoc(membershipRef);
