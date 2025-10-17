@@ -1,6 +1,8 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import { useFirebase } from '@/firebase';
 import { getQuizDraft, saveQuizDraft } from '@/firebase/quiz';
@@ -18,12 +20,15 @@ const QuizClient = () => {
   const { user, isUserLoading } = useFirebase();
   const [showResumePrompt, setShowResumePrompt] = useState(false);
   const [draftToResume, setDraftToResume] = useState<Record<string, any> | null>(null);
+  const searchParams = useSearchParams();
+  const jumpTo = searchParams.get('qid');
 
   const {
     state,
     dispatch,
     isInitialized,
     initializeState,
+    jumpToQuestion,
   } = useQuizEngine();
   const { track } = useAnalytics();
 
@@ -33,6 +38,13 @@ const QuizClient = () => {
       initializeState({}, null);
     }
   }, [isInitialized, initializeState]);
+
+  // Handle direct jump from URL
+  useEffect(() => {
+     if (isInitialized && jumpTo) {
+        jumpToQuestion(jumpTo);
+    }
+  }, [isInitialized, jumpTo, jumpToQuestion]);
 
   // 2. Check for drafts on load (after initial render)
   useEffect(() => {
@@ -64,11 +76,12 @@ const QuizClient = () => {
       .then((draft) => {
         if (!isActive) return;
 
-        if (draft && draft.answers && Object.keys(draft.answers).length > 0) {
+        // Don't show resume prompt if we are jumping to a specific question
+        if (draft && draft.answers && Object.keys(draft.answers).length > 0 && !jumpTo) {
           setDraftToResume(draft);
           setShowResumePrompt(true);
-        } else {
-          // No draft, so we can track the start event.
+        } else if (!jumpTo) {
+          // No draft and not jumping, so we can track the start event.
           // If there was a draft, this is handled in `handleResume`.
           track('quiz_start');
         }
@@ -81,7 +94,7 @@ const QuizClient = () => {
     return () => {
       isActive = false;
     };
-  }, [user, isUserLoading, track]);
+  }, [user, isUserLoading, track, jumpTo]);
 
 
   // 3. Autosave logic (debounced in hook)

@@ -7,22 +7,24 @@ import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 
 const MeasurementsCard = ({ intakeData }: { intakeData: any }) => {
-  const { measures, preferences } = intakeData;
+  const { measures, preferences } = intakeData || {};
+  const { height_cm, weight_kg, goal_weight_kg, bmi } = measures || {};
+  
   const unitWeight = preferences?.unitWeight || 'metric';
   const unitHeight = preferences?.unitHeight || 'metric';
   const shouldReduceMotion = useReducedMotion();
 
   const displayHeight = unitHeight === 'imperial'
-    ? `${Math.floor(measures.height_cm / 2.54 / 12)}'${Math.round((measures.height_cm / 2.54) % 12)}"`
-    : `${Math.round(measures.height_cm)} cm`;
+    ? height_cm ? `${Math.floor(height_cm / 2.54 / 12)}'${Math.round((height_cm / 2.54) % 12)}"` : '—'
+    : height_cm ? `${Math.round(height_cm)} cm` : '—';
 
   const displayWeight = unitWeight === 'imperial'
-    ? `${Math.round(measures.weight_kg * 2.20462)} lbs`
-    : `${Math.round(measures.weight_kg)} kg`;
+    ? weight_kg ? `${Math.round(weight_kg * 2.20462)} lbs` : '—'
+    : weight_kg ? `${Math.round(weight_kg)} kg` : '—';
     
   const displayGoalWeight = unitWeight === 'imperial'
-    ? `${Math.round(measures.goal_weight_kg * 2.20462)} lbs`
-    : `${Math.round(measures.goal_weight_kg)} kg`;
+    ? goal_weight_kg ? `${Math.round(goal_weight_kg * 2.20462)} lbs` : '—'
+    : goal_weight_kg ? `${Math.round(goal_weight_kg)} kg` : '—';
 
   const variants = {
     initial: { opacity: 0, y: 20 },
@@ -52,7 +54,7 @@ const MeasurementsCard = ({ intakeData }: { intakeData: any }) => {
             </div>
             <div className="rounded-lg bg-muted p-4">
               <p className="text-sm text-muted-foreground">BMI</p>
-              <p className="text-2xl font-bold">{measures.bmi}</p>
+              <p className="text-2xl font-bold">{bmi ?? '—'}</p>
             </div>
             <div className="rounded-lg bg-muted p-4">
               <p className="text-sm text-muted-foreground">Goal Weight</p>
@@ -62,7 +64,7 @@ const MeasurementsCard = ({ intakeData }: { intakeData: any }) => {
         </CardContent>
         <CardFooter>
           <Button asChild variant="outline" className="w-full">
-            <Link href="/quiz/goal-weight">Update Goal</Link>
+            <Link href="/quiz?qid=goal_weight">Update Goal</Link>
           </Button>
         </CardFooter>
       </Card>
