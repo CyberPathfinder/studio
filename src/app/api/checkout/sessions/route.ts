@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase/server'; // Assumes server-side initialization
 import { logger } from '@/lib/logger';
-import { getServerEnv } from '@/config/env';
+import { getServerEnv } from '@/config/server-env';
 
 const serverEnvPromise = getServerEnv();
 
