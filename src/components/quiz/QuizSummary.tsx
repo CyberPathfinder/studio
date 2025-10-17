@@ -265,7 +265,7 @@ const QuizSummary = () => {
               </form>
             </Form>
             <p className="text-xs text-muted-foreground mt-4 text-center">
-                <Button variant="link" className="text-xs p-0 h-auto" disabled>Продолжить без аккаунта</Button>
+              Создайте аккаунт, чтобы сохранить ваш прогресс.
             </p>
           </div>
         )}
