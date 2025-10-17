@@ -3,14 +3,14 @@ import { useEffect, useState } from 'react';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useFirebase } from '@/firebase/provider';
 import { getQuizDraft, saveQuizDraft } from '@/firebase/quiz';
-import { useQuizEngine, QuizProvider } from '@/hooks/useQuizEngine.tsx';
+import { useQuizEngine } from '@/hooks/useQuizEngine.tsx';
 import quizConfig from '@/data/questions.json';
 import ResumePrompt from './ResumePrompt';
 import QuizEngine from './QuizEngine';
 
 const LOCAL_STORAGE_KEY = 'vf_quiz_draft';
 
-const QuizClientInternal = () => {
+const QuizClient = () => {
   const { user, isUserLoading } = useFirebase();
   const [showResumePrompt, setShowResumePrompt] = useState(false);
   const [draftToResume, setDraftToResume] = useState<Record<string, any> | null>(null);
@@ -56,7 +56,7 @@ const QuizClientInternal = () => {
     });
     // This effect should only run once when the user's auth state is resolved.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, isUserLoading, quizConfig.quizId]);
+  }, [user, isUserLoading]);
 
 
   // 3. Autosave logic (debounced in hook)
@@ -77,7 +77,7 @@ const QuizClientInternal = () => {
     };
 
     saveData();
-  }, [state.answers, user, isUserLoading, state.isDirty, quizConfig.quizId, state.currentQuestionId, dispatch, isInitialized]);
+  }, [state.answers, user, isUserLoading, state.isDirty, state.currentQuestionId, dispatch, isInitialized]);
 
 
   const handleResume = (resume: boolean) => {
@@ -116,15 +116,5 @@ const QuizClientInternal = () => {
   );
 };
 
-const QuizClient = () => {
-    if (!quizConfig) {
-        return <div>Loading...</div>
-    }
-    return (
-        <QuizProvider config={quizConfig as any}>
-            <QuizClientInternal />
-        </QuizProvider>
-    )
-}
 
 export default QuizClient;
