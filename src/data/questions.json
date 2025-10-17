@@ -50,6 +50,7 @@
       "order": 4,
       "type": "weight",
       "label": "What’s your current weight?",
+      "description": "We’ll use this to tailor your plan.",
       "ui": { "unit_toggle": ["kg", "lb"] },
       "validation": { "required": true, "min": 35, "max": 300 },
       "analytics_key": "weight_kg"
