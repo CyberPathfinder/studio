@@ -9,7 +9,8 @@ import { event as metaEvent } from '@/lib/meta';
 export type EventName =
   | 'quiz_start'
   | 'quiz_resume'
-  | 'quiz_step'
+  | 'quiz_step_view'
+  | 'quiz_unit_change'
   | 'quiz_answer'
   | 'quiz_complete'
   | 'sign_up_attempt'
@@ -33,12 +34,19 @@ const eventMap: Record<EventName, AnalyticsMapping> = {
   quiz_resume: {
     gtag: () => ({ action: 'quiz_resume', category: 'engagement', label: 'User resumed a quiz' }),
   },
-  quiz_step: {
-    gtag: (payload: { stepId: string; direction: 'next' | 'previous' | 'jump' }) => ({
+  quiz_step_view: {
+    gtag: (payload: { step: string; }) => ({
       action: `quiz_step_view`,
       category: 'engagement',
-      label: `User navigated to step: ${payload.stepId} (${payload.direction})`,
-      value: payload.stepId,
+      label: `User viewed step: ${payload.step}`,
+      value: payload.step,
+    }),
+  },
+  quiz_unit_change: {
+    gtag: (payload: { field: string; unit: string; }) => ({
+      action: 'quiz_unit_change',
+      category: 'engagement',
+      label: `User changed unit for ${payload.field} to ${payload.unit}`,
     }),
   },
   quiz_answer: {

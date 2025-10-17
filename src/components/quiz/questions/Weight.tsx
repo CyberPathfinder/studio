@@ -16,10 +16,12 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { useAnalytics } from '@/hooks/use-analytics';
 
 
 const Weight = ({ question }: { question: Question }) => {
   const { state, dispatch } = useQuizEngine();
+  const { track } = useAnalytics();
   const { toast } = useToast();
   
   const isGoalWeightQuestion = question.id === 'goal_weight';
@@ -102,6 +104,7 @@ const Weight = ({ question }: { question: Question }) => {
   };
 
   const handleUnitChange = (newUnit: 'metric' | 'imperial') => {
+    track('quiz_unit_change', { field: isGoalWeightQuestion ? 'goal_weight' : 'weight', unit: newUnit });
     dispatch({ type: 'SET_BODY_UNIT', payload: { unitType: 'weight', unit: newUnit } });
   };
 

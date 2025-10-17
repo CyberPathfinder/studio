@@ -13,9 +13,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useEffect } from 'react';
+import { useAnalytics } from '@/hooks/use-analytics';
 
 const Height = ({ question }: { question: Question }) => {
   const { state, dispatch } = useQuizEngine();
+  const { track } = useAnalytics();
   
   const { 
     unitHeight = 'metric', 
@@ -42,6 +44,7 @@ const Height = ({ question }: { question: Question }) => {
 
 
   const handleUnitChange = (newUnit: 'metric' | 'imperial') => {
+    track('quiz_unit_change', { field: 'height', unit: newUnit });
     dispatch({ type: 'SET_BODY_UNIT', payload: { unitType: 'height', unit: newUnit } });
   }
 

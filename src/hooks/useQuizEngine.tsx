@@ -3,7 +3,7 @@
 import { QuizConfig } from '@/lib/quiz-engine/config';
 import { quizReducer, getInitialState } from '@/lib/quiz-engine/state';
 import { evaluateBranchingLogic, validateAnswer } from '@/lib/quiz-engine/utils';
-import { useReducer, useCallback, useMemo, useContext, createContext, ReactNode, Dispatch } from 'react';
+import { useReducer, useCallback, useMemo, useContext, createContext, ReactNode, Dispatch, useEffect } from 'react';
 import { useAnalytics } from './use-analytics';
 import { useDebouncedCallback } from 'use-debounce';
 import { saveIntakeData } from '@/firebase/quiz';
@@ -27,6 +27,14 @@ const QuizEngineContext = createContext<QuizEngineContextType | null>(null);
 export const QuizEngineProvider = ({ children, config }: { children: ReactNode, config: QuizConfig }) => {
   const { track } = useAnalytics();
   const [state, dispatch] = useReducer(quizReducer, getInitialState(config));
+
+  // Track step view
+  useEffect(() => {
+    if (state.currentQuestionId) {
+      track('quiz_step_view', { step: state.currentQuestionId });
+    }
+  }, [state.currentQuestionId, track]);
+
 
   const initializeState = useCallback((initialAnswers: Record<string, any>, currentQuestionId: string | null = null) => {
     dispatch({ type: 'INITIALIZE_STATE', payload: { config, initialAnswers, currentQuestionId } });
@@ -83,7 +91,6 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
       const nextQ = config.questions[nextIndex];
       if (evaluateBranchingLogic(nextQ.branching, answers)) {
         dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: nextIndex });
-        track('quiz_step', { stepId: nextQ.id, direction: 'next' });
         return { isValid: true };
       }
       nextIndex++;
@@ -92,14 +99,14 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
     // If no next question is found (we are on the last visible question), complete the quiz
     completeQuiz();
 
-  }, [state, config.questions, track, completeQuiz]);
+  }, [state, config.questions, completeQuiz]);
 
   const prevQuestion = useCallback(() => {
     const { answers } = state;
     if (state.status === 'completed') {
         const lastQuestionIndex = config.questions.map(q => evaluateBranchingLogic(q.branching, answers)).lastIndexOf(true);
         dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: lastQuestionIndex });
-        track('quiz_step', { stepId: config.questions[lastQuestionIndex].id, direction: 'jump' });
+        track('quiz_step_view', { step: config.questions[lastQuestionIndex].id });
         return;
     }
 
@@ -108,7 +115,6 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
       const prevQ = config.questions[prevIndex];
       if (evaluateBranchingLogic(prevQ.branching, answers)) {
         dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: prevIndex });
-        track('quiz_step', { stepId: prevQ.id, direction: 'previous' });
         return;
       }
       prevIndex--;
@@ -122,9 +128,8 @@ export const QuizEngineProvider = ({ children, config }: { children: ReactNode, 
             dispatch({ type: 'SET_STATUS', payload: 'in-progress' });
           }
           dispatch({ type: 'SET_QUESTION_BY_INDEX', payload: questionIndex });
-          track('quiz_step', { stepId: questionId, direction: 'jump' });
       }
-  }, [config.questions, track, state.status]);
+  }, [config.questions, state.status]);
 
   const submitQuiz = async (uid: string) => {
     const { answers } = state;
